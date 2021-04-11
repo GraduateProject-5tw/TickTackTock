@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.GraduateProject.TimeManagementApp;
 
 import org.junit.Test;
 

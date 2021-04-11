@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.GraduateProject.TimeManagementApp;
 
 import android.content.Context;
 
