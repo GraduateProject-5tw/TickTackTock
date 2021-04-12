@@ -1,12 +1,13 @@
 package com.GraduateProject.TimeManagementApp;
 
-import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +23,7 @@ public class StopWatchActivity extends AppCompatActivity {
         chronometer = findViewById(R.id.time_view);   //用id尋找在介面佈局檔案中，時間呈現的區塊
         startBtn = findViewById(R.id.start_btn);
         stopBtn = findViewById(R.id.stop_btn);
+        setContentView(R.layout. activity_main ) ;
 
         //計時按鈕的功能實作
         startBtn.setOnClickListener(new View.OnClickListener() {
@@ -76,5 +78,14 @@ public class StopWatchActivity extends AppCompatActivity {
         sb.append(" 秒");
 
         return(sb.toString());
+    }
+
+    @Override
+    protected void onStop () {
+        super .onStop() ;
+        startService( new Intent( this, NotificationService. class )) ;
+    }
+    public void closeApp (View view) {
+        finish() ;
     }
 }
