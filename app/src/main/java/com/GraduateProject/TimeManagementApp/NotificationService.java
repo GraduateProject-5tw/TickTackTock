@@ -66,8 +66,8 @@ public class NotificationService extends Service {
     private void createNotification () {
         NotificationManager mNotificationManager = (NotificationManager) getSystemService( NOTIFICATION_SERVICE ) ;
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext() , default_notification_channel_id ) ;
-        mBuilder.setContentTitle( "My Notification" ) ;
-        mBuilder.setContentText( "Notification Listener Service Example" ) ;
+        mBuilder.setContentTitle( "警告" ) ;
+        mBuilder.setContentText( "停止計時 時間歸0" ) ;
         mBuilder.setTicker( "Notification Listener Service Example" ) ;
         mBuilder.setSmallIcon(R.drawable. ic_launcher_foreground ) ;
         mBuilder.setAutoCancel( true ) ;
