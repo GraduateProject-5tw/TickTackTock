@@ -12,10 +12,18 @@
         <activity android:name="com.GraduateProject.TimeManagementApp.StopWatchActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service
+            android:name = ".NotificationService"
+            android:label = "@string/app_name" >
+            <intent-filter>
+                <action
+                    android:name = "app.tutorialspoint.com.notifyme.NotificationService" />
+                <category android:name= "android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
