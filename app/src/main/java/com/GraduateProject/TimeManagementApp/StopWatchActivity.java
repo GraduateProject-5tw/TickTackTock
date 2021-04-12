@@ -23,7 +23,7 @@ public class StopWatchActivity extends AppCompatActivity {
         chronometer = findViewById(R.id.time_view);   //用id尋找在介面佈局檔案中，時間呈現的區塊
         startBtn = findViewById(R.id.start_btn);
         stopBtn = findViewById(R.id.stop_btn);
-        setContentView(R.layout. activity_main ) ;
+        setContentView(R.layout. activity_stopwatch ) ;
 
         //計時按鈕的功能實作
         startBtn.setOnClickListener(new View.OnClickListener() {
