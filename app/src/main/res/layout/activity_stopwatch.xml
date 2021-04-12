@@ -16,7 +16,7 @@
         android:layout_marginTop="100dp"
         android:textAlignment="center"
         android:textColor="#2C2C2C"
-        android:textSize="90dp" />
+        android:textSize="90sp" />
 
     <FrameLayout
         android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="65dp"
-        android:text="計時"
+        android:text="@string/start_btn"
         app:backgroundTint="#05E66A" />
 
     <Button
@@ -36,22 +36,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="結束"
+        android:text="@string/stop_btn"
         android:layout_marginTop="65dp"
         android:visibility="gone"
         app:backgroundTint="#F44336"/>
     </FrameLayout>
-    <RelativeLayout xmlns:android = "http://schemas.android.com/apk/res/android"
-        xmlns:tools = "http://schemas.android.com/tools"
-        android:layout_width = "match_parent"
-        android:layout_height = "match_parent"
-        android:padding = "16dp"
-        tools:context = ".MainActivity" >
-        <Button
-            android:layout_width = "match_parent"
-            android:layout_height = "wrap_content"
-            android:layout_centerInParent = "true"
-            android:onClick = "closeApp"
-            android:text = "close App for notification" />
-    </RelativeLayout>
 </LinearLayout>
