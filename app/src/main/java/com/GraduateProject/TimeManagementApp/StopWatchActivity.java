@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 
+import java.util.concurrent.TimeUnit;
+
 public class StopWatchActivity extends AppCompatActivity {
 
     private Chronometer chronometer; //計時器
@@ -37,17 +39,42 @@ public class StopWatchActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 chronometer.stop();
-                recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間
+                recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間，單位是毫秒
+                String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
                 startBtn.setVisibility(View.VISIBLE);
                 stopBtn.setVisibility(View.GONE);
                 //跳出視窗
                 AlertDialog.Builder builder = new AlertDialog.Builder(StopWatchActivity.this);
                 AlertDialog dialog = builder.create();
-                dialog.setMessage("本次累積"+ recordTime);
+                dialog.setMessage("本次累積："+ Time);
                 dialog.setCanceledOnTouchOutside(true); //允許按對話框外部來關閉視窗
+                dialog.show();
                 recordTime = 0;
+                Time = "";
                 chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
             }
         });
+    }
+
+    public static String getDurationBreakdown(long millis) {
+        if(millis < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(hours);
+        sb.append(" 小時 ");
+        sb.append(minutes);
+        sb.append(" 分 ");
+        sb.append(seconds);
+        sb.append(" 秒");
+
+        return(sb.toString());
     }
 }

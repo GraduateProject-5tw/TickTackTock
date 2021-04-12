@@ -13,17 +13,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="100dp"
         android:textAlignment="center"
         android:textColor="#2C2C2C"
-        android:textSize="50dp" />
+        android:textSize="90dp" />
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
     <Button
         android:id="@+id/start_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="65dp"
         android:text="計時"
         app:backgroundTint="#05E66A" />
 
@@ -31,9 +35,10 @@
         android:id="@+id/stop_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-48dp"
         android:layout_gravity="center_horizontal"
         android:text="結束"
+        android:layout_marginTop="65dp"
+        android:visibility="gone"
         app:backgroundTint="#F44336"/>
-
+    </FrameLayout>
 </LinearLayout>
