@@ -1,6 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
@@ -52,8 +53,12 @@ public class StopWatchActivity extends AppCompatActivity implements LifecycleObs
     }
 
     @Override
-    protected void onPause() {
-
+    protected void onPause() {  //當APP跑到背景時
+        startService( new Intent( this, NotificationService.class )) ;
+        chronometer.stop();
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        startBtn.setVisibility(View.VISIBLE);
+        stopBtn.setVisibility(View.GONE);
         super.onPause();
     }
 

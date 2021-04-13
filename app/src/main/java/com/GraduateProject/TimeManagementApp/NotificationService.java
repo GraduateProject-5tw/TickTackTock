@@ -73,7 +73,7 @@ public class NotificationService extends Service {    //server是一個在背景
         NotificationManager mNotificationManager = (NotificationManager) getSystemService( NOTIFICATION_SERVICE ) ;
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext() , default_notification_channel_id ) ;
         mBuilder.setContentTitle( "時間通知" ) ;
-        mBuilder.setContentText( "停止計時" ) ;
+        mBuilder.setContentText( "停止計時，前次紀錄作廢" ) ;
         mBuilder.setTicker( "停止計時" ) ;
         mBuilder.setSmallIcon(R.drawable. ic_launcher_foreground ) ;
         mBuilder.setAutoCancel( true ) ;
