@@ -8,6 +8,35 @@
     android:padding="20dp"
     tools:context=".StopWatchActivity">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/generalTimer_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="65dp"
+            android:text="@string/general"
+            android:textColor="#FF424242"
+            android:background="@drawable/button_left" />
+
+        <Button
+            android:id="@+id/tomatoClock_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/tomato"
+            android:textColor="#FF424242"
+            android:layout_marginTop="65dp"
+            android:background="@drawable/button_right"
+            android:layout_toEndOf="@id/generalTimer_btn"
+            android:layout_toRightOf="@id/generalTimer_btn" />
+    </RelativeLayout>
+
     <Chronometer
         android:id="@+id/time_view"
         android:layout_width="match_parent"
