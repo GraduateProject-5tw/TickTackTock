@@ -2,4 +2,6 @@
     <string name="app_name">時間管理APP</string>
     <string name="start_btn">計時</string>
     <string name="stop_btn">結束</string>
+    <string name="general">General</string>
+    <string name="tomato">Tomato</string>
 </resources>
