@@ -49,7 +49,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         general_btn.setBackgroundColor(-1); //白色
         //general的切換頁面
         Intent intent = new Intent();
-        intent.setClass(TomatoClockActivity.this, StopWatchActivity.class);
+        intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
         general_btn.setOnClickListener(v ->
                 startActivity(intent));
 
