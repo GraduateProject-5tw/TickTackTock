@@ -53,7 +53,6 @@
             android:layout_centerHorizontal="true"
             android:background="@drawable/drawable_circle_progress"
             android:indeterminate="false"
-            android:max="100"
             android:progress="100"
             android:progressDrawable="@drawable/drawable_circle_default"
             android:rotation="-90" />
@@ -70,14 +69,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
+
         <Button
             android:id="@+id/tstart_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="45dp"
-            android:text="@string/start_btn"
-            android:visibility="gone"
+            android:text="計時"
+            android:visibility="visible"
             app:backgroundTint="#05E66A" />
 
         <Button
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="@string/stop_btn"
+            android:text="停止"
             android:layout_marginTop="45dp"
             android:visibility="gone"
             app:backgroundTint="#F44336"/>

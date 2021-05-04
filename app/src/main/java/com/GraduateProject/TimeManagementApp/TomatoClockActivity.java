@@ -3,24 +3,35 @@ package com.GraduateProject.TimeManagementApp;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 public class TomatoClockActivity extends AppCompatActivity {
 
     private Button startBtn;
+    private Button stopBtn;
+    private int futureInMillis = 1500000;
+    private int cushion = 5000;
+    private ProgressBar spinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
         startBtn = findViewById(R.id.tstart_btn);
+        stopBtn = findViewById(R.id.tstop_btn);     //可用K停止
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         AnalogClockStyle timeButton = findViewById(R.id.clock); //clock image
+        spinner = (ProgressBar)findViewById(R.id.progressBarCircle);
 
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
 
@@ -56,7 +67,38 @@ public class TomatoClockActivity extends AppCompatActivity {
         //general的禁按
         tomato_btn.setEnabled(false);
         tomato_btn.setBackgroundColor(-3355444); //淺灰色
+
+        //計時按鈕的功能實作
+        startBtn.setOnClickListener(v -> {
+            stopBtn.setVisibility(View.VISIBLE);
+
+            //先計時25分鐘
+            CountDownTimer study = new CountDownTimer(futureInMillis, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) { }
+
+                @Override
+                public void onFinish() {  // 倒數結束時,會執行這裡
+                    if(futureInMillis == 1500000 || futureInMillis == 1500000+cushion){
+                        AlertDialog.Builder startrest = new AlertDialog.Builder(TomatoClockActivity.this);
+                        startrest.setMessage("開始休息");
+                        startrest.setCancelable(true);  // disable click back button
+                        startrest.show();
+                        futureInMillis = 600000+cushion;
+                        this.start();
+                    }else{
+                        AlertDialog.Builder startstudy = new AlertDialog.Builder(TomatoClockActivity.this);
+                        startstudy.setMessage("開始讀書");
+                        startstudy.setCancelable(true);  // disable click back button
+                        startstudy.show();
+                        futureInMillis = 1500000+cushion;
+                        this.start();
+                    }
+                }
+            };
+            study.start();
+        });
+
+
     }
-
-
 }
