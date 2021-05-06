@@ -2,11 +2,15 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.RemoteViews;
+
 import androidx.core.app.NotificationCompat;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -76,7 +80,15 @@ public class NotificationService extends Service {    //server是一個在背景
         mBuilder.setContentText( "停止計時，前次紀錄作廢" ) ;
         mBuilder.setTicker( "停止計時" ) ;
         mBuilder.setSmallIcon(R.drawable. ic_launcher_foreground ) ;
-        mBuilder.setAutoCancel( true ) ;
+        mBuilder.setAutoCancel( true ) ; //
+
+        //點通知回到主畫面??
+        Intent it = new Intent();
+        it.setAction(Intent.ACTION_MAIN);
+        it.addCategory(Intent.CATEGORY_HOME);
+        startActivity(it);
+        //到這裡
+
         if (android.os.Build.VERSION. SDK_INT >= android.os.Build.VERSION_CODES. O ) {
             int importance = NotificationManager. IMPORTANCE_HIGH ;
             NotificationChannel notificationChannel = new NotificationChannel( NOTIFICATION_CHANNEL_ID , "NOTIFICATION_CHANNEL_NAME" , importance) ;
