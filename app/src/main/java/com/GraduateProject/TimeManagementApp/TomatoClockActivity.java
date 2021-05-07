@@ -1,11 +1,15 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
+import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -13,6 +17,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
+
+import java.time.Instant;
 
 public class TomatoClockActivity extends AppCompatActivity {
 
@@ -31,7 +37,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         AnalogClockStyle timeButton = findViewById(R.id.clock); //clock image
-        spinner = (ProgressBar)findViewById(R.id.progressBarCircle);
+        spinner = (ProgressBar) findViewById(R.id.progressBarCircle);
 
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
 
@@ -75,30 +81,67 @@ public class TomatoClockActivity extends AppCompatActivity {
             //先計時25分鐘
             CountDownTimer study = new CountDownTimer(futureInMillis, 1000) {
                 @Override
-                public void onTick(long millisUntilFinished) { }
+                public void onTick(long millisUntilFinished) {
+                }
 
                 @Override
                 public void onFinish() {  // 倒數結束時,會執行這裡
-                    if(futureInMillis == 1500000 || futureInMillis == 1500000+cushion){
+                    if (futureInMillis == 1500000 || futureInMillis == 1500000 + cushion) {
                         AlertDialog.Builder startrest = new AlertDialog.Builder(TomatoClockActivity.this);
                         startrest.setMessage("開始休息");
                         startrest.setCancelable(true);  // disable click back button
                         startrest.show();
-                        futureInMillis = 600000+cushion;
+                        futureInMillis = 600000 + cushion;
                         this.start();
-                    }else{
+                    } else {
                         AlertDialog.Builder startstudy = new AlertDialog.Builder(TomatoClockActivity.this);
                         startstudy.setMessage("開始讀書");
                         startstudy.setCancelable(true);  // disable click back button
                         startstudy.show();
-                        futureInMillis = 1500000+cushion;
+                        futureInMillis = 1500000 + cushion;
                         this.start();
                     }
                 }
             };
             study.start();
         });
+        //停止按鈕的功能實作
+        stopBtn.setOnClickListener(v -> {
+
+            startBtn.setVisibility(View.VISIBLE);
+            stopBtn.setVisibility(View.GONE);
+            //跳出視窗
+            AlertDialog.Builder builder = new AlertDialog.Builder(TomatoClockActivity.this);
+            AlertDialog dialog = builder.create();
+            dialog.setMessage("本次累積：\n\n");
+            dialog.setCanceledOnTouchOutside(true); //允許按對話框外部來關閉視窗
+            dialog.show();
+
+        });
 
 
     }
+
+    @Override
+    public void onBackPressed() {
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
+        alert.setTitle("離開");
+        alert.setMessage("確定要離開?");
+        alert.setPositiveButton("是", new DialogInterface.OnClickListener() { //按"是",則退出應用程式
+            public void onClick(DialogInterface dialog, int i) {
+                System.exit(0);//關閉activity
+                moveTaskToBack(true);
+            }
+        });
+
+        alert.setNegativeButton("否", new DialogInterface.OnClickListener() { //按"否",則不執行任何操作
+            public void onClick(DialogInterface dialog, int i) {
+            }
+        });
+        alert.show();//顯示訊息視窗
+
+
+    }
+
 }
