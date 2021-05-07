@@ -25,13 +25,15 @@
         </activity>
         <service
             android:name = ".NotificationService"
-            android:label = "@string/app_name" >
+            android:label = "@string/app_name"
+            android:background = "red">
             <intent-filter>
                 <action
                     android:name = "app.tutorialspoint.com.notifyme.NotificationService" />
                 <category android:name= "android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>
