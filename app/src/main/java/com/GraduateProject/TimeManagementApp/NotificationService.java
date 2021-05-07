@@ -91,10 +91,10 @@ public class NotificationService extends Service {    //server是一個在背景
 
 
         //點通知回到主畫面??
-        Intent it = new Intent();
-        it.setAction(Intent.ACTION_MAIN);
-        it.addCategory(Intent.CATEGORY_HOME);
-        startActivity(it);
+        Intent its = new Intent();
+        its.setAction(Intent.ACTION_MAIN);
+        its.addCategory(Intent.CATEGORY_HOME);
+        startActivity(its);
         //到這裡
 
         if (android.os.Build.VERSION. SDK_INT >= android.os.Build.VERSION_CODES. O ) {
