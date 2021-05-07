@@ -65,7 +65,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }
 
     @Override
-    protected void onPause() {  //當APP跑到背景時
+    public void onBackPressed() {  //當按back按紐時
         startService( new Intent( this, NotificationService.class )) ;
         chronometer.stop();
         chronometer.setBase(SystemClock.elapsedRealtime());
@@ -88,12 +88,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         millis -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
 
-        String sb = hours +
+        return(hours +
                 " 小時 " +
                 minutes +
                 " 分 " +
                 seconds +
-                " 秒";
-        return(sb);
+                " 秒");
     }
 }

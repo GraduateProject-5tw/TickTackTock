@@ -4,4 +4,6 @@
     <string name="stop_btn">結束</string>
     <string name="general">General</string>
     <string name="tomato">Tomato</string>
+    <string name="計時">計時</string>
+    <string name="停止">停止</string>
 </resources>

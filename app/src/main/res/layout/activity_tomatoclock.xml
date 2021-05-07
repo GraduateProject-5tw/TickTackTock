@@ -76,8 +76,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="45dp"
-            android:text="計時"
-            android:visibility="visible"
+            android:text="@string/計時"
+            android:visibility="gone"
             app:backgroundTint="#05E66A" />
 
         <Button
@@ -85,7 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="停止"
+            android:text="@string/停止"
             android:layout_marginTop="45dp"
             android:visibility="gone"
             app:backgroundTint="#F44336"/>
