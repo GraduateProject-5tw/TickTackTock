@@ -71,6 +71,9 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         chronometer.setBase(SystemClock.elapsedRealtime());
         startBtn.setVisibility(View.VISIBLE);
         stopBtn.setVisibility(View.GONE);
+        //跳出app立刻將時間歸零
+        recordTime = 0;
+        chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
         super.onPause();
     }
 
