@@ -150,9 +150,12 @@ public class TomatoClockActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int i) {
                 System.exit(0);//關閉activity
                 moveTaskToBack(true);
-                recordTime=0;//若離開則歸零
-                beginTime=0;
-
+                if(recordTime>0) {
+                    startService(new Intent(TomatoClockActivity.this, NotificationService.class));
+                    recordTime = 0;//若離開則歸零
+                    beginTime=0;
+                    futureInMillis=0; //將計時器歸0
+                }
             }
         });
 

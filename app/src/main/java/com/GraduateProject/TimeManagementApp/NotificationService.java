@@ -78,6 +78,8 @@ public class NotificationService extends Service {    //server是一個在背景
         //for notification back to app
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, 0, new Intent(this, GeneralTimerActivity.class), 0);
+        PendingIntent pendingIntent2 =
+                PendingIntent.getActivity(this, 0, new Intent(this, TomatoClockActivity.class), 0);
         //
 
         mBuilder.setContentTitle( "時間通知" ) ;

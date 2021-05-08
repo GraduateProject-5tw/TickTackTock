@@ -79,9 +79,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 startBtn.setVisibility(View.VISIBLE);
                 stopBtn.setVisibility(View.GONE);
                 //跳出app立刻將時間歸零
-                recordTime = 0;
-                chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
-                startService(notification);
+                if(recordTime>0) {
+                    startService(new Intent(GeneralTimerActivity.this, NotificationService.class));
+                    recordTime = 0;
+                    chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
+                }
 
             }
         });
