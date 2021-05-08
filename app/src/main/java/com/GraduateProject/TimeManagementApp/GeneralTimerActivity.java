@@ -1,6 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -66,15 +67,32 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     @Override
     public void onBackPressed() {  //當按back按紐時
-        startService( new Intent( this, NotificationService.class )) ;
-        chronometer.stop();
-        chronometer.setBase(SystemClock.elapsedRealtime());
-        startBtn.setVisibility(View.VISIBLE);
-        stopBtn.setVisibility(View.GONE);
-        //跳出app立刻將時間歸零
-        recordTime = 0;
-        chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
-        super.onPause();
+        Intent notification = new Intent( this, NotificationService.class );
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
+        alert.setTitle("離開");
+        alert.setMessage("確定要離開?");
+        alert.setPositiveButton("是", new DialogInterface.OnClickListener() { //按"是",則退出應用程式
+            public void onClick(DialogInterface dialog, int i) {
+                chronometer.stop();
+                chronometer.setBase(SystemClock.elapsedRealtime());
+                startBtn.setVisibility(View.VISIBLE);
+                stopBtn.setVisibility(View.GONE);
+                //跳出app立刻將時間歸零
+                recordTime = 0;
+                chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
+                startService(notification);
+
+            }
+        });
+        alert.setNegativeButton("否", new DialogInterface.OnClickListener() { //按"否",則不執行任何操作
+            public void onClick(DialogInterface dialog, int i) {
+            }
+        });
+        alert.show();//顯示訊息視窗
+
+
+
     }
 
     public static String getDurationBreakdown(long millis) {

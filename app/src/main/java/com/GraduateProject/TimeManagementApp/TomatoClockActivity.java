@@ -113,6 +113,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                         futureInMillis = 1500000 + cushion;
                         this.start();
 
+
                     }
                 }
             };
@@ -141,6 +142,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Intent notification = new Intent( this, NotificationService.class );
         AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
         alert.setTitle("離開");
         alert.setMessage("確定要離開?");
@@ -149,6 +151,8 @@ public class TomatoClockActivity extends AppCompatActivity {
                 System.exit(0);//關閉activity
                 moveTaskToBack(true);
                 recordTime=0;//若離開則歸零
+                beginTime=0;
+
             }
         });
 
