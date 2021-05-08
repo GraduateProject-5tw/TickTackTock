@@ -28,8 +28,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private int futureInMillis = 1500000;
     private int cushion = 5000;
     private ProgressBar spinner;
-
-
+    private long beginTime;
     private long recordTime;
 
 
@@ -43,6 +42,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         AnalogClockStyle timeButton = findViewById(R.id.clock); //clock image
         spinner = (ProgressBar) findViewById(R.id.progressBarCircle);
+
 
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
 
@@ -82,6 +82,8 @@ public class TomatoClockActivity extends AppCompatActivity {
         //計時按鈕的功能實作
         startBtn.setOnClickListener(v -> {
             stopBtn.setVisibility(View.VISIBLE);
+            beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
+
 
             //先計時25分鐘
             CountDownTimer study = new CountDownTimer(futureInMillis, 1000) {
@@ -94,22 +96,21 @@ public class TomatoClockActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {  // 倒數結束時,會執行這裡
                     if (futureInMillis == 1500000 || futureInMillis == 1500000 + cushion) {
-                        recordTime+=futureInMillis;
+                        recordTime += (SystemClock.elapsedRealtime()-beginTime);//將讀完時間記錄下來
                         AlertDialog.Builder startrest = new AlertDialog.Builder(TomatoClockActivity.this);
                         startrest.setMessage("開始休息");
                         startrest.setCancelable(true);  // disable click back button
                         startrest.show();
                         futureInMillis = 600000 + cushion;
-
                         this.start();
 
                     } else {
+                        beginTime=SystemClock.elapsedRealtime();    //重設開始的時間
                         AlertDialog.Builder startstudy = new AlertDialog.Builder(TomatoClockActivity.this);
                         startstudy.setMessage("開始讀書");
                         startstudy.setCancelable(true);  // disable click back button
                         startstudy.show();
                         futureInMillis = 1500000 + cushion;
-
                         this.start();
 
                     }
@@ -121,6 +122,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         stopBtn.setOnClickListener(v -> {
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
+            recordTime+=(SystemClock.elapsedRealtime()-beginTime);
 
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             //跳出視窗
