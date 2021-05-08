@@ -18,6 +18,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private Button startBtn;
     private Button stopBtn;
     private long recordTime;  //累計的時間
+    private boolean isCounting = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +36,13 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             chronometer.start();
             startBtn.setVisibility(View.GONE);
             stopBtn.setVisibility(View.VISIBLE);
-
+            isCounting = true;
         });
 
         //停止按鈕的功能實作
         stopBtn.setOnClickListener(v -> {
             chronometer.stop();
+            isCounting = false;
             recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間，單位是毫秒
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             startBtn.setVisibility(View.VISIBLE);
@@ -74,17 +76,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         alert.setMessage("確定要離開?");
         alert.setPositiveButton("是", new DialogInterface.OnClickListener() { //按"是",則退出應用程式
             public void onClick(DialogInterface dialog, int i) {
-                chronometer.stop();
-                chronometer.setBase(SystemClock.elapsedRealtime());
-                startBtn.setVisibility(View.VISIBLE);
-                stopBtn.setVisibility(View.GONE);
-                //跳出app立刻將時間歸零
-                if(recordTime>0) {
-                    startService(new Intent(GeneralTimerActivity.this, NotificationService.class));
-                    recordTime = 0;
-                    chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
-                }
-
+                moveTaskToBack(true);
             }
         });
         alert.setNegativeButton("否", new DialogInterface.OnClickListener() { //按"否",則不執行任何操作
@@ -92,9 +84,21 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             }
         });
         alert.show();//顯示訊息視窗
+    }
 
-
-
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(isCounting){
+            isCounting = false;
+            startService(new Intent(GeneralTimerActivity.this, NotificationService.class));
+            chronometer.stop();
+            chronometer.setBase(SystemClock.elapsedRealtime());
+            startBtn.setVisibility(View.VISIBLE);
+            stopBtn.setVisibility(View.GONE);
+            //跳出app立刻將時間歸0
+            recordTime=0;//若離開則歸0
+        }
     }
 
     public static String getDurationBreakdown(long millis) {
