@@ -96,6 +96,7 @@ public class NotificationService extends Service {    //server是一個在背景
         Intent its = new Intent();
         its.setAction(Intent.ACTION_MAIN);
         its.addCategory(Intent.CATEGORY_HOME);
+        its.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(its);
         //到這裡
 
