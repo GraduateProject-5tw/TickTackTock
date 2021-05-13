@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ProgressBar;
 
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -56,6 +57,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         AnalogClockStyle timeButton = findViewById(R.id.clock); //clock image
         spinner = findViewById(R.id.progressBarCircle);
+        RelativeLayout clockLayout = findViewById(R.id.clockPanel);
 
 
         //當按下時鐘
@@ -95,13 +97,15 @@ public class TomatoClockActivity extends AppCompatActivity {
         startBtn.setOnClickListener(v -> {
             stopBtn.setVisibility(View.VISIBLE);
             beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
-            isCounting = true;
+            isCounting = true; //正在計時中
+
+            //progress bar起始位置
             Calendar calendar = Calendar.getInstance();
             spinner.setMinute(calendar.get(Calendar.MINUTE));
             spinner.setTime(futureInMillis);
-            //spinner.setMax(spinner.getTime());
             spinner.setVisibility(View.VISIBLE);
             initVariable();
+
             new Thread( new ProgressRunable()).start();
             timeButton.setEnabled(false);
 
@@ -228,7 +232,6 @@ public class TomatoClockActivity extends AppCompatActivity {
 
             while (mCurrentProgress < mTotalProgress) {
                 mCurrentProgress += 1 ;
-
                 spinner.setProgress(mCurrentProgress);
 
                 try {

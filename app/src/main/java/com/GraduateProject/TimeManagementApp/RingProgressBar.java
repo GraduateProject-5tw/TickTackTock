@@ -107,23 +107,9 @@ public class RingProgressBar extends View{
 
     public RingProgressBar(Context context, AttributeSet attrs, int defStyle) {
         super (context, attrs, defStyle);
+        //獲取自定義屬性和默認值，第一個參數是從用戶屬性中得到的設置，如果用戶沒有設置，那麼就用默認的屬性，即：第二個參數
         mTypedArray = context.obtainStyledAttributes(attrs,
                 R.styleable.RingProgressBar);
-        roundColor = mTypedArray.getColor(R.styleable.RingProgressBar_roundColor, Color.GRAY);
-        //圓環進度條的顏色
-        roundProgressColor = mTypedArray.getColor(R.styleable.RingProgressBar_roundProgressColor, Color.YELLOW);
-        //最大進度
-        maxx = (int)time*10/6;
-        max = mTypedArray.getInteger(R.styleable.RingProgressBar_max, maxx );
-        //是否顯示中間的進度
-        textIsDisplayable = mTypedArray.getBoolean(R.styleable.RingProgressBar_textIsDisplayable, false );
-        //進度的風格，實心或者空心
-        style = mTypedArray.getInt(R.styleable.RingProgressBar_style, 0 );
-        //進度開始的角度數
-        startAngle = mTypedArray.getInt(R.styleable.RingProgressBar_startAngle, stangle );
-        //圓形顏色
-        backColor = mTypedArray.getColor(R.styleable.RingProgressBar_backColor, 0 );
-        mTypedArray.recycle();
     }
 
     @Override
@@ -145,23 +131,37 @@ public class RingProgressBar extends View{
             mHandTruncation = minAttr / 20;
             mHourHandTruncation = minAttr / 10;
 
+            /**根據實際時間，取得分針位置*/
+            minn =  minute-15;
+            stangle = minn*6;
+
+            //圓環的顏色
+            roundColor = mTypedArray .getColor(R.styleable.RingProgressBar_roundColor, Color.GRAY);
+            //圓環進度條的顏色
+            roundProgressColor = mTypedArray.getColor(R.styleable.RingProgressBar_roundProgressColor, Color.YELLOW);
+            //圓環的寬度
+            roundWidth = mTypedArray.getDimension(R.styleable.RingProgressBar_roundWidth, 40 );
+            //最大進度
+            maxx = (int)time*10/6;
+            max = mTypedArray.getInteger(R.styleable.RingProgressBar_max, maxx );
+            //是否顯示中間的進度
+            textIsDisplayable = mTypedArray.getBoolean(R.styleable.RingProgressBar_textIsDisplayable, false );
+            //進度的風格，實心或者空心
+            style = mTypedArray.getInt(R.styleable.RingProgressBar_style, 0 );
+            //進度開始的角度數
+            startAngle = mTypedArray.getInt(R.styleable.RingProgressBar_startAngle, stangle );
+            //圓形顏色
+            backColor = mTypedArray.getColor(R.styleable.RingProgressBar_backColor, 0 );
+            //mTypedArray.recycle();
+
+
             isInit = true; //代表時鐘建立完成
         }
 
 
         paint = new Paint();
 
-        /**根據實際時間，取得分針位置*/
-        minn =  minute-15;
-        stangle = minn*6;
 
-
-        //獲取自定義屬性和默認值，第一個參數是從用戶屬性中得到的設置，如果用戶沒有設置，那麼就用默認的屬性，即：第二個參數
-        //圓環的顏色
-        //文字的顏色
-        //textColor = mTypedArray.getColor( R.styleable.RingProgressBar_textColor, Color.GREEN);
-        //文字的大小
-        //textSize = mTypedArray.getDimension(R.styleable.RingProgressBar_textSize, 15 );
 
         int centre = getWidth()/2; //獲取圓心的x坐標
         int radius = ( int ) (centre - roundWidth/2); //圓環的半徑
@@ -182,7 +182,7 @@ public class RingProgressBar extends View{
         /**
          * 畫進度百分比
          */
-        paint.setStrokeWidth( 0 );
+        paint.setStrokeWidth(0);
         paint.setColor(textColor);
         paint.setTextSize(textSize);
         paint.setTypeface(Typeface.DEFAULT_BOLD); //設置字體
