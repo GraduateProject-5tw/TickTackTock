@@ -39,30 +39,27 @@
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/clockPanel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="40dp">
 
         <!--background為進度條(黃色) // progressDrawable會隨著progress變化的圓圈(灰色)-->
-        <ProgressBar
+        <com.GraduateProject.TimeManagementApp.RingProgressBar
             android:id="@+id/progressBarCircle"
-            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="270dp"
             android:layout_height="270dp"
             android:layout_centerHorizontal="true"
-            android:background="@drawable/drawable_circle_progress"
-            android:indeterminate="false"
-            android:progress="100"
-            android:progressDrawable="@drawable/drawable_circle_default"
-            android:rotation="-90" />
+            android:visibility="gone"/>
 
         <com.GraduateProject.TimeManagementApp.AnalogClockStyle
             android:id="@+id/clock"
             android:layout_width="match_parent"
             android:layout_height="240dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginTop="15dp" />
+            android:layout_marginTop="15dp"
+            />
     </RelativeLayout>
 
     <FrameLayout

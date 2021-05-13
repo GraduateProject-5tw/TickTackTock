@@ -64,6 +64,11 @@ public class AnalogClockStyle extends View {
 
         /**時鐘邊框*/
         mPaint.reset();
+        mPaint.setColor(-1);
+        mPaint.setStyle(Paint.Style.FILL); //邊線
+        mPaint.setAntiAlias(true);
+        canvas.drawCircle(mWidth / 2, mHeight / 2, mRadius + mPadding - 10, mPaint);
+        mPaint.reset();
         mPaint.setColor(Color.parseColor("#A9A9A9"));
         mPaint.setStyle(Paint.Style.STROKE); //邊線
         mPaint.setStrokeWidth(4);

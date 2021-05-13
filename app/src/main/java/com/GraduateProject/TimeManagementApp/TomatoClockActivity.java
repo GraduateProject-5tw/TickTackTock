@@ -3,9 +3,12 @@ package com.GraduateProject.TimeManagementApp;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.icu.util.Calendar;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 
+import android.os.Handler;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.View;
@@ -17,6 +20,7 @@ import android.widget.ProgressBar;
 
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.Timer;
@@ -28,13 +32,19 @@ public class TomatoClockActivity extends AppCompatActivity {
     private Button stopBtn;
     private int futureInMillis = 1500000;
     private int cushion = 5000;
-    private ProgressBar spinner;
     private long beginTime;
     private long recordTime;
     private boolean isCounting = false;
     private CountDownTimer study;
+    private RingProgressBar spinner;
+    private int progressStatus;
+    private Handler handler = new Handler();
+    private int mTotalProgress;
+    private int mCurrentProgress;
 
 
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +55,8 @@ public class TomatoClockActivity extends AppCompatActivity {
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         AnalogClockStyle timeButton = findViewById(R.id.clock); //clock image
-        spinner = (ProgressBar) findViewById(R.id.progressBarCircle);
+        spinner = findViewById(R.id.progressBarCircle);
+
 
         //當按下時鐘
         timeButton.setOnClickListener(v -> {
@@ -85,6 +96,14 @@ public class TomatoClockActivity extends AppCompatActivity {
             stopBtn.setVisibility(View.VISIBLE);
             beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
             isCounting = true;
+            Calendar calendar = Calendar.getInstance();
+            spinner.setMinute(calendar.get(Calendar.MINUTE));
+            spinner.setTime(futureInMillis);
+            //spinner.setMax(spinner.getTime());
+            spinner.setVisibility(View.VISIBLE);
+            initVariable();
+            new Thread( new ProgressRunable()).start();
+            timeButton.setEnabled(false);
 
             //先計時25分鐘
             study = new CountDownTimer(futureInMillis, 1000) {
@@ -128,6 +147,7 @@ public class TomatoClockActivity extends AppCompatActivity {
             recordTime+=(SystemClock.elapsedRealtime()-beginTime);
             isCounting = false;
             study.cancel();
+            timeButton.setEnabled(true);
 
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             //跳出視窗
@@ -140,6 +160,11 @@ public class TomatoClockActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private  void initVariable(){
+        mTotalProgress = 100 ;
+        mCurrentProgress = 0 ;
     }
 
     @Override
@@ -194,6 +219,27 @@ public class TomatoClockActivity extends AppCompatActivity {
                 seconds +
                 " 秒";
         return(sb);
+    }
+
+    class ProgressRunable implements Runnable {
+
+        @Override
+        public  void run() {
+
+            while (mCurrentProgress < mTotalProgress) {
+                mCurrentProgress += 1 ;
+
+                spinner.setProgress(mCurrentProgress);
+
+                try {
+                    Thread.sleep( 100 );
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
 
 }
