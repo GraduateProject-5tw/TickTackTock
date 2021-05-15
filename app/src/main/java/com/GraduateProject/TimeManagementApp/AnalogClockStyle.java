@@ -1,5 +1,6 @@
 package com.GraduateProject.TimeManagementApp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,6 +9,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ImageView;
 
 import java.util.Calendar;
 
@@ -84,18 +86,8 @@ public class AnalogClockStyle extends View {
         mPaint.setTextSize(fontSize);  // set font size (optional)
 
         /**在邊框畫上數字，迴圈12次*/
-        for (int hour : mClockHours) {
-            String tmp = String.valueOf(hour);
-            mPaint.getTextBounds(tmp, 0, tmp.length(), mRect);  // for circle-wise bounding
 
-            // 透過sin cos找出數字應擺的位置
-            double angle = Math.PI / 6 * (hour - 3);
-            int x = (int) (mWidth / 2 + Math.cos(angle) * mRadius - mRect.width() / 2);
-            int y = (int) (mHeight / 2 + Math.sin(angle) * mRadius + mRect.height() / 2);
 
-            //將數字畫到該位置上
-            canvas.drawText(String.valueOf(hour), x, y, mPaint);
-        }
 
         /**根據實際時間，繪製時針位置*/
         Calendar calendar = Calendar.getInstance();  //取得現在時間
