@@ -127,7 +127,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                     //重畫新的progress bar
                     spinner.setInit(false);
                     spinner.setTime(futureInMillis);
-                    spinner.setMinute(calendar.get(Calendar.MINUTE));
+                    spinner.setMinute(Calendar.getInstance().get(Calendar.MINUTE));
                     initVariable();
                     spinner.invalidate();
                     this.start();
@@ -142,6 +142,7 @@ public class TomatoClockActivity extends AppCompatActivity {
             recordTime+=(SystemClock.elapsedRealtime()-beginTime);
             isCounting = false;
             spinner.setInit(false);
+            spinner.setVisibility(View.GONE);
             study.cancel();
             timeButton.setEnabled(true);
 

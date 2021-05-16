@@ -19,7 +19,7 @@ public class RingProgressBar extends View{
 
     /** 其他用來計算指針位置的變數 */
     private int mRadius = 0;
-    private boolean isInit;  //一旦時鐘被建立會變成true
+    private boolean isInit = false;  //一旦時鐘被建立會變成true
 
     /**
      * 圓環的顏色
@@ -136,19 +136,15 @@ public class RingProgressBar extends View{
         //用於定義的圓弧的形狀和大小的界限
         @SuppressLint("DrawAllocation") RectF rectF = new RectF(mWidth/2-(mRadius + mPadding - 10)+10, mWidth/2-(mRadius + mPadding - 10)+10, mWidth/2+(mRadius + mPadding - 10)-10, mWidth/2+(mRadius + mPadding - 10)-10);
 
+        paint.setStyle(Paint.Style.STROKE);
 
-                paint.setStyle(Paint.Style.STROKE);
-
-                /*第二個參數是進度開始的角度，-90表示從12點方向開始走進度，如果是0表示從三點鐘方向走進度，依次類推
-                 *public void drawArc(RectF oval, float startAngle, float sweepAngle, boolean useCenter, Paint paint)
-                    oval :指定圓弧的外輪廓矩形區域。
-                    endAngle: 圓弧終點角度，單位為度。
-                    sweepAngle: 圓弧從endAngle往回掃過的角度，加"-"順時針移動，單位為度。
-                    useCenter: 如果為True時，在繪製圓弧時將圓心包括在內，通常用來繪製扇形。
-                    paint: 繪製圓弧的畫板屬性，如顏色，是否填充等
-                 *
-                */
-
+        /*oval :指定圓弧的外輪廓矩形區域。
+          endAngle: 圓弧終點角度，單位為度。
+          sweepAngle: 圓弧從endAngle往回掃過的角度，加"-"順時針移動，單位為度。
+          useCenter: 如果為True時，在繪製圓弧時將圓心包括在內，通常用來繪製扇形。
+          paint: 繪製圓弧的畫板屬性，如顏色，是否填充等
+        *
+        */
         //根據進度畫圓弧
         canvas.drawArc(rectF, endAngle, -time/10000, true, paint);
     }
