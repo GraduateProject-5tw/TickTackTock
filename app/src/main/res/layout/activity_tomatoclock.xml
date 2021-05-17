@@ -56,15 +56,15 @@
         <com.GraduateProject.TimeManagementApp.AnalogClockStyle
             android:id="@+id/clock"
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="295dp"
             android:layout_alignParentEnd="true"
             android:layout_gravity="center_vertical"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="0dp" />
 
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="270dp"
+            android:layout_height="300dp"
             android:src="@drawable/clock"
             android:contentDescription="@null" />
     </RelativeLayout>
