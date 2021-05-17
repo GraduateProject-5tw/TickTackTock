@@ -54,11 +54,11 @@ public class RingProgressBar extends View{
     /**
      * 進度開始的角度數
      */
-    private  int endAngle;
-
+    private  int endAngle, newAngle;
     private  int backColor;
     private int time;
     private int minute;
+    private boolean isNewProgress = false;
     private final TypedArray mTypedArray;
 
     public RingProgressBar(Context context) {
@@ -146,7 +146,10 @@ public class RingProgressBar extends View{
         *
         */
         //根據進度畫圓弧
-        canvas.drawArc(rectF, endAngle, -time/10000, true, paint);
+        if(!isNewProgress)
+            canvas.drawArc(rectF, endAngle, -time/10000, true, paint);
+        else
+            canvas.drawArc(rectF, newAngle, -time/10000, true, paint);
     }
 
     public  synchronized  int getMax() {
@@ -168,11 +171,16 @@ public class RingProgressBar extends View{
      * 設置進度，此為線程安全控件，由於考慮多線的問題，需要同步
      * 刷新界面調用postInvalidate()能在非UI線程刷新
      */
+    public  synchronized  void setProgress(int startTime, int leftTime) {
+        this.time = leftTime;
+        this.newAngle = (startTime - 15)* 6 + (time / 10000);
+        postInvalidate();
+    }
+
     public  synchronized  void setProgress(int leftTime) {
         this.time = leftTime;
         postInvalidate();
     }
-
 
     public  int getCircleColor() {
         return roundColor;
@@ -218,7 +226,7 @@ public class RingProgressBar extends View{
 
     public int getTime(){return time;}
 
-    public void setInit(boolean init){ this.isInit = init;}
+    public void setIsNewProgress(boolean init){ this.isNewProgress = init;}
 
-    public boolean getInit(){ return isInit;}
+    public boolean getIsNewProgress(){ return isNewProgress;}
 }

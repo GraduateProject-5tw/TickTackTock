@@ -60,7 +60,21 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         tomato_btn.setEnabled(true);
         tomato_btn.setBackgroundColor(-1); //白色
         //tomato的切換頁面
-        tomato_btn.setOnClickListener(view -> startActivity(new Intent(GeneralTimerActivity.this, TomatoClockActivity.class)));
+        Intent intent = new Intent();
+        intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+        tomato_btn.setOnClickListener(view ->
+        {
+            if(isCounting){
+                isCounting = false;
+                chronometer.stop();
+                chronometer.setBase(SystemClock.elapsedRealtime());
+                startBtn.setVisibility(View.VISIBLE);
+                stopBtn.setVisibility(View.GONE);
+                //跳出app立刻將時間歸0
+                recordTime=0;//若離開則歸0
+            }
+            startActivity(intent);
+        });
 
         //general的禁按
         general_btn.setEnabled(false);

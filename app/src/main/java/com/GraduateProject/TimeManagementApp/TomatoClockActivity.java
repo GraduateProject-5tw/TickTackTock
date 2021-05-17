@@ -19,7 +19,6 @@ public class TomatoClockActivity extends AppCompatActivity {
     private Button startBtn;
     private Button stopBtn;
     private int futureInMillis;
-    private final int cushion = 5000;
     private long beginTime;
     private long recordTime = 0;
     private boolean isCounting = false;
@@ -69,8 +68,17 @@ public class TomatoClockActivity extends AppCompatActivity {
         //general的切換頁面
         Intent intent = new Intent();
         intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
-        general_btn.setOnClickListener(v ->
-                startActivity(intent));
+        general_btn.setOnClickListener(v -> {
+            if(isCounting){
+                isCounting = false;
+                spinner.setIsNewProgress(false);
+                recordTime = 0;//若離開則歸0
+                beginTime = 0;
+                study.cancel();
+                TomatoClockActivity.this.finish();
+            }
+            startActivity(intent);
+        });
 
         //general的禁按
         tomato_btn.setEnabled(false);
@@ -91,7 +99,6 @@ public class TomatoClockActivity extends AppCompatActivity {
             spinner.setMinute(calendar.get(Calendar.MINUTE));
             spinner.setVisibility(View.VISIBLE);
 
-            //先計時25分鐘
             study = new CountDownTimer(futureInMillis, 1000) {
 
                 @Override
@@ -105,32 +112,43 @@ public class TomatoClockActivity extends AppCompatActivity {
 
                 @Override
                 public void onFinish() {  // 倒數結束時,會執行這裡
-                    if (futureInMillis == 1500000 || futureInMillis == 1500000 + cushion) {
+                    if (futureInMillis == 1500000) {
                         recordTime += (SystemClock.elapsedRealtime()-beginTime);//將讀完時間記錄下來
-                        beginTime = SystemClock.elapsedRealtime();
                         isCounting = false;
+                        spinner.setVisibility(View.GONE);
                         AlertDialog.Builder startrest = new AlertDialog.Builder(TomatoClockActivity.this);
                         startrest.setMessage("開始休息");
                         startrest.setCancelable(true);  // disable click back button
+                        startrest.setPositiveButton("OK", (dialog, which) -> {
+                            //重畫新的progress bar
+                            futureInMillis = 600000 ;
+                            beginTime = SystemClock.elapsedRealtime();
+                            initVariable();
+                            spinner.setIsNewProgress(true);
+                            spinner.setProgress(Calendar.getInstance().get(Calendar.MINUTE), futureInMillis);
+                            spinner.setVisibility(View.VISIBLE);
+                            study.start();
+                        });
                         startrest.show();
-                        futureInMillis = 600000 + cushion;
 
-                    } else {
-                        beginTime=SystemClock.elapsedRealtime();    //重設開始的時間
+                    } else{
                         isCounting = true;
+                        spinner.setVisibility(View.GONE);
                         AlertDialog.Builder startstudy = new AlertDialog.Builder(TomatoClockActivity.this);
                         startstudy.setMessage("開始讀書");
                         startstudy.setCancelable(true);  // disable click back button
+                        startstudy.setPositiveButton("OK", (dialog, which) -> {
+                            //重畫新的progress bar
+                            futureInMillis = 1500000;
+                            beginTime=SystemClock.elapsedRealtime();
+                            initVariable();
+                            spinner.setIsNewProgress(true);
+                            spinner.setProgress(Calendar.getInstance().get(Calendar.MINUTE), futureInMillis);
+                            spinner.setVisibility(View.VISIBLE);
+                            study.start();
+                        });
                         startstudy.show();
-                        futureInMillis = 1500000 + cushion;
                     }
-                    //重畫新的progress bar
-                    spinner.setInit(false);
-                    spinner.setTime(futureInMillis);
-                    spinner.setMinute(Calendar.getInstance().get(Calendar.MINUTE));
-                    initVariable();
-                    spinner.invalidate();
-                    this.start();
                 }
             };
             study.start();
@@ -141,7 +159,7 @@ public class TomatoClockActivity extends AppCompatActivity {
             stopBtn.setVisibility(View.GONE);
             recordTime+=(SystemClock.elapsedRealtime()-beginTime);
             isCounting = false;
-            spinner.setInit(false);
+            spinner.setIsNewProgress(false);
             spinner.setVisibility(View.GONE);
             study.cancel();
             timeButton.setEnabled(true);
@@ -183,7 +201,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         super.onPause();
         if(isCounting){
             isCounting = false;
-            spinner.setInit(false);
+            spinner.setIsNewProgress(false);
             startService(new Intent(TomatoClockActivity.this, NotificationService.class));
             recordTime = 0;//若離開則歸0
             beginTime = 0;
