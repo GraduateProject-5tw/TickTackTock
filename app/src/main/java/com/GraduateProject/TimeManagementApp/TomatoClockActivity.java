@@ -1,6 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Build;
@@ -178,14 +179,15 @@ public class TomatoClockActivity extends AppCompatActivity {
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
             recordTime+=(SystemClock.elapsedRealtime()-beginTime);
-            isCounting = false;
-            spinnerStudy.setIsNewProgress(false);
-            spinnerStudy.setVisibility(View.GONE);
-            spinnerRest.setIsNewProgress(false);
-            spinnerRest.setVisibility(View.GONE);
-            study.cancel();
-            rest.cancel();
-            timeButton.setEnabled(true);
+            if(isCounting){
+                study.cancel();
+                spinnerStudy.setVisibility(View.GONE);
+                isCounting = false;
+
+            }else{
+                rest.cancel();
+                spinnerRest.setVisibility(View.GONE);
+            }
 
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             //跳出視窗
@@ -193,7 +195,14 @@ public class TomatoClockActivity extends AppCompatActivity {
             AlertDialog dialog = builder.create();
             dialog.setMessage("本次累積：\n\n"+ Time);
             dialog.setCanceledOnTouchOutside(true); //允許按對話框外部來關閉視窗
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    TomatoClockActivity.this.recreate();
+                }
+            });
             dialog.show();
+
             recordTime = 0;
         });
     }
@@ -218,12 +227,8 @@ public class TomatoClockActivity extends AppCompatActivity {
         super.onPause();
         if(isCounting){
             isCounting = false;
-            spinnerStudy.setIsNewProgress(false);
             spinnerStudy.setVisibility(View.GONE);
-            spinnerRest.setIsNewProgress(false);
-            spinnerRest.setVisibility(View.GONE);
             study.cancel();
-            rest.cancel();
             startService(new Intent(TomatoClockActivity.this, NotificationService.class));
             recordTime = 0;//若離開則歸0
             beginTime = 0;
