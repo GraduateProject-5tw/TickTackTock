@@ -96,9 +96,10 @@ public class RingProgressBar extends View{
             int stangle = minn * 6 + (time / 10000);
 
             //圓環的顏色
-            roundColor = mTypedArray .getColor(R.styleable.RingProgressBar_roundColor, Color.GRAY);
+            roundColor = mTypedArray .getColor(R.styleable.RingProgressBar_roundColor, Color.rgb(246,238,232));
             //圓環進度條的顏色
-            roundProgressColor = mTypedArray.getColor(R.styleable.RingProgressBar_roundProgressColor, Color.YELLOW);
+            roundProgressColor = mTypedArray.getColor(R.styleable.RingProgressBar_roundProgressColor, Color.rgb(237,167,167));
+            //roundProgressColor = mTypedArray.getColor(R.styleable.RingProgressBar_roundProgressColor, Color.YELLOW);
             //圓環的寬度
             roundWidth = mTypedArray.getDimension(R.styleable.RingProgressBar_roundWidth, 40 );
             //最大進度

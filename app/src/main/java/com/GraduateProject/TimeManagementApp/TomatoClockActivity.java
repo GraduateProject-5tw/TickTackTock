@@ -1,6 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Build;
@@ -19,14 +20,16 @@ public class TomatoClockActivity extends AppCompatActivity {
     private Button startBtn;
     private Button stopBtn;
     private int futureInMillis;
+    private int studyInMillis;
+    private int stopInMillis;
     private long beginTime;
     private long recordTime = 0;
     private boolean isCounting = false;
     private MyCountdownTimer study;
     private RingProgressBar spinnerStudy;
     private int mCurrentProgress;
-
-
+    final String[] studytime = new String[]{"15","20","25","30","35","40","45","50","55","60"};
+    final String[] resttime = new String[]{"0","5","10","15","20","25","30","35","40","45","50","55","60"};
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -44,24 +47,62 @@ public class TomatoClockActivity extends AppCompatActivity {
         //當按下時鐘
         timeButton.setOnClickListener(v -> {
             AlertDialog.Builder timeConfirm = new AlertDialog.Builder(TomatoClockActivity.this);
-            timeConfirm.setTitle("時間配置確認");
-            timeConfirm.setMessage("\n\n讀書時間：25分鐘\n\n休息時間：10分鐘");
+            AlertDialog.Builder StoptimeConfirm = new AlertDialog.Builder(TomatoClockActivity.this);
+            AlertDialog.Builder remind = new AlertDialog.Builder(TomatoClockActivity.this);
+            timeConfirm.setTitle("讀書時間設置:(分鐘)");
             timeConfirm.setIcon(android.R.drawable.ic_dialog_info);
+            StoptimeConfirm.setIcon(android.R.drawable.ic_dialog_info);
+            remind.setIcon(android.R.drawable.ic_popup_reminder);
+            StoptimeConfirm.setCancelable(false);
             timeConfirm.setCancelable(false);
-
-            //設定視窗按鈕的功能
-            timeConfirm.setPositiveButton("OK", (dialog, which) -> {
-                //顯示設定完成提醒
-                Toast.makeText(TomatoClockActivity.this, "時間設定完成", Toast.LENGTH_SHORT).show();
-                futureInMillis = 1500000;
-
-                //出現開始計時按鈕
-                startBtn.setVisibility(View.VISIBLE);
+            //設定單選列表
+            timeConfirm.setSingleChoiceItems(studytime, -1, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // TODO Auto-generated method stub
+                    Toast.makeText(TomatoClockActivity.this, studytime[which], Toast.LENGTH_SHORT).show();
+                    int i = Integer.valueOf(studytime[which]);
+                    studyInMillis = i*60000;
+                }
             });
-
+            //設定取消按鈕並且設定響應事件
+            timeConfirm.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // TODO Auto-generated method stub
+                    //取消按鈕響應事件
+                    dialog.dismiss();//結束對話框
+                }
+            });
+            timeConfirm.setPositiveButton("下一步→", (dialog, which) -> {
+                StoptimeConfirm.setTitle("休息時間設置:(分鐘)");
+                StoptimeConfirm.setSingleChoiceItems(resttime, -1, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // TODO Auto-generated method stub
+                        Toast.makeText(TomatoClockActivity.this, resttime[which], Toast.LENGTH_SHORT).show();
+                        int j = Integer.valueOf(resttime[which]);
+                        stopInMillis = j*60000;
+                    }
+                });
+                StoptimeConfirm.setPositiveButton("確定", (ddialog, wwhich) -> {
+                    if(stopInMillis>studyInMillis){
+                        remind.setTitle("請重新設置");
+                        remind.setMessage("尚未點選\n\nor\n\n讀書時間大於休息時間");
+                        remind.show();
+                        dialog.dismiss();
+                    }else {
+                        //顯示設定完成提醒
+                        Toast.makeText(TomatoClockActivity.this, "時間設定完成", Toast.LENGTH_SHORT).show();
+                        futureInMillis = studyInMillis;
+                        //出現開始計時按鈕
+                        startBtn.setVisibility(View.VISIBLE);
+                    }
+                });
+                StoptimeConfirm.show();
+            });
             timeConfirm.show();
         });
-
 
         general_btn.setEnabled(true);
         general_btn.setBackgroundColor(-1); //白色
@@ -113,7 +154,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
                 @Override
                 public void onFinish() {  // 倒數結束時,會執行這裡
-                    if (futureInMillis == 1500000) {
+                    if (futureInMillis == studyInMillis) {
                         recordTime += (SystemClock.elapsedRealtime()-beginTime);//將讀完時間記錄下來
                         isCounting = false;
                         spinnerStudy.setVisibility(View.GONE);
@@ -123,7 +164,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                         startrest.setOnCancelListener(dialog -> {
                             //重畫新的progress bar
                             vibration().cancel();
-                            futureInMillis = 600000;
+                            futureInMillis = stopInMillis;
                             beginTime = SystemClock.elapsedRealtime();
                             initVariable();
                             spinnerStudy.setIsNewProgress(true);
@@ -143,7 +184,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                         startstudy.setOnCancelListener(dialog -> {
                             //重畫新的progress bar
                             vibration().cancel();
-                            futureInMillis = 1500000;
+                            futureInMillis = studyInMillis;
                             beginTime = SystemClock.elapsedRealtime();
                             initVariable();
                             spinnerStudy.setIsNewProgress(true);
