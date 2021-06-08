@@ -191,8 +191,6 @@ public class NotificationService extends Service {    //server是一個在背景
 
     //跳出通知
     public void createNotification () {
-        timerTask.cancel();
-        timer.cancel();
         NotificationManager mNotificationManager = (NotificationManager) getSystemService( NOTIFICATION_SERVICE ) ;
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext() , default_notification_channel_id ) ;
         //for notification back to app

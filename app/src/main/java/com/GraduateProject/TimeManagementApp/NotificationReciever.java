@@ -19,7 +19,7 @@ public class NotificationReciever extends BroadcastReceiver {
             Log.v("shuffTest", "Pressed YES");
 
         } else if (NO_ACTION.equals(action)) {
-            Log.v("shuffTest", "Pressed MAYBE");
+            Log.v("shuffTest", "Pressed NO");
             android.os.Process.killProcess(android.os.Process.myPid());
         }
     }
