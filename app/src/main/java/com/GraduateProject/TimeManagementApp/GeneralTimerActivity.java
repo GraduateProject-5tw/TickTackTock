@@ -1,32 +1,15 @@
 package com.GraduateProject.TimeManagementApp;
 
-import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.AppOpsManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleObserver;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class GeneralTimerActivity extends AppCompatActivity implements LifecycleObserver {
@@ -121,44 +104,14 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     public void onPause(){
         super.onPause();
         if(isCounting){
+            isCounting = false;
             startService(new Intent(GeneralTimerActivity.this, NotificationService.class));
-        }
-    }
-
-    private String getForegroundTask() {
-        String currentApp = "NULL";
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressLint("WrongConstant") UsageStatsManager usm = (UsageStatsManager)this.getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
-            if (appList != null && appList.size() > 0) {
-                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<Long, UsageStats>();
-                for (UsageStats usageStats : appList) {
-                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-                }
-                if (mySortedMap != null && !mySortedMap.isEmpty()) {
-                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
-                }
-            }
-        } else {
-            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
-            currentApp = tasks.get(0).processName;
-        }
-
-        Log.e("adapter", "Current App in foreground is: " + currentApp);
-        return currentApp;
-    }
-
-    public static boolean needPermissionForBlocking(Context context){
-        try {
-            PackageManager packageManager = context.getPackageManager();
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
-            AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-            int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
-            return  (mode != AppOpsManager.MODE_ALLOWED);
-        } catch (PackageManager.NameNotFoundException e) {
-            return true;
+            chronometer.stop();
+            chronometer.setBase(SystemClock.elapsedRealtime());
+            startBtn.setVisibility(View.VISIBLE);
+            stopBtn.setVisibility(View.GONE);
+            //跳出app立刻將時間歸0
+            recordTime=0;//若離開則歸0
         }
     }
 
@@ -179,9 +132,5 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " 分 " +
                 seconds +
                 " 秒");
-    }
-
-    protected void onDestroy() {
-        super.onDestroy();
     }
 }

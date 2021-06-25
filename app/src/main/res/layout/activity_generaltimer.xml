@@ -9,7 +9,7 @@
     tools:context=".GeneralTimerActivity">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="275dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:orientation="horizontal">
@@ -20,22 +20,24 @@
             android:layout_height="35dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="65dp"
-            android:textSize="12sp"
+            android:background="@drawable/button_left"
             android:text="@string/general"
             android:textColor="#FF424242"
-            android:background="@drawable/button_left" />
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/tomatoClock_btn"
             android:layout_width="130dp"
             android:layout_height="35dp"
             android:layout_gravity="center_horizontal"
-            android:text="@string/tomato"
-            android:textSize="12sp"
-            android:textColor="#FF424242"
+            android:layout_marginStart="2dp"
             android:layout_marginTop="65dp"
+            android:layout_toEndOf="@id/generalTimer_btn"
             android:background="@drawable/button_right"
-            android:layout_toEndOf="@id/generalTimer_btn" />
+            android:text="@string/tomato"
+            android:textColor="#FF424242"
+            android:textSize="12sp" />
+
     </RelativeLayout>
 
     <Chronometer
@@ -52,16 +54,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
-    <Button
-        android:id="@+id/start_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="130dp"
-        android:text="@string/start_btn"
-        app:backgroundTint="#05E66A" />
 
-    <Button
+        <Button
+            android:id="@+id/start_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="130dp"
+            android:text="@string/start_btn"
+            app:backgroundTint="#05E66A" />
+
+        <Button
         android:id="@+id/stop_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,4 +74,6 @@
         android:visibility="gone"
         app:backgroundTint="#F44336"/>
     </FrameLayout>
+
+
 </LinearLayout>
