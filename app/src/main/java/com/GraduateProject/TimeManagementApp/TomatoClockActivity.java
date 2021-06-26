@@ -106,19 +106,57 @@ public class TomatoClockActivity extends AppCompatActivity {
 
         general_btn.setEnabled(true);
         general_btn.setBackgroundColor(-1); //白色
-        //general的切換頁面
-        Intent intent = new Intent();
-        intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
         general_btn.setOnClickListener(v -> {
             if(isCounting){
+                AlertDialog.Builder change = new AlertDialog.Builder(TomatoClockActivity.this);
+                change.setTitle("一般計時");
+                change.setMessage("是否要換成一般計時?");
                 isCounting = false;
-                spinnerStudy.setIsNewProgress(false);
-                recordTime = 0;//若離開則歸0
-                beginTime = 0;
-                study.cancel();
-                TomatoClockActivity.this.finish();
+                recordTime += (SystemClock.elapsedRealtime()-beginTime);//將讀完時間記錄下來
+                String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
+                change.setPositiveButton("是", new DialogInterface.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int i) {
+                        //general的切換頁面
+                        Intent intent = new Intent();
+                        intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
+                        //顯示紀錄時間
+                        AlertDialog.Builder record = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
+                        record.setTitle("紀錄時間");
+                        record.setMessage("讀書時間：\n\n"+Time);
+                        record.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                spinnerStudy.setIsNewProgress(false);
+                                spinnerStudy.setIsNewProgress(false);
+                                recordTime = 0;
+                                beginTime = 0;
+                                study.cancel();
+                                TomatoClockActivity.this.finish();
+                                startActivity(intent);
+                            }
+                        });
+                        record.show();
+                    }
+                });
+                change.setNegativeButton("否", new DialogInterface.OnClickListener() { //否的話留在一般
+                    public void onClick(DialogInterface dialog, int i) {
+                        stopBtn.setVisibility(View.VISIBLE);
+                        beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
+                        isCounting = true; //正在計時中
+                        timeButton.setEnabled(false); //計時中不得按時鐘
+                    }
+                });
+                change.show();
             }
-            startActivity(intent);
+            else{
+                //general的切換頁面
+                Intent intent = new Intent();
+                intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
+                isCounting = false;
+                startBtn.setVisibility(View.VISIBLE);
+                stopBtn.setVisibility(View.GONE);
+                startActivity(intent);
+            }
         });
 
         //tomato的禁按

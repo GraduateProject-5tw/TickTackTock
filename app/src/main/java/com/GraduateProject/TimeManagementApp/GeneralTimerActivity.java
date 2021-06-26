@@ -76,21 +76,60 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
         tomato_btn.setEnabled(true);
         tomato_btn.setBackgroundColor(-1); //白色
-        //tomato的切換頁面
-        Intent intent = new Intent();
-        intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
         tomato_btn.setOnClickListener(view ->
         {
             if(isCounting){
-                isCounting = false;
+                AlertDialog.Builder change = new AlertDialog.Builder(GeneralTimerActivity.this);
+                change.setTitle("番茄時鐘");
+                change.setMessage("是否要換成番茄時鐘?");
                 chronometer.stop();
+                isCounting = false;
+                recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間，單位是毫秒
+                String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
+                change.setPositiveButton("是", new DialogInterface.OnClickListener() { //是的話跳轉到tomato
+                    public void onClick(DialogInterface dialog, int i) {
+                        //tomato的切換頁面
+                        Intent intent = new Intent();
+                        intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                        //顯示紀錄時間
+                        AlertDialog.Builder record = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
+                        record.setTitle("紀錄時間");
+                        record.setMessage("讀書時間：\n\n"+Time);
+                        record.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                chronometer.setBase(SystemClock.elapsedRealtime());
+                                recordTime=0;
+                                startActivity(intent);
+                            }
+                        });
+                        record.show();
+                    }
+                });
+                change.setNegativeButton("否", new DialogInterface.OnClickListener() { //否的話留在一般
+                    public void onClick(DialogInterface dialog, int i) {
+                        startBtn.setVisibility(View.GONE);
+                        stopBtn.setVisibility(View.VISIBLE);
+                        Double temp = Double.parseDouble(chronometer.getText().toString().split(":")[1]) * 1000;
+                        chronometer.setBase((long) (SystemClock.elapsedRealtime() - temp));
+                        chronometer.start();
+                        isCounting = true;
+                    }
+                });
+                change.show();
+            }
+            else{
+                //tomato的切換頁面
+                Intent intent = new Intent();
+                intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                isCounting = false;
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 startBtn.setVisibility(View.VISIBLE);
                 stopBtn.setVisibility(View.GONE);
-                //跳出app立刻將時間歸0
-                recordTime=0;//若離開則歸0
+                recordTime=0;
+                startActivity(intent);
+
             }
-            startActivity(intent);
         });
 
         //general的禁按
