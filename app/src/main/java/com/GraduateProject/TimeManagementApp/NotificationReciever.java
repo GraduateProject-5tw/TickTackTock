@@ -10,17 +10,25 @@ import android.util.Log;
 
 public class NotificationReciever extends BroadcastReceiver {
     private static final String NO_ACTION = "NO_ACTION";
-    private static final String YES_ACTION = "YES_ACTION";
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        if (YES_ACTION.equals(action)) {
-            Log.v("shuffTest", "Pressed YES");
+        if (action.contains("com")) {
+            /**if(GeneralTimerActivity.getInstance()!=null){
+                Log.v("shuffTest", "Pressed YES");
+                GeneralTimerActivity.getInstance().refresh();
 
+                Intent service=  new Intent(context,NotificationService.class);
+                context.stopService(service);
+            }
         } else if (NO_ACTION.equals(action)) {
             Log.v("shuffTest", "Pressed NO");
-            android.os.Process.killProcess(android.os.Process.myPid());
+            android.os.Process.killProcess(android.os.Process.myPid());**/
+
         }
     }
+
+
 }
