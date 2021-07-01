@@ -40,7 +40,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private long recordTime;  //累計的時間
     private boolean isCounting = false;
     private int Preset = 0; //讀書科目
-    private String studyCourse;
+    private String  GeneralStudyCourse;//記錄的讀書科目
 
 
     @Override
@@ -72,49 +72,38 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             stopBtn.setVisibility(View.GONE);
             //跳出視窗
             final  String[] course={"國文","英文","數學","社會","自然","其他"};
-            final EditText editText = new EditText(GeneralTimerActivity.this);
+            final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
             AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
+            builder.setCancelable(false);
             builder.setTitle("本次累積："+ Time);
             builder.setSingleChoiceItems(course, Preset, new DialogInterface.OnClickListener() {
-
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    builder.setPositiveButton("確認", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (Preset ==5){
-                                builder.setPositiveButton("下一步", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        builder.setView(editText);
-                                        builder.setTitle("輸入讀書科目");
-                                        builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                studyCourse = editText.getText().toString();
-                                                dialog.dismiss();
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                            else{
-                                builder.setPositiveButton("確認", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        studyCourse= course[Preset];
-                                        dialog.dismiss();//結束對話框
-                                    }
-                                });
-                            }
-
-                        }
-                    });
+                    Preset = which;
                 }
             });
-
-
-            builder.create().show();
+            builder.setPositiveButton("確認", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (Preset ==5) {
+                                AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this);
+                                alert.setCancelable(false);
+                                alert.setTitle("輸入讀書科目");
+                                alert.setView(editText);
+                                alert.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        GeneralStudyCourse = editText.getText().toString();
+                                    }
+                                });
+                        alert.show();
+                            }
+                    else{
+                        GeneralStudyCourse= course[Preset];
+                    }
+                }
+            });
+            builder.show();
             recordTime = 0;
             chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
         });
