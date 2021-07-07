@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -27,13 +28,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class GeneralTimerActivity extends AppCompatActivity implements LifecycleObserver {
 
+    private static GeneralTimerActivity generalTimerActivity;
     private Chronometer chronometer; //計時器
     private Button startBtn;
     private Button stopBtn;
@@ -41,6 +46,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private boolean isCounting = false;
     private int Preset = 0; //讀書科目
     private String  GeneralStudyCourse;//記錄的讀書科目
+    private Timer timer;
+    private TimerTask timerTask;
+    private String frontApp;
+    private List<String> apps;
+    private PopupMessage popUp;
 
 
     @Override
@@ -52,6 +62,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         stopBtn = findViewById(R.id.stop_btn);
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
+        generalTimerActivity = this;
 
         //計時按鈕的功能實作
         startBtn.setOnClickListener(v -> {
@@ -180,7 +191,10 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         alert.setMessage("確定要離開?");
         alert.setPositiveButton("是", new DialogInterface.OnClickListener() { //按"是",則退出應用程式
             public void onClick(DialogInterface dialog, int i) {
-                moveTaskToBack(true);
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                startActivity(intent);
             }
         });
         alert.setNegativeButton("否", new DialogInterface.OnClickListener() { //按"否",則不執行任何操作
@@ -194,45 +208,12 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     public void onPause(){
         super.onPause();
         if(isCounting){
-            startService(new Intent(GeneralTimerActivity.this, NotificationService.class));
+            startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
         }
     }
 
-    private String getForegroundTask() {
-        String currentApp = "NULL";
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressLint("WrongConstant") UsageStatsManager usm = (UsageStatsManager)this.getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
-            if (appList != null && appList.size() > 0) {
-                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<Long, UsageStats>();
-                for (UsageStats usageStats : appList) {
-                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-                }
-                if (mySortedMap != null && !mySortedMap.isEmpty()) {
-                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
-                }
-            }
-        } else {
-            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
-            currentApp = tasks.get(0).processName;
-        }
-
-        Log.e("adapter", "Current App in foreground is: " + currentApp);
-        return currentApp;
-    }
-
-    public static boolean needPermissionForBlocking(Context context){
-        try {
-            PackageManager packageManager = context.getPackageManager();
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(context.getPackageName(), 0);
-            AppOpsManager appOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-            int mode = appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, applicationInfo.uid, applicationInfo.packageName);
-            return  (mode != AppOpsManager.MODE_ALLOWED);
-        } catch (PackageManager.NameNotFoundException e) {
-            return true;
-        }
+    public static GeneralTimerActivity getActivity(){
+        return generalTimerActivity;
     }
 
     public static String getDurationBreakdown(long millis) {
@@ -254,7 +235,72 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " 秒");
     }
 
-    protected void onDestroy() {
-        super.onDestroy();
+
+    //建立計時器
+    public void startTimer (List<String> apps) {
+        timer = new Timer() ;
+        initializeTimerTask (apps);
+        timer.schedule(timerTask , 10 , 2000 ) ; //每5秒執行一次task
     }
+
+    //時間內，任務要做的任務
+    public void initializeTimerTask (List<String> apps) {
+        timerTask = new TimerTask() {
+            public void run () {
+                frontApp = getForegroundTask();
+                if(apps.contains(frontApp)){
+                    Log.e("check", "Detect App Press");
+                    popUp.popMessage(1, frontApp);
+                    cancel();
+                }
+            }
+        } ;
+    }
+
+    public List<String> loadAppList(){
+        PackageManager packageManager = getPackageManager();
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
+        List<AppInfo> appsList = new ArrayList<>();
+        List<String> apps = new ArrayList<>();
+        for (ResolveInfo info : homeApps) {
+            AppInfo appInfo = new AppInfo();
+            appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
+            appInfo.setPackageName(info.activityInfo.packageName);
+            appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
+            appsList.add(appInfo);
+            apps.add(info.activityInfo.packageName);
+        }
+        return apps;
+    }
+
+
+    private String getForegroundTask() {
+        String currentApp = "NULL";
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            @SuppressLint("WrongConstant") UsageStatsManager usm = (UsageStatsManager)this.getSystemService("usagestats");
+            long time = System.currentTimeMillis();
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
+            if (appList != null && appList.size() > 0) {
+                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
+                for (UsageStats usageStats : appList) {
+                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
+                }
+                if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                }
+            }
+        } else {
+            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
+            currentApp = tasks.get(0).processName;
+        }
+
+        Log.e("adapter", "Current App in foreground is: " + currentApp);
+        return currentApp;
+    }
+
+
 }

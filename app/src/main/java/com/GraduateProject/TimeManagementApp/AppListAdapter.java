@@ -37,6 +37,20 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
         else
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock_open);
+
+        viewHolder.appStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(appList.get(i).appStatus) {
+                    appList.get(i).appStatus = false;
+                    viewHolder.appStatus.setImageResource(R.drawable.ic_lock_open);
+
+                }else {
+                    appList.get(i).appStatus = true;
+                    viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
+                }
+            }
+        });
     }
 
     @Override

@@ -7,6 +7,7 @@ import java.util.Objects;
 public class AppInfo {
     String packageName;
     String appName;
+    String appCategory;
     Drawable appLogo;
     boolean appStatus;
 
@@ -37,6 +38,14 @@ public class AppInfo {
 
     public void setAppName(String appName){
         this.appName=appName;
+    }
+
+    public String getAppCategory(){
+        return appCategory;
+    }
+
+    public void setAppCategory(String appName){
+        this.appCategory=appCategory;
     }
 
     public Drawable getAppLogo(){

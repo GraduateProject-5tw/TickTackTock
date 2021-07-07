@@ -6,4 +6,7 @@
     <string name="tomato">Tomato</string>
     <string name="計時">計時</string>
     <string name="停止">停止</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="confirmTitle">確 認</string>
 </resources>
