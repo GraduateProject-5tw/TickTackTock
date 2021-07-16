@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    tools:context=".ToDoListActivity">
+
+
+    <CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="139dp"
+        android:firstDayOfWeek="3"
+        android:shownWeekCount="4" />
+
+    <RelativeLayout
+        android:layout_width="275dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/today_btn"
+            android:layout_width="130dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="1dp"
+            android:background="@drawable/button_left"
+            android:text="today"
+            android:textColor="#FF424242"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/all_btn"
+            android:layout_width="130dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginStart="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_toEndOf="@id/today_btn"
+            android:background="@drawable/button_right"
+            android:text="all"
+            android:textColor="#FF424242"
+            android:textSize="12sp" />
+
+
+    </RelativeLayout>
+//看可否改成scroll
+    <RelativeLayout
+        android:layout_width="270dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <CheckBox
+            android:id="@+id/ToDoCheckBox"
+            style="@style/Widget.AppCompat.CompoundButton.RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:buttonTint="@android:color/holo_orange_light" />
+
+        <EditText
+            android:id="@+id/ToDoEditText"
+            android:layout_width="210dp"
+            android:layout_height="45dp"
+            android:layout_toEndOf="@id/ToDoCheckBox"
+            android:textSize="18sp"
+            android:text="To Do"/>
+
+    </RelativeLayout>
+
+    //晚點按鈕再挑顏色
+    <Button
+        android:id="@+id/new_btn"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="1dp"
+        android:background="@drawable/circle_button"
+        android:text="new"
+        android:textColor="#FF424242"
+        android:textSize="11sp" />
+
+</LinearLayout>
