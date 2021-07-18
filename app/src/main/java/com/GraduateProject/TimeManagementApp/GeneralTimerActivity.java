@@ -1,56 +1,41 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.AppOpsManager;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.provider.Settings;
-import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LifecycleObserver;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class GeneralTimerActivity extends AppCompatActivity implements LifecycleObserver {
 
+    @SuppressLint("StaticFieldLeak")
     private static GeneralTimerActivity generalTimerActivity;
     private Chronometer chronometer; //計時器
     private Button startBtn;
     private Button stopBtn;
     private long recordTime;  //累計的時間
-    private boolean isCounting = false;
+    private static boolean isCounting = false;
     private int Preset = 0; //讀書科目
-    private String  GeneralStudyCourse;//記錄的讀書科目
-    private Timer timer;
-    private TimerTask timerTask;
-    private String frontApp;
-    private List<String> apps;
-    private PopupMessage popUp;
+    private String GeneralStudyCourse;//記錄的讀書科目
+
 
 
     @Override
@@ -63,6 +48,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         generalTimerActivity = this;
+
+
 
         //計時按鈕的功能實作
         startBtn.setOnClickListener(v -> {
@@ -87,31 +74,18 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
             builder.setCancelable(false);
             builder.setTitle("本次累積："+ Time);
-            builder.setSingleChoiceItems(course, Preset, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Preset = which;
-                }
-            });
-            builder.setPositiveButton("確認", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (Preset ==5) {
-                                AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this);
-                                alert.setCancelable(false);
-                                alert.setTitle("輸入讀書科目");
-                                alert.setView(editText);
-                                alert.setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        GeneralStudyCourse = editText.getText().toString();
-                                    }
-                                });
-                        alert.show();
-                            }
-                    else{
-                        GeneralStudyCourse= course[Preset];
-                    }
+            builder.setSingleChoiceItems(course, Preset, (dialog, which) -> Preset = which);
+            builder.setPositiveButton("確認", (dialog, which) -> {
+                if (Preset ==5) {
+                            AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this);
+                            alert.setCancelable(false);
+                            alert.setTitle("輸入讀書科目");
+                            alert.setView(editText);
+                            alert.setPositiveButton("確定", (dialogInterface, i) -> GeneralStudyCourse = editText.getText().toString());
+                    alert.show();
+                        }
+                else{
+                    GeneralStudyCourse= course[Preset];
                 }
             });
             builder.show();
@@ -131,35 +105,30 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 isCounting = false;
                 recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間，單位是毫秒
                 String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
-                change.setPositiveButton("是", new DialogInterface.OnClickListener() { //是的話跳轉到tomato
-                    public void onClick(DialogInterface dialog, int i) {
-                        //tomato的切換頁面
-                        Intent intent = new Intent();
-                        intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
-                        //顯示紀錄時間
-                        AlertDialog.Builder record = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
-                        record.setTitle("紀錄時間");
-                        record.setMessage("讀書時間：\n\n"+Time);
-                        record.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                chronometer.setBase(SystemClock.elapsedRealtime());
-                                recordTime=0;
-                                startActivity(intent);
-                            }
-                        });
-                        record.show();
-                    }
+                //是的話跳轉到tomato
+                change.setPositiveButton("是", (dialog, i) -> {
+                    //tomato的切換頁面
+                    Intent intent = new Intent();
+                    intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                    //顯示紀錄時間
+                    AlertDialog.Builder record = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
+                    record.setTitle("紀錄時間");
+                    record.setMessage("讀書時間：\n\n"+Time);
+                    record.setPositiveButton("ok", (dialog1, which) -> {
+                        chronometer.setBase(SystemClock.elapsedRealtime());
+                        recordTime=0;
+                        startActivity(intent);
+                    });
+                    record.show();
                 });
-                change.setNegativeButton("否", new DialogInterface.OnClickListener() { //否的話留在一般
-                    public void onClick(DialogInterface dialog, int i) {
-                        startBtn.setVisibility(View.GONE);
-                        stopBtn.setVisibility(View.VISIBLE);
-                        Double temp = Double.parseDouble(chronometer.getText().toString().split(":")[1]) * 1000;
-                        chronometer.setBase((long) (SystemClock.elapsedRealtime() - temp));
-                        chronometer.start();
-                        isCounting = true;
-                    }
+                //否的話留在一般
+                change.setNegativeButton("否", (dialog, i) -> {
+                    startBtn.setVisibility(View.GONE);
+                    stopBtn.setVisibility(View.VISIBLE);
+                    double temp = Double.parseDouble(chronometer.getText().toString().split(":")[1]) * 1000;
+                    chronometer.setBase((long) (SystemClock.elapsedRealtime() - temp));
+                    chronometer.start();
+                    isCounting = true;
                 });
                 change.show();
             }
@@ -184,22 +153,18 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     @Override
     public void onBackPressed() {  //當按back按紐時
-        Intent notification = new Intent( this, NotificationService.class );
-
         AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
         alert.setTitle("離開");
         alert.setMessage("確定要離開?");
-        alert.setPositiveButton("是", new DialogInterface.OnClickListener() { //按"是",則退出應用程式
-            public void onClick(DialogInterface dialog, int i) {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                startActivity(intent);
-            }
+        //按"是",則退出應用程式
+        alert.setPositiveButton("是", (dialog, i) -> {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
         });
-        alert.setNegativeButton("否", new DialogInterface.OnClickListener() { //按"否",則不執行任何操作
-            public void onClick(DialogInterface dialog, int i) {
-            }
+        //按"否",則不執行任何操作
+        alert.setNegativeButton("否", (dialog, i) -> {
         });
         alert.show();//顯示訊息視窗
     }
@@ -210,10 +175,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         if(isCounting){
             startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
         }
-    }
-
-    public static GeneralTimerActivity getActivity(){
-        return generalTimerActivity;
     }
 
     public static String getDurationBreakdown(long millis) {
@@ -235,72 +196,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " 秒");
     }
 
-
-    //建立計時器
-    public void startTimer (List<String> apps) {
-        timer = new Timer() ;
-        initializeTimerTask (apps);
-        timer.schedule(timerTask , 10 , 2000 ) ; //每5秒執行一次task
+    public static GeneralTimerActivity getActivity(){
+        return generalTimerActivity;
     }
 
-    //時間內，任務要做的任務
-    public void initializeTimerTask (List<String> apps) {
-        timerTask = new TimerTask() {
-            public void run () {
-                frontApp = getForegroundTask();
-                if(apps.contains(frontApp)){
-                    Log.e("check", "Detect App Press");
-                    popUp.popMessage(1, frontApp);
-                    cancel();
-                }
-            }
-        } ;
+    public static boolean getIsCounting(){
+        return isCounting;
     }
-
-    public List<String> loadAppList(){
-        PackageManager packageManager = getPackageManager();
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
-        List<AppInfo> appsList = new ArrayList<>();
-        List<String> apps = new ArrayList<>();
-        for (ResolveInfo info : homeApps) {
-            AppInfo appInfo = new AppInfo();
-            appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
-            appInfo.setPackageName(info.activityInfo.packageName);
-            appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
-            appsList.add(appInfo);
-            apps.add(info.activityInfo.packageName);
-        }
-        return apps;
-    }
-
-
-    private String getForegroundTask() {
-        String currentApp = "NULL";
-        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressLint("WrongConstant") UsageStatsManager usm = (UsageStatsManager)this.getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
-            if (appList != null && appList.size() > 0) {
-                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
-                for (UsageStats usageStats : appList) {
-                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-                }
-                if (mySortedMap != null && !mySortedMap.isEmpty()) {
-                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
-                }
-            }
-        } else {
-            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
-            currentApp = tasks.get(0).processName;
-        }
-
-        Log.e("adapter", "Current App in foreground is: " + currentApp);
-        return currentApp;
-    }
-
-
 }

@@ -1,28 +1,23 @@
 package com.GraduateProject.TimeManagementApp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-
+import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class PopupMessage extends AppCompatActivity {
 
-    private static Button btn_yes, btn_no;
     FrameLayout bg;
 
     @Override
@@ -31,14 +26,18 @@ public class PopupMessage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
         bg = findViewById(R.id.transparentBG);
-        btn_yes = findViewById(R.id.btn_yes);
-        btn_no = findViewById(R.id.btn_no);
+        Button btn_yes = findViewById(R.id.btn_yes);
+        Button btn_no = findViewById(R.id.btn_no);
 
         bg.setBackground(wallpaper);
 
         btn_yes.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed YES");
+            if(GeneralTimerActivity.getIsCounting()){
             GeneralTimerActivity.getActivity().finish();
+            } else{
+            TomatoClockActivity.getTomatoClockActivity().finish();
+            }
             finish();
         });
 
@@ -61,7 +60,7 @@ public class PopupMessage extends AppCompatActivity {
                 for (UsageStats usageStats : appList) {
                     mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
                 }
-                if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                if (!mySortedMap.isEmpty()) {
                     currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
                 }
             }
@@ -73,29 +72,5 @@ public class PopupMessage extends AppCompatActivity {
 
         Log.e("adapter", "Current App in foreground is: " + currentApp);
         return currentApp;
-    }
-
-    public void popMessage(int i, String frontApp){
-
-        btn_yes.setOnClickListener(v -> {
-            Log.v("shuffTest", "Pressed YES");
-            if(i == 1){
-                GeneralTimerActivity.getActivity().finish();
-            }
-            else if(i == 2){
-                Intent intent = new Intent(PopupMessage.this, TomatoClockActivity.class);
-                intent.putExtra("StopCurrent", true);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-            }
-            finish();
-        });
-
-        btn_no.setOnClickListener(v -> {
-            Log.v("shuffTest", "Pressed NO");
-            ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
-            mActivityManager.killBackgroundProcesses(frontApp);
-            finish();
-        });
     }
 }
