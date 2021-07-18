@@ -10,7 +10,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 import java.util.SortedMap;
@@ -18,7 +19,7 @@ import java.util.TreeMap;
 
 public class PopupMessage extends AppCompatActivity {
 
-    FrameLayout bg;
+    LinearLayout bg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
