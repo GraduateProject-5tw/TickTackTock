@@ -1,7 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.icu.util.Calendar;
 import android.os.Build;
@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
 
 public class TomatoClockActivity extends AppCompatActivity {
 
+    @SuppressLint("StaticFieldLeak")
+    private static TomatoClockActivity tomatoClockActivity;
     private Button startBtn;
     private Button stopBtn;
     private int futureInMillis;
@@ -25,7 +27,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private int stopInMillis;
     private long beginTime;
     private long recordTime = 0;
-    private boolean isCounting = false;
+    private static boolean isCounting = false;
     private MyCountdownTimer study;
     private RingProgressBar spinnerStudy;
     private int mCurrentProgress;
@@ -38,6 +40,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        tomatoClockActivity = this;
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
         startBtn = findViewById(R.id.tstart_btn);
@@ -59,34 +62,25 @@ public class TomatoClockActivity extends AppCompatActivity {
             StoptimeConfirm.setCancelable(false);
             timeConfirm.setCancelable(false);
             //設定單選列表
-            timeConfirm.setSingleChoiceItems(studytime, -1, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // TODO Auto-generated method stub
-                    Toast.makeText(TomatoClockActivity.this, studytime[which], Toast.LENGTH_SHORT).show();
-                    int i = Integer.valueOf(studytime[which]);
-                    studyInMillis = i*60000;
-                }
+            timeConfirm.setSingleChoiceItems(studytime, -1, (dialog, which) -> {
+                // TODO Auto-generated method stub
+                Toast.makeText(TomatoClockActivity.this, studytime[which], Toast.LENGTH_SHORT).show();
+                int i = Integer.parseInt(studytime[which]);
+                studyInMillis = i*60000;
             });
             //設定取消按鈕並且設定響應事件
-            timeConfirm.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // TODO Auto-generated method stub
-                    //取消按鈕響應事件
-                    dialog.dismiss();//結束對話框
-                }
+            timeConfirm.setNegativeButton("取消", (dialog, which) -> {
+                // TODO Auto-generated method stub
+                //取消按鈕響應事件
+                dialog.dismiss();//結束對話框
             });
             timeConfirm.setPositiveButton("下一步→", (dialog, which) -> {
                 StoptimeConfirm.setTitle("休息時間設置:(分鐘)");
-                StoptimeConfirm.setSingleChoiceItems(resttime, -1, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // TODO Auto-generated method stub
-                        Toast.makeText(TomatoClockActivity.this, resttime[which], Toast.LENGTH_SHORT).show();
-                        int j = Integer.valueOf(resttime[which]);
-                        stopInMillis = j*60000;
-                    }
+                StoptimeConfirm.setSingleChoiceItems(resttime, -1, (dialog1, which1) -> {
+                    // TODO Auto-generated method stub
+                    Toast.makeText(TomatoClockActivity.this, resttime[which1], Toast.LENGTH_SHORT).show();
+                    int j = Integer.parseInt(resttime[which1]);
+                    stopInMillis = j*60000;
                 });
                 StoptimeConfirm.setPositiveButton("確定", (ddialog, wwhich) -> {
                     if(stopInMillis>studyInMillis){
@@ -117,37 +111,31 @@ public class TomatoClockActivity extends AppCompatActivity {
                 isCounting = false;
                 recordTime += (SystemClock.elapsedRealtime()-beginTime);//將讀完時間記錄下來
                 String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
-                change.setPositiveButton("是", new DialogInterface.OnClickListener(){
-                    public void onClick(DialogInterface dialog, int i) {
-                        //general的切換頁面
-                        Intent intent = new Intent();
-                        intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
-                        //顯示紀錄時間
-                        AlertDialog.Builder record = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
-                        record.setTitle("紀錄時間");
-                        record.setMessage("讀書時間：\n\n"+Time);
-                        record.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                spinnerStudy.setIsNewProgress(false);
-                                spinnerStudy.setIsNewProgress(false);
-                                recordTime = 0;
-                                beginTime = 0;
-                                study.cancel();
-                                TomatoClockActivity.this.finish();
-                                startActivity(intent);
-                            }
-                        });
-                        record.show();
-                    }
+                change.setPositiveButton("是", (dialog, i) -> {
+                    //general的切換頁面
+                    Intent intent = new Intent();
+                    intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
+                    //顯示紀錄時間
+                    AlertDialog.Builder record = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
+                    record.setTitle("紀錄時間");
+                    record.setMessage("讀書時間：\n\n"+Time);
+                    record.setPositiveButton("ok", (dialog12, which) -> {
+                        spinnerStudy.setIsNewProgress(false);
+                        spinnerStudy.setIsNewProgress(false);
+                        recordTime = 0;
+                        beginTime = 0;
+                        study.cancel();
+                        TomatoClockActivity.this.finish();
+                        startActivity(intent);
+                    });
+                    record.show();
                 });
-                change.setNegativeButton("否", new DialogInterface.OnClickListener() { //否的話留在一般
-                    public void onClick(DialogInterface dialog, int i) {
-                        stopBtn.setVisibility(View.VISIBLE);
-                        beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
-                        isCounting = true; //正在計時中
-                        timeButton.setEnabled(false); //計時中不得按時鐘
-                    }
+                //否的話留在一般
+                change.setNegativeButton("否", (dialog, i) -> {
+                    stopBtn.setVisibility(View.VISIBLE);
+                    beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
+                    isCounting = true; //正在計時中
+                    timeButton.setEnabled(false); //計時中不得按時鐘
                 });
                 change.show();
             }
@@ -215,7 +203,6 @@ public class TomatoClockActivity extends AppCompatActivity {
                             this.start();
                         });
                         startrest.show();
-                        vibration();
                     }else{
                         isCounting = true;
                         spinnerStudy.setVisibility(View.GONE);
@@ -235,8 +222,8 @@ public class TomatoClockActivity extends AppCompatActivity {
                             this.start();
                         });
                         startstudy.show();
-                        vibration();
                     }
+                    vibration();
 
                 }
             };
@@ -262,31 +249,18 @@ public class TomatoClockActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(TomatoClockActivity.this);
             builder.setCancelable(false);
             builder.setTitle("本次累積："+ Time);
-            builder.setSingleChoiceItems(course, Preset, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Preset = which;
+            builder.setSingleChoiceItems(course, Preset, (dialog, which) -> Preset = which);
+            builder.setPositiveButton("確認", (dialog, which) -> {
+                if (Preset ==5) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this);
+                    alert.setCancelable(false);
+                    alert.setTitle("輸入讀書科目");
+                    alert.setView(editText);
+                    alert.setPositiveButton("確定", (dialogInterface, i) -> TomatoStudyCourse = editText.getText().toString());
+                    alert.show();
                 }
-            });
-            builder.setPositiveButton("確認", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (Preset ==5) {
-                        AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this);
-                        alert.setCancelable(false);
-                        alert.setTitle("輸入讀書科目");
-                        alert.setView(editText);
-                        alert.setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                TomatoStudyCourse = editText.getText().toString();
-                            }
-                        });
-                        alert.show();
-                    }
-                    else{
-                        TomatoStudyCourse= course[Preset];
-                    }
+                else{
+                    TomatoStudyCourse= course[Preset];
                 }
             });
             builder.show();
@@ -300,7 +274,12 @@ public class TomatoClockActivity extends AppCompatActivity {
         alert.setTitle("離開");
         alert.setMessage("確定要離開?");
         //按"是",則退出應用程式
-        alert.setPositiveButton("是", (dialog, i) -> moveTaskToBack(true));
+        alert.setPositiveButton("是", (dialog, i) -> {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
+        });
 
         //按"否",則不執行任何操作
         alert.setNegativeButton("否", (dialog, i) -> { });
@@ -313,14 +292,12 @@ public class TomatoClockActivity extends AppCompatActivity {
     public void onPause(){
         super.onPause();
         if(isCounting){
-            isCounting = false;
-            spinnerStudy.setVisibility(View.GONE);
-            study.cancel();
-            startService(new Intent(TomatoClockActivity.this, NotificationService.class));
-            recordTime = 0;//若離開則歸0
-            beginTime = 0;
-            TomatoClockActivity.this.recreate();
+            startService(new Intent(TomatoClockActivity.this, CheckFrontApp.class));
         }
+    }
+
+    public static TomatoClockActivity getTomatoClockActivity(){
+        return tomatoClockActivity;
     }
 
     private  void initVariable(){
@@ -355,5 +332,9 @@ public class TomatoClockActivity extends AppCompatActivity {
         v.vibrate(pattern, 0);
         return v;
 
+    }
+
+    public static boolean getIsCounting(){
+        return isCounting;
     }
 }

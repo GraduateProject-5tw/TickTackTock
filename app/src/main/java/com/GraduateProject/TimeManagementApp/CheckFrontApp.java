@@ -2,26 +2,18 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.graphics.Color;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.RemoteViews;
-
-import androidx.core.app.NotificationCompat;
-
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.Timer;
@@ -30,12 +22,11 @@ import java.util.TreeMap;
 
 public class CheckFrontApp extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
-    public static final String NOTIFICATION_CHANNEL_ID = "10001" ;
-    private final static String default_notification_channel_id = "default" ;
     Timer timer ;
     TimerTask timerTask ;
     String TAG = "Timers" ;
-    private List<String> apps;
+    private List<String> apps = new ArrayList<>();
+    private final List<AppInfo> appsList = new ArrayList<>();
 
     @Override
     public IBinder onBind (Intent arg0) {  //將app綁定server服務
@@ -45,7 +36,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     @Override //一旦離開app，建立server服務
     public void onCreate () {
         Log. e ( TAG , "onCreate" );
-        apps = loadAppList();
+        apps = LoadingApp.getAllowedApps();
     }
 
     @Override
@@ -63,49 +54,35 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
         this.stopSelf();
     }
 
-    //用 handler 處理計時器任務
-    final Handler handler = new Handler() ;
-
     //建立計時器
     public void startTimer () {
         timer = new Timer() ;
         initializeTimerTask ();
-        timer .schedule( timerTask , 10 , 2000 ) ; //每5秒執行一次task
+        timer .schedule( timerTask , 10 , 5000 ) ; //每5秒執行一次task
     }
 
     //時間內，任務要做的任務
     public void initializeTimerTask () {
         timerTask = new TimerTask() {
             public void run () {
-                String frontApp = getForegroundTask();
-                if(apps.contains(frontApp)){
+                String frontApp = getForegroundTask().replaceAll("\\s+","");
+                if(frontApp.contains("camera")){
                     Log.e("check", "Detect App Press");
                     startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
                     cancel();
                 }
+                else if(!apps.contains(frontApp)){
+                    if(frontApp.contains("launcher") || frontApp.contains("recent") || frontApp.contains("system") || frontApp.contains("category")){
+
+                    }else {
+                        Log.e("check", "Detect App Press");
+                        startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
+                        cancel();
+                    }
+                }
             }
         } ;
     }
-
-    public List<String> loadAppList(){
-        PackageManager packageManager = getPackageManager();
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
-        List<AppInfo> appsList = new ArrayList<>();
-        List<String> apps = new ArrayList<>();
-        for (ResolveInfo info : homeApps) {
-            AppInfo appInfo = new AppInfo();
-            appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
-            appInfo.setPackageName(info.activityInfo.packageName);
-            appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
-            appsList.add(appInfo);
-            apps.add(info.activityInfo.packageName);
-        }
-        return apps;
-    }
-
 
     private String getForegroundTask() {
         String currentApp = "NULL";
@@ -118,7 +95,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
                 for (UsageStats usageStats : appList) {
                     mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
                 }
-                if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                if (!mySortedMap.isEmpty()) {
                     currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
                 }
             }
@@ -127,8 +104,25 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
             List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
             currentApp = tasks.get(0).processName;
         }
-
-        Log.e("adapter", "Current App in foreground is: " + currentApp);
+        Log.e("adapter", "Current App in foreground is: " + currentApp + "Category is:"  + getCategory("https://play.google.com/store/apps/details?id="+currentApp));
         return currentApp;
+    }
+
+    private String getCategory(String query_url) {
+
+        try {
+            Document doc = Jsoup.connect(query_url).get();
+
+            if (doc != null) {
+                Element link = doc.select("a[itemprop=genre]").first();
+                return link.text();
+            } else{
+                Log.e("category", "null doc");
+                return "null doc";
+            }
+        } catch (Exception e) {
+            Log.e("DOc", e.toString());
+            return "error";
+        }
     }
 }
