@@ -48,40 +48,34 @@
 
 
     </RelativeLayout>
-//看可否改成scroll
+
     <RelativeLayout
         android:layout_width="270dp"
         android:layout_height="300dp"
         android:layout_gravity="center_horizontal"
         android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/ToDoCheckBox"
-            style="@style/Widget.AppCompat.CompoundButton.RadioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:buttonTint="@android:color/holo_orange_light" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tasksRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:nestedScrollingEnabled="true" />
 
-        <EditText
-            android:id="@+id/ToDoEditText"
-            android:layout_width="210dp"
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/new_btn"
+            android:layout_width="45dp"
             android:layout_height="45dp"
-            android:layout_toEndOf="@id/ToDoCheckBox"
-            android:textSize="18sp"
-            android:text="To Do"/>
+            android:layout_gravity="center_horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="32dp"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:src="@drawable/ic_baseline_add"
+            />
+
 
     </RelativeLayout>
 
-    //晚點按鈕再挑顏色
-    <Button
-        android:id="@+id/new_btn"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="1dp"
-        android:background="@drawable/circle_button"
-        android:text="new"
-        android:textColor="#FF424242"
-        android:textSize="11sp" />
 
 </LinearLayout>
