@@ -21,8 +21,8 @@ public class LoadingApp extends AppCompatActivity {
 
     private static List<String> apps = new ArrayList<>();
     private static final List<AppInfo> appsList = new ArrayList<>();
-    //private final String[] bannedCat = {"artdesign", "shopping", "games"};
-    private final String[] bannedCat = {"artdesign", "business", "communication", "education", "photography", "productivity", "tools", "error", "musicaudio"};
+    private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors"};
+    //private final String[] bannedCat = {"artdesign", "business", "communication", "education", "photography", "productivity", "tools", "error", "musicaudio"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
 
@@ -31,6 +31,7 @@ public class LoadingApp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_loadingapp);
+        Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
 
         //先列出所有禁用App
         Thread loadingThread = new Thread() {
@@ -50,7 +51,10 @@ public class LoadingApp extends AppCompatActivity {
                 }
             }
         };
-        loadingThread.start();
+
+        if(isFirstRun){
+            loadingThread.start();
+        }
     }
 
     protected List<String> startLoading(){
@@ -71,7 +75,6 @@ public class LoadingApp extends AppCompatActivity {
             appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
             String query_url = GOOGLE_URL + info.activityInfo.packageName + "&hl=en";
             category = getCategory(query_url).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-            Log.e("CATEGORY", category);
             if(banned.contains(category)){
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "is added");
@@ -94,11 +97,9 @@ public class LoadingApp extends AppCompatActivity {
                 Element link = doc.select("a[itemprop=genre]").first();
                 return link.text();
             } else{
-                Log.e("category", "null doc");
                 return "null doc";
             }
         } catch (Exception e) {
-            Log.e("DOc", e.toString());
             return "error";
         }
     }

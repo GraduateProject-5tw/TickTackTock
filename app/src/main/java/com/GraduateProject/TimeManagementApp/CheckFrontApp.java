@@ -19,6 +19,8 @@ import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class CheckFrontApp extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
@@ -27,6 +29,29 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     String TAG = "Timers" ;
     private List<String> apps = new ArrayList<>();
     private final List<AppInfo> appsList = new ArrayList<>();
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    private Thread DetectFrontApp = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            String frontApp = getForegroundTask().replaceAll("\\s+","");
+            /**if(frontApp.contains("camera")){
+             Log.e("check", "Detect App Press");
+             startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
+             cancel();
+             }
+             else */
+            if(apps.contains(frontApp)){
+                //if(frontApp.contains("launcher") || frontApp.contains("recent") || frontApp.contains("system") || frontApp.contains("category") || frontApp.contains("screen")){
+
+                //}else {
+                Log.e("check", "Detect App Press");
+                executor.shutdown();
+                startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
+                onDestroy();
+                //}
+            }
+        }
+    });
 
     @Override
     public IBinder onBind (Intent arg0) {  //將app綁定server服務
@@ -42,7 +67,9 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
-        startTimer();
+        //startTimer();
+        long period = 400;
+        executor.scheduleAtFixedRate(DetectFrontApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }
@@ -51,37 +78,8 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     public void onDestroy () {
         Log. e ( TAG , "onDestroy" ) ;
         super.onDestroy() ;
+        executor.shutdown();
         this.stopSelf();
-    }
-
-    //建立計時器
-    public void startTimer () {
-        timer = new Timer() ;
-        initializeTimerTask ();
-        timer .schedule( timerTask , 10 , 5000 ) ; //每5秒執行一次task
-    }
-
-    //時間內，任務要做的任務
-    public void initializeTimerTask () {
-        timerTask = new TimerTask() {
-            public void run () {
-                String frontApp = getForegroundTask().replaceAll("\\s+","");
-                if(frontApp.contains("camera")){
-                    Log.e("check", "Detect App Press");
-                    startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
-                    cancel();
-                }
-                else if(!apps.contains(frontApp)){
-                    if(frontApp.contains("launcher") || frontApp.contains("recent") || frontApp.contains("system") || frontApp.contains("category")){
-
-                    }else {
-                        Log.e("check", "Detect App Press");
-                        startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
-                        cancel();
-                    }
-                }
-            }
-        } ;
     }
 
     private String getForegroundTask() {
