@@ -29,11 +29,13 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     String TAG = "Timers" ;
     private List<String> apps = new ArrayList<>();
     private final List<AppInfo> appsList = new ArrayList<>();
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+    private ScheduledThreadPoolExecutor executor;
+    private String frontApp;
+    private Service checkFrontApp;
     private Thread DetectFrontApp = new Thread(new Runnable() {
         @Override
         public void run() {
-            String frontApp = getForegroundTask().replaceAll("\\s+","");
+            frontApp = getForegroundTask().replaceAll("\\s+","");
             /**if(frontApp.contains("camera")){
              Log.e("check", "Detect App Press");
              startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
@@ -46,8 +48,9 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
                 //}else {
                 Log.e("check", "Detect App Press");
                 executor.shutdown();
-                startActivity(new Intent(CheckFrontApp.this, PopupMessage.class));
-                onDestroy();
+                Intent intent = new Intent(CheckFrontApp.this, PopupMessage.class);
+                intent.putExtra("FrontApp", frontApp);
+                startActivity(intent);
                 //}
             }
         }
@@ -61,6 +64,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     @Override //一旦離開app，建立server服務
     public void onCreate () {
         Log. e ( TAG , "onCreate" );
+        checkFrontApp = this;
         apps = LoadingApp.getAllowedApps();
     }
 
@@ -69,6 +73,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
         Log. e ( TAG , "onStartCommand" ) ;
         //startTimer();
         long period = 400;
+        executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(DetectFrontApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
@@ -122,5 +127,13 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
             Log.e("DOc", e.toString());
             return "error";
         }
+    }
+
+    public String getFrontApp(){
+        return frontApp;
+    }
+
+    public Service getCheckFrontApp(){
+        return checkFrontApp;
     }
 }

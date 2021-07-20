@@ -6,6 +6,7 @@ import android.app.WallpaperManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +30,7 @@ public class PopupMessage extends AppCompatActivity {
         bg = findViewById(R.id.transparentBG);
         Button btn_yes = findViewById(R.id.btn_yes);
         Button btn_no = findViewById(R.id.btn_no);
+        Intent intent = getIntent();
 
         bg.setBackground(wallpaper);
 
@@ -39,6 +41,8 @@ public class PopupMessage extends AppCompatActivity {
             } else{
             TomatoClockActivity.getTomatoClockActivity().finish();
             }
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(intent.getStringExtra("FrontApp"));
+            startActivity(launchIntent);
             finish();
         });
 
