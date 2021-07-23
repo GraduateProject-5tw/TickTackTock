@@ -9,4 +9,11 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="confirmTitle">確 認</string>
+    <string name="menu_home">計時器</string>
+    <string name="menu_todolist">To Do List</string>
+    <string name="menu_readtime">讀書時間</string>
+    <string name="menu_setting">設定</string>
+    <string name="action_about">關於</string>
+    <string name="drawer_open" >openes</string>
+    <string name="drawer_close" >closed</string>
 </resources>

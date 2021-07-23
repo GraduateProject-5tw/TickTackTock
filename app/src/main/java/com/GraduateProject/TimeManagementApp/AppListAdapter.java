@@ -67,6 +67,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
             appStatus=itemView.findViewById(R.id.app_status);
             appLogo=itemView.findViewById(R.id.app_logo);
 
+
         }
     }
 

@@ -32,14 +32,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".OutlookMenu">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN">
+                </action>
+
+            </intent-filter>
+
+        </activity>
         <activity android:name=".GeneralTimerActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action" />
             </intent-filter>
         </activity>
         <activity android:name=".TomatoClockActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -62,6 +70,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
 
         <service
             android:name=".NotificationService"
