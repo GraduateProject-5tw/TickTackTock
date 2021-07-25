@@ -23,8 +23,10 @@ public class TomatoClockActivity extends AppCompatActivity {
     private Button startBtn;
     private Button stopBtn;
     private int futureInMillis;
-    private int studyInMillis;
-    private int stopInMillis;
+    //private int studyInMillis;
+    private int studyInMillis=1500000;
+    //private int stopInMillis;
+    private int stopInMillis=600000;
     private long beginTime;
     private long recordTime = 0;
     private static boolean isCounting = false;
