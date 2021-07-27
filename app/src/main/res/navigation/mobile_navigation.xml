@@ -9,8 +9,16 @@
         android:id="@+id/nav_home"
         tools:layout="@layout/activity_generaltimer"
         android:label="@string/general" />
-
-
+    <fragment
+        android:id="@+id/timeBlockerActivity"
+        android:name="com.GraduateProject.TimeManagementApp.TimeBlockerActivity"
+        android:label="activity_time_blocker"
+        tools:layout="@layout/activity_time_blocker" />
+    <fragment
+        android:id="@+id/toDoListActivity"
+        android:name="com.GraduateProject.TimeManagementApp.ToDoListActivity"
+        android:label="activity_todolist"
+        tools:layout="@layout/activity_todolist" />
 
 
 

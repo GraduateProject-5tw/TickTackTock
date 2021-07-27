@@ -8,12 +8,24 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+
+import com.google.android.material.navigation.NavigationView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -35,7 +47,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private static boolean isCounting = false;
     private int Preset = 0; //讀書科目
     private String GeneralStudyCourse;//記錄的讀書科目
-
+    private AppBarConfiguration mAppBarConfiguration;
 
 
     @Override
@@ -48,6 +60,15 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         generalTimerActivity = this;
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        toolbar.setNavigationOnClickListener((View.OnClickListener) navigationView);
+        toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) drawer);
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
+
+
 
 
 
@@ -69,23 +90,22 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
             //跳出視窗
-            final  String[] course={"國文","英文","數學","社會","自然","其他"};
+            final String[] course = {"國文", "英文", "數學", "社會", "自然", "其他"};
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
             AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
             builder.setCancelable(false);
-            builder.setTitle("本次累積："+ Time);
+            builder.setTitle("本次累積：" + Time);
             builder.setSingleChoiceItems(course, Preset, (dialog, which) -> Preset = which);
             builder.setPositiveButton("確認", (dialog, which) -> {
-                if (Preset ==5) {
-                            AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this);
-                            alert.setCancelable(false);
-                            alert.setTitle("輸入讀書科目");
-                            alert.setView(editText);
-                            alert.setPositiveButton("確定", (dialogInterface, i) -> GeneralStudyCourse = editText.getText().toString());
+                if (Preset == 5) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this);
+                    alert.setCancelable(false);
+                    alert.setTitle("輸入讀書科目");
+                    alert.setView(editText);
+                    alert.setPositiveButton("確定", (dialogInterface, i) -> GeneralStudyCourse = editText.getText().toString());
                     alert.show();
-                        }
-                else{
-                    GeneralStudyCourse= course[Preset];
+                } else {
+                    GeneralStudyCourse = course[Preset];
                 }
             });
             builder.show();
@@ -97,7 +117,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         tomato_btn.setBackgroundColor(-1); //白色
         tomato_btn.setOnClickListener(view ->
         {
-            if(isCounting){
+            if (isCounting) {
                 AlertDialog.Builder change = new AlertDialog.Builder(GeneralTimerActivity.this);
                 change.setTitle("番茄時鐘");
                 change.setMessage("是否要換成番茄時鐘?");
@@ -113,10 +133,10 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     //顯示紀錄時間
                     AlertDialog.Builder record = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
                     record.setTitle("紀錄時間");
-                    record.setMessage("讀書時間：\n\n"+Time);
+                    record.setMessage("讀書時間：\n\n" + Time);
                     record.setPositiveButton("ok", (dialog1, which) -> {
                         chronometer.setBase(SystemClock.elapsedRealtime());
-                        recordTime=0;
+                        recordTime = 0;
                         startActivity(intent);
                     });
                     record.show();
@@ -131,8 +151,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     isCounting = true;
                 });
                 change.show();
-            }
-            else{
+            } else {
                 //tomato的切換頁面
                 Intent intent = new Intent();
                 intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
@@ -140,7 +159,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 startBtn.setVisibility(View.VISIBLE);
                 stopBtn.setVisibility(View.GONE);
-                recordTime=0;
+                recordTime = 0;
                 startActivity(intent);
 
             }
@@ -170,15 +189,15 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }
 
     @Override
-    public void onPause(){
+    public void onPause() {
         super.onPause();
-        if(isCounting){
+        if (isCounting) {
             startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
         }
     }
 
     public static String getDurationBreakdown(long millis) {
-        if(millis < 0) {
+        if (millis < 0) {
             throw new IllegalArgumentException("Duration must be greater than zero!");
         }
 
@@ -188,7 +207,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         millis -= TimeUnit.MINUTES.toMillis(minutes);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
 
-        return(hours +
+        return (hours +
                 " 小時 " +
                 minutes +
                 " 分 " +
@@ -196,11 +215,31 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " 秒");
     }
 
-    public static GeneralTimerActivity getActivity(){
+    public static GeneralTimerActivity getActivity() {
         return generalTimerActivity;
     }
 
-    public static boolean getIsCounting(){
+    public static boolean getIsCounting() {
         return isCounting;
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        return super.onOptionsItemSelected(item);
+    }
+
 }

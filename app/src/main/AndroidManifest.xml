@@ -32,17 +32,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".OutlookMenu">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN">
-                </action>
-
-            </intent-filter>
-
-        </activity>
         <activity android:name=".GeneralTimerActivity">
             <intent-filter>
-                <action android:name="android.intent.action" />
+                <action android:name="android.intent.action.Main" />
             </intent-filter>
         </activity>
         <activity android:name=".TomatoClockActivity">
@@ -65,7 +57,7 @@
         </activity>
         <activity android:name=".ToDoListActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -89,8 +81,11 @@
                 <action android:name="app.tutorialspoint.com.notifyme.CheckFrontApp" />
 
                 <category android:name="android.intent.category.DEFAULT" />
+
             </intent-filter>
         </service>
+
+
 
         <receiver
             android:name=".NotificationReciever"
