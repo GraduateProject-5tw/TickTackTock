@@ -19,6 +19,7 @@ public class DBTimeBlockerHelper extends SQLiteOpenHelper {
         final String SQL = "CREATE TABLE IF NOT EXISTS " + _TableName + "( " +
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "_DATE TEXT, " +
+                "_COURSE TEXT," +
                 "_STARTTIME INTEGER," +
                 "_STOPTIME INTEGER," +
                 "_TOTAL INTEGER" +
@@ -33,3 +34,4 @@ public class DBTimeBlockerHelper extends SQLiteOpenHelper {
         db.execSQL(SQL);
     }
 }
+
