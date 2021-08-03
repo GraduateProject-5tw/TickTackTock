@@ -1,100 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".GeneralTimerActivity">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat"
-        app:liftOnScroll="true">
-        >
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".GeneralTimerActivity">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        app:title="@string/app_name"
-        app:menu="@menu/nav_menuitem"
-        app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
-        style="@style/Widget.MaterialComponents.Toolbar.Primary"
-        >
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat"
+            app:liftOnScroll="true">
+        </com.google.android.material.appbar.AppBarLayout>
 
-    </com.google.android.material.appbar.MaterialToolbar>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/mytoolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="@string/app_name"
+            app:menu="@menu/nav_menuitem"
+            app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary">
+        </com.google.android.material.appbar.MaterialToolbar>
 
 
-    <RelativeLayout
-        android:layout_width="275dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/generalTimer_btn"
-            android:layout_width="130dp"
-            android:layout_height="35dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="65dp"
-            android:background="@drawable/button_left"
-            android:text="@string/general"
-            android:textColor="#FF424242"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/tomatoClock_btn"
-            android:layout_width="130dp"
-            android:layout_height="35dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginStart="2dp"
-            android:layout_marginTop="65dp"
-            android:layout_toEndOf="@id/generalTimer_btn"
-            android:background="@drawable/button_right"
-            android:text="@string/tomato"
-            android:textColor="#FF424242"
-            android:textSize="12sp" />
-
-    </RelativeLayout>
-
-    <Chronometer
-        android:id="@+id/time_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="105dp"
-        android:textAlignment="center"
-        android:textColor="#2C2C2C"
-        android:textSize="100sp" />
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
-
-        <Button
-            android:id="@+id/start_btn"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="275dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="130dp"
-            android:text="@string/start_btn"
-            app:backgroundTint="#05E66A" />
+            android:orientation="horizontal">
 
-        <Button
-        android:id="@+id/stop_btn"
+            <Button
+                android:id="@+id/generalTimer_btn"
+                android:layout_width="130dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="65dp"
+                android:background="@drawable/button_left"
+                android:text="@string/general"
+                android:textColor="#FF424242"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/tomatoClock_btn"
+                android:layout_width="130dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginStart="2dp"
+                android:layout_marginTop="65dp"
+                android:layout_toEndOf="@id/generalTimer_btn"
+                android:background="@drawable/button_right"
+                android:text="@string/tomato"
+                android:textColor="#FF424242"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+        <Chronometer
+            android:id="@+id/time_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="105dp"
+            android:textAlignment="center"
+            android:textColor="#2C2C2C"
+            android:textSize="100sp" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/start_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="130dp"
+                android:text="@string/start_btn"
+                app:backgroundTint="#05E66A" />
+
+            <Button
+                android:id="@+id/stop_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/stop_btn"
+                android:layout_marginTop="130dp"
+                android:visibility="gone"
+                app:backgroundTint="#F44336"/>
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/stop_btn"
-        android:layout_marginTop="130dp"
-        android:visibility="gone"
-        app:backgroundTint="#F44336"/>
-    </FrameLayout>
-
-</LinearLayout>
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/nav_menuitem" />
+</androidx.drawerlayout.widget.DrawerLayout>

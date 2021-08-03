@@ -20,8 +20,10 @@ import java.util.List;
 public class LoadingApp extends AppCompatActivity {
 
     private static List<String> apps = new ArrayList<>();
-    private static final List<AppInfo> appsList = new ArrayList<>();
-    private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors"};
+    private static List<String> defaultApps = new ArrayList<>();
+    private static List<AppInfo> appsList = new ArrayList<>();
+    private static List<AppInfo> defaultAppsList = new ArrayList<>();
+    private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
     //private final String[] bannedCat = {"artdesign", "business", "communication", "education", "photography", "productivity", "tools", "error", "musicaudio"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
@@ -40,6 +42,7 @@ public class LoadingApp extends AppCompatActivity {
                 try {
                     super.run();
                     apps = startLoading();
+                    defaultApps = apps;
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -103,12 +106,28 @@ public class LoadingApp extends AppCompatActivity {
         }
     }
 
+    public static void setAllowedApps(List<String> app){
+        apps = app;
+    }
+
+    public static void setAllowedAppInfos(List<AppInfo> appList){
+        appsList = appList;
+    }
+
     public static List<String> getAllowedApps(){
         return apps;
     }
 
+    public static List<String> getDefaultAllowedApps(){
+        return defaultApps;
+    }
+
     public static List<AppInfo> getAllowedAppInfos(){
         return appsList;
+    }
+
+    public static List<AppInfo> getDefaultAllowedAppInfos(){
+        return defaultAppsList;
     }
 }
 

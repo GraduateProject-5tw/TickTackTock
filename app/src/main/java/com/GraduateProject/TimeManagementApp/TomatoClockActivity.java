@@ -8,12 +8,28 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
+
+import com.google.android.material.navigation.NavigationView;
+
 import java.util.concurrent.TimeUnit;
 
 public class TomatoClockActivity extends AppCompatActivity {
@@ -37,6 +53,8 @@ public class TomatoClockActivity extends AppCompatActivity {
     final String[] resttime = new String[]{"0","5","10","15","20","25","30","35","40","45","50","55","60"};
     private int Preset = 0; //讀書科目
     private String   TomatoStudyCourse;//記錄的讀書科目
+    private AnalogClockStyle timeButton;
+    private AppBarConfiguration mAppBarConfiguration;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -49,7 +67,56 @@ public class TomatoClockActivity extends AppCompatActivity {
         stopBtn = findViewById(R.id.tstop_btn);     //可用K停止
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
-        AnalogClockStyle timeButton = findViewById(R.id.clock); //clock image
+        timeButton = findViewById(R.id.clock); //clock image
+
+
+        //目錄相關
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        Toolbar toolbar = findViewById(R.id.mytoolbar);
+        setSupportActionBar(toolbar);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.nav_open, R.string.nav_close);
+        drawer.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        //to make the Navigation drawer icon always appear on the action bar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.openDrawer(navigationView);
+            }
+        });
+        //toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) drawer);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                switch (item.getItemId()) {
+                    // launch general timer
+                    case R.id.nav_home:
+                        break;
+                    // launch to do list
+                    case R.id.todolist:
+                        Log.e("Menu", "to do list");
+                        startActivity(new Intent(TomatoClockActivity.this, ToDoListActivity.class));
+                        break;
+                    // launch time block
+                    case R.id.studytime:
+                        startActivity(new Intent(TomatoClockActivity.this, TimeBlockerActivity.class));
+                        break;
+                    // launch settings activity
+                    case R.id.setting:
+                        startActivity(new Intent(TomatoClockActivity.this, SettingsActivity.class));
+                        break;
+                }
+
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
+        navigationView.setCheckedItem(R.id.nav_home);
 
 
         //當按下時鐘
@@ -238,6 +305,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         stopBtn.setOnClickListener(v -> {
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
+            timeButton.setEnabled(true);
             recordTime+=(SystemClock.elapsedRealtime()-beginTime);
             if(isCounting){
                 study.cancel();
@@ -331,12 +399,37 @@ public class TomatoClockActivity extends AppCompatActivity {
 
         long[] pattern = { 0, 3000, 3000 };
 
-        v.vibrate(pattern, 0);
+        v.vibrate(pattern, 5);
         return v;
 
     }
 
     public static boolean getIsCounting(){
         return isCounting;
+    }
+
+    public void finishCounting(){
+        isCounting = false;
+        study.cancel();
+        timeButton.setEnabled(true);
+        spinnerStudy.setVisibility(View.GONE);
+        startBtn.setVisibility(View.GONE);
+        stopBtn.setVisibility(View.GONE);
+        recordTime=0;
+    }
+
+    //目錄相關操作
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.nav_menuitem, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment2);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
     }
 }

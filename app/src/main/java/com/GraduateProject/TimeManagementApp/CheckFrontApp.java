@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
@@ -48,7 +49,11 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
                 //}else {
                 Log.e("check", "Detect App Press");
                 executor.shutdown();
-                Intent intent = new Intent(CheckFrontApp.this, PopupMessage.class);
+                //ActivityManager mActivityManager = (ActivityManager) CheckFrontApp.this.getSystemService(Context.ACTIVITY_SERVICE);
+                //mActivityManager.forceStopPackage(frontApp);
+                Intent intent = new Intent("com.GraduateProject.TimeManagementApp.FOO");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
                 intent.putExtra("FrontApp", frontApp);
                 startActivity(intent);
                 //}
@@ -72,7 +77,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
         //startTimer();
-        long period = 400;
+        long period = 1000;
         executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(DetectFrontApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
