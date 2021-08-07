@@ -2,7 +2,9 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +32,8 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class TomatoClockActivity extends AppCompatActivity {
@@ -55,6 +59,11 @@ public class TomatoClockActivity extends AppCompatActivity {
     private String   TomatoStudyCourse;//記錄的讀書科目
     private AnalogClockStyle timeButton;
     private AppBarConfiguration mAppBarConfiguration;
+    private DBTimeBlockerHelper DBHelper = null;
+    private int startTime;
+    private String date;
+    private int stopTime;
+    private int totalTime;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -226,6 +235,8 @@ public class TomatoClockActivity extends AppCompatActivity {
         //計時按鈕的功能實作
         startBtn.setOnClickListener(v -> {
             stopBtn.setVisibility(View.VISIBLE);
+            startTime = getTime();
+            date = getDay();
             beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
             isCounting = true; //正在計時中
             timeButton.setEnabled(false); //計時中不得按時鐘
@@ -303,6 +314,8 @@ public class TomatoClockActivity extends AppCompatActivity {
 
         //停止按鈕的功能實作
         stopBtn.setOnClickListener(v -> {
+            stopTime = getTime();
+            totalTime = stopTime-startTime;
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
             timeButton.setEnabled(true);
@@ -333,6 +346,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                     TomatoStudyCourse= course[Preset];
                 }
             });
+            insertDB(date,TomatoStudyCourse,startTime,stopTime,totalTime);
             builder.show();
             recordTime = 0;
         });
@@ -432,4 +446,42 @@ public class TomatoClockActivity extends AppCompatActivity {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }
+
+    public String getDay(){
+        String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        return nowDate;
+    }
+    public int getTime(){
+        int nowTime= (int) SystemClock.elapsedRealtime();
+        return nowTime ;
+    }
+
+    //打開database
+    private void openDB() {
+        DBHelper = new DBTimeBlockerHelper(this);
+    }
+
+    private void insertDB(String date ,String TomatoStudyCourse, int startTime,int stopTime ,int totalTime ){
+
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("_DATE ",date);
+        values.put("_COURSE",TomatoStudyCourse);
+        values.put("_STARTTIME",startTime);
+        values.put("_STOPTIME",stopTime);
+        values.put("_TOTAL",totalTime);
+        db.insert("TimeBlocker",null,values);
+
+    }
+    private void closeDB() {
+        DBHelper.close();
+    }
+
+    private void onDestory(){
+        super.onDestroy();
+
+        closeDB();
+    }
+
+
 }

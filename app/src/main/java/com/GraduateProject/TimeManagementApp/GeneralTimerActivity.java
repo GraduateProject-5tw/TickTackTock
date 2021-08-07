@@ -24,14 +24,15 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import com.facebook.stetho.Stetho;
 import com.google.android.material.navigation.NavigationView;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 
 public class GeneralTimerActivity extends AppCompatActivity implements LifecycleObserver {
 
@@ -47,10 +48,10 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private AppBarConfiguration mAppBarConfiguration;
     private Calendar calendar;
     private String date;
-    private int stratTime;
+    private int startTime;
     private int stopTime;
     private int totalTime;
-    private DBTimeBlockerHelper DBHelper;
+    private DBTimeBlockerHelper DBHelper = null;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     @Override
@@ -64,6 +65,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         generalTimerActivity = this;
         openDB();
+        Stetho.initializeWithDefaults(this);
 
 
         //目錄相關
@@ -123,7 +125,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             stopBtn.setVisibility(View.VISIBLE);
             isCounting = true;
             date= getDay();
-            stratTime=getTime();
+            startTime=getTime();
 
         });
 
@@ -136,7 +138,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
-            totalTime=stopTime-stratTime;
+            totalTime=stopTime-startTime;
             //跳出視窗
             final String[] course = {"國文", "英文", "數學", "社會", "自然", "其他"};
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
@@ -152,11 +154,13 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     alert.setView(editText);
                     alert.setPositiveButton("確定", (dialogInterface, i) -> GeneralStudyCourse = editText.getText().toString());
                     alert.show();
-                } else {
+                }
+                else {
                     GeneralStudyCourse = course[Preset];
                 }
-                insertDB(date,GeneralStudyCourse,stratTime,stopTime,totalTime);
             });
+
+            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
             builder.show();
             recordTime = 0;
             chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
@@ -315,6 +319,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }
 
     private void insertDB(String date ,String GeneralStudyCourse, int stratTime,int stopTime ,int totalTime ){
+
         SQLiteDatabase db = DBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("_DATE ",date);
