@@ -34,6 +34,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Objects;
 
+
 public class TodayToDoListActivity extends AppCompatActivity implements DialogCloseListener{
 
     @SuppressLint("StaticFieldLeak")
