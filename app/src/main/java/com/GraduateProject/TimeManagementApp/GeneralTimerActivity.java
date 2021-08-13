@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,22 +14,25 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import com.facebook.stetho.Stetho;
 import com.google.android.material.navigation.NavigationView;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 
 public class GeneralTimerActivity extends AppCompatActivity implements LifecycleObserver {
 
@@ -44,14 +48,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private AppBarConfiguration mAppBarConfiguration;
     private Calendar calendar;
     private String date;
-    private int stratTime;
+    private int startTime;
     private int stopTime;
     private int totalTime;
-    private DBTimeBlockerHelper DBHelper;
-
-    public GeneralTimerActivity() {
-    }
-
+    private DBTimeBlockerHelper DBHelper = null;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,16 +65,56 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         generalTimerActivity = this;
         openDB();
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Stetho.initializeWithDefaults(this);
+
+
+        //目錄相關
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        Toolbar toolbar = findViewById(R.id.mytoolbar);
+        setSupportActionBar(toolbar);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        toolbar.setNavigationOnClickListener((View.OnClickListener) navigationView);
-        toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) drawer);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.nav_open, R.string.nav_close);
+        drawer.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        //to make the Navigation drawer icon always appear on the action bar
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawer.openDrawer(navigationView);
+            }
+        });
+        //toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) drawer);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
+                switch (item.getItemId()) {
+                    // launch general timer
+                    case R.id.nav_home:
+                        break;
+                        // launch to do list
+                    case R.id.todolist:
+                        Log.e("Menu", "to do list");
+                        startActivity(new Intent(GeneralTimerActivity.this, ToDoListActivity.class));
+                        break;
+                        // launch time block
+                    case R.id.studytime:
+                        startActivity(new Intent(GeneralTimerActivity.this, TimeBlockerActivity.class));
+                        break;
+                        // launch settings activity
+                    case R.id.setting:
+                        startActivity(new Intent(GeneralTimerActivity.this, SettingsActivity.class));
+                        break;
+                    }
 
-
+                drawer.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
+        navigationView.setCheckedItem(R.id.nav_home);
 
 
         //計時按鈕的功能實作
@@ -84,7 +125,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             stopBtn.setVisibility(View.VISIBLE);
             isCounting = true;
             date= getDay();
-            stratTime=getTime();
+            startTime=getTime();
 
         });
 
@@ -97,7 +138,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
-            totalTime=stopTime-stratTime;
+            totalTime=stopTime-startTime;
             //跳出視窗
             final String[] course = {"國文", "英文", "數學", "社會", "自然", "其他"};
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
@@ -113,11 +154,13 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     alert.setView(editText);
                     alert.setPositiveButton("確定", (dialogInterface, i) -> GeneralStudyCourse = editText.getText().toString());
                     alert.show();
-                } else {
+                }
+                else {
                     GeneralStudyCourse = course[Preset];
                 }
-                insertDB(date,GeneralStudyCourse,stratTime,stopTime,totalTime);
             });
+
+            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
             builder.show();
             recordTime = 0;
             chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
@@ -207,6 +250,15 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         }
     }
 
+    public void finishCounting(){
+        isCounting = false;
+        chronometer.stop();
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        startBtn.setVisibility(View.VISIBLE);
+        stopBtn.setVisibility(View.GONE);
+        recordTime = 0;
+    }
+
     public static String getDurationBreakdown(long millis) {
         if (millis < 0) {
             throw new IllegalArgumentException("Duration must be greater than zero!");
@@ -236,19 +288,19 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     public String getDay(){
         String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-
         return nowDate;
     }
     public int getTime(){
         int nowTime= (int) SystemClock.elapsedRealtime();
-
-
         return nowTime ;
     }
+
+
+    //目錄相關操作
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.nav_menuitem, menu);
         return true;
     }
 
@@ -259,11 +311,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 || super.onSupportNavigateUp();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
-        return super.onOptionsItemSelected(item);
-    }
 
     //打開database
     private void openDB() {
@@ -271,6 +319,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }
 
     private void insertDB(String date ,String GeneralStudyCourse, int stratTime,int stopTime ,int totalTime ){
+
         SQLiteDatabase db = DBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("_DATE ",date);

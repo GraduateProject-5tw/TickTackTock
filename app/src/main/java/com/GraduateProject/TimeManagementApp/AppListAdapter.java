@@ -24,7 +24,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i){
         if(context==null)
             context=viewGroup.getContext();
-        View view= LayoutInflater.from(context).inflate(R.layout.app_card,viewGroup,false);
+        View view= LayoutInflater.from(context).inflate(R.layout.controllerview_tomato,viewGroup,false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }

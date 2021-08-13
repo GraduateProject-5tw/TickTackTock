@@ -19,7 +19,4 @@
         android:name="com.GraduateProject.TimeManagementApp.ToDoListActivity"
         android:label="activity_todolist"
         tools:layout="@layout/activity_todolist" />
-
-
-
 </navigation>

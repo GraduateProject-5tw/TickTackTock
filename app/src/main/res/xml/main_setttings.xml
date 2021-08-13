@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="禁用模式">
+        <SwitchPreference
+            android:key="isCustomApp"
+            android:title="開啟自訂"/>
+
+        <Preference
+            android:title="編輯禁用app"
+            android:key="editCustomApp"
+            android:shouldDisableView="true"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="關於">
+        <Preference
+            android:summary="我們是學生團隊"
+            android:selectable="false" />
+        <Preference
+            android:summary="1.0"
+            android:title="版本" />
+        <Preference android:title="隱私條例">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="url_privacy" />
+        </Preference>
+        <Preference android:title="使用聲明">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="url_terms" />
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>
