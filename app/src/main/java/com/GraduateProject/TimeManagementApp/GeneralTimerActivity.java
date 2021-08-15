@@ -98,7 +98,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                         // launch to do list
                     case R.id.todolist:
                         Log.e("Menu", "to do list");
-                        startActivity(new Intent(GeneralTimerActivity.this, ToDoListActivity.class));
+                        startActivity(new Intent(GeneralTimerActivity.this, TodayToDoListActivity.class));
                         break;
                         // launch time block
                     case R.id.studytime:
@@ -294,8 +294,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " : " +
                 minutes +
                 " : " +
-                seconds +
-                " :");
+                seconds );
     }
 
     public static GeneralTimerActivity getActivity() {

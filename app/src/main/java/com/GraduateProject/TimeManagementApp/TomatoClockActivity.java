@@ -109,7 +109,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                     // launch to do list
                     case R.id.todolist:
                         Log.e("Menu", "to do list");
-                        startActivity(new Intent(TomatoClockActivity.this, ToDoListActivity.class));
+                        startActivity(new Intent(TomatoClockActivity.this, TodayToDoListActivity.class));
                         break;
                     // launch time block
                     case R.id.studytime:
@@ -421,8 +421,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                 " : " +
                 minutes +
                 " : " +
-                seconds +
-                " :");
+                seconds );
     }
 
     public Vibrator vibration() {
@@ -470,7 +469,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         return nowDate;
     }
     public String getTime(){
-        String nowTime= new SimpleDateFormat("HH:mm").format(new Date());
+        String nowTime= new SimpleDateFormat("HH:mm:ss").format(new Date());
         return nowTime ;
     }
 
