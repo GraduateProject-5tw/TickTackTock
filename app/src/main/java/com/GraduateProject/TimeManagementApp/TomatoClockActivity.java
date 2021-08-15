@@ -60,10 +60,10 @@ public class TomatoClockActivity extends AppCompatActivity {
     private AnalogClockStyle timeButton;
     private AppBarConfiguration mAppBarConfiguration;
     private DBTimeBlockerHelper DBHelper = null;
-    private int startTime;
+    private String startTime;
     private String date;
-    private int stopTime;
-    private int totalTime;
+    private String stopTime;
+    private String totalTime;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -315,7 +315,6 @@ public class TomatoClockActivity extends AppCompatActivity {
         //停止按鈕的功能實作
         stopBtn.setOnClickListener(v -> {
             stopTime = getTime();
-            totalTime = stopTime-startTime;
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
             timeButton.setEnabled(true);
@@ -326,6 +325,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                 isCounting = false;
             }
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
+            totalTime=getTotalTime(recordTime);
         //跳出視窗
             final  String[] course={"國文","英文","數學","社會","自然","其他"};
             final EditText editText = new EditText(TomatoClockActivity.this);
@@ -406,6 +406,24 @@ public class TomatoClockActivity extends AppCompatActivity {
                 seconds +
                 " 秒");
     }
+    public static String getTotalTime(long millis) {
+        if (millis < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+        return (hours +
+                " : " +
+                minutes +
+                " : " +
+                seconds +
+                " :");
+    }
 
     public Vibrator vibration() {
 
@@ -451,17 +469,18 @@ public class TomatoClockActivity extends AppCompatActivity {
         String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         return nowDate;
     }
-    public int getTime(){
-        int nowTime= (int) SystemClock.elapsedRealtime();
+    public String getTime(){
+        String nowTime= new SimpleDateFormat("HH:mm").format(new Date());
         return nowTime ;
     }
+
 
     //打開database
     private void openDB() {
         DBHelper = new DBTimeBlockerHelper(this);
     }
 
-    private void insertDB(String date ,String TomatoStudyCourse, int startTime,int stopTime ,int totalTime ){
+    private void insertDB(String date ,String TomatoStudyCourse, String startTime,String stopTime ,String totalTime){
 
         SQLiteDatabase db = DBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();

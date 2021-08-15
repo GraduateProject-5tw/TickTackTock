@@ -23,9 +23,9 @@ public class DBTimeBlockerHelper extends SQLiteOpenHelper {
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "_DATE TEXT, " +
                 "_COURSE TEXT," +
-                "_STARTTIME INTEGER," +
-                "_STOPTIME INTEGER," +
-                "_TOTAL INTEGER" +
+                "_STARTTIME TEXT," +
+                "_STOPTIME TEXT," +
+                "_TOTAL TEXT" +
                 ");";
         db.execSQL(SQL);
     }
