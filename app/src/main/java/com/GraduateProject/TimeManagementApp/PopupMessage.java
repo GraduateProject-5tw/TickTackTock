@@ -58,11 +58,13 @@ public class PopupMessage extends AppCompatActivity {
 
         btn_no.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed NO");
+            Intent intentHome = null;
             if(GeneralTimerActivity.getActivity().getIsCounting()){
-                startActivity(new Intent(PopupMessage.this, GeneralTimerActivity.class));
+                intentHome = new Intent(getApplicationContext(), GeneralTimerActivity.class);
             } else{
-                startActivity(new Intent(PopupMessage.this, TomatoClockActivity.class));
+                intentHome = new Intent(getApplicationContext(), TomatoClockActivity.class);
             }
+            startActivity(intentHome);
             finish();
         });
     }

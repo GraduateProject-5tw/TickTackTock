@@ -29,16 +29,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GeneralTimerActivity" android:launchMode="singleInstance">
+        <activity android:name=".GeneralTimerActivity" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.Main" />
             </intent-filter>
         </activity>
-        <activity android:name=".TomatoClockActivity" android:launchMode="singleInstance">
+        <activity android:name=".TomatoClockActivity" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
@@ -48,22 +46,17 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.FOO"/>
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         <activity android:name=".TodayToDoListActivity">
             <intent-filter>
                 <action android:name="android.intent.action" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".TimeBlockerActivity">
             <intent-filter>
                 <action android:name="android.intent.action" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
