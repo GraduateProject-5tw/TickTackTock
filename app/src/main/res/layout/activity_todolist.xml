@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    tools:context=".ToDoListActivity">
+    tools:context=".TodayToDoListActivity">
 
 
     <TextView
@@ -84,20 +84,20 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             android:nestedScrollingEnabled="true" />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/new_btn"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="32dp"
-            android:backgroundTint="@android:color/holo_blue_dark"
-            android:src="@drawable/ic_baseline_add"
-            />
-
 
     </RelativeLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/new_btn"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:src="@drawable/ic_baseline_add" />
 
 
 </LinearLayout>

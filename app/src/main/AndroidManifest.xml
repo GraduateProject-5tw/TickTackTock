@@ -52,7 +52,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".ToDoListActivity">
+        <activity android:name=".TodayToDoListActivity">
             <intent-filter>
                 <action android:name="android.intent.action" />
 

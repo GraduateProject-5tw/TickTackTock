@@ -57,11 +57,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private AppBarConfiguration mAppBarConfiguration;
     private Calendar calendar;
     private String date;
-    private int startTime;
-    private int stopTime;
-    private int totalTime;
-    private DBTimeBlockerHelper DBHelper = null;
+    private String startTime;
+    private String stopTime;
+    private String totalTime;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    DBTimeBlockerHelper DBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,9 +145,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             isCounting = false;
             recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間，單位是毫秒
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
+            totalTime = getTotalTime(recordTime);
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
-            totalTime=stopTime-startTime;
+
+
             //跳出視窗
             final String[] course = {"國文", "英文", "數學", "社會", "自然", "其他"};
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
@@ -168,9 +170,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     GeneralStudyCourse = course[Preset];
                 }
             });
-
-            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
             builder.show();
+            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
             recordTime = 0;
             chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
 
@@ -289,6 +290,25 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " 秒");
     }
 
+    public static String getTotalTime(long millis) {
+        if (millis < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+        return (hours +
+                " : " +
+                minutes +
+                " : " +
+                seconds +
+                " :");
+    }
+
     public static GeneralTimerActivity getActivity() {
         return generalTimerActivity;
     }
@@ -301,8 +321,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         String nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         return nowDate;
     }
-    public int getTime(){
-        int nowTime= (int) SystemClock.elapsedRealtime();
+    public String getTime(){
+        String nowTime= new SimpleDateFormat("HH:mm:ss").format(new Date());
         return nowTime ;
     }
 
@@ -367,7 +387,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         DBHelper = new DBTimeBlockerHelper(this);
     }
 
-    private void insertDB(String date ,String GeneralStudyCourse, int stratTime,int stopTime ,int totalTime ){
+    private void insertDB(String date ,String GeneralStudyCourse, String stratTime,String stopTime ,String totalTime ){
 
         SQLiteDatabase db = DBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
