@@ -78,6 +78,8 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         Log. e ( TAG , "onStartCommandCOMMU" ) ;
         //startTimer();
         long period = 600000;//?
+        checkFrontCommuApp = this;
+        commuapps = LoadingApp.getAllowedCommuApps();
         executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(DetectFrontCommuApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
