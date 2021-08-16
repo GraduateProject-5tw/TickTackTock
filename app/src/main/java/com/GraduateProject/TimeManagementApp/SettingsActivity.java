@@ -62,7 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
                         Log.e("Custom", "is Custom");
                         editButton.setEnabled(true);
                         mSwitchPreference.setChecked(true);
-
+                        LoadingApp.setAllowedApps(LoadingApp.getCustomAllowedApps());
                     } else {
                         Log.e("Custom", "is Default");
                         LoadingApp.setAllowedApps(LoadingApp.getDefaultAllowedApps());

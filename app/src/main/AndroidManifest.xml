@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -19,7 +20,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         android:largeHeap="true"
-        android:hardwareAccelerated="false">
+        android:hardwareAccelerated="false"
+        android:taskAffinity="">
         <activity android:name=".LoadingApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,12 +29,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GeneralTimerActivity">
+        <activity android:name=".GeneralTimerActivity" android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action.Main" />
             </intent-filter>
         </activity>
-        <activity android:name=".TomatoClockActivity">
+        <activity android:name=".TomatoClockActivity" android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.intent.action" />
 

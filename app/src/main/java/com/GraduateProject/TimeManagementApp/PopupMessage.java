@@ -36,26 +36,33 @@ public class PopupMessage extends AppCompatActivity {
         Button btn_yes = findViewById(R.id.btn_yes);
         Button btn_no = findViewById(R.id.btn_no);
         Intent intent = getIntent();
+        String bannedApp = intent.getStringExtra("FrontApp");
 
         bg.setBackground(wallpaper);
         setFullscreen();
 
+        ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
+        mActivityManager.killBackgroundProcesses(bannedApp);
+
         btn_yes.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed YES");
-            if(GeneralTimerActivity.getIsCounting()){
+            if(GeneralTimerActivity.getActivity().getIsCounting()){
             GeneralTimerActivity.getActivity().finishCounting();
             } else{
             TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(intent.getStringExtra("FrontApp"));
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(bannedApp);
             startActivity(launchIntent);
             finish();
         });
 
         btn_no.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed NO");
-            ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
-            mActivityManager.killBackgroundProcesses(getForegroundTask());
+            if(GeneralTimerActivity.getActivity().getIsCounting()){
+                startActivity(new Intent(PopupMessage.this, GeneralTimerActivity.class));
+            } else{
+                startActivity(new Intent(PopupMessage.this, TomatoClockActivity.class));
+            }
             finish();
         });
     }

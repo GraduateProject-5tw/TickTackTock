@@ -24,7 +24,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i){
         if(context==null)
             context=viewGroup.getContext();
-        View view= LayoutInflater.from(context).inflate(R.layout.controllerview_tomato,viewGroup,false);
+        View view= LayoutInflater.from(context).inflate(R.layout.customapp_format,viewGroup,false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
@@ -33,6 +33,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i){
         viewHolder.appLogo.setImageDrawable(appList.get(i).appLogo);
         viewHolder.appName.setText(appList.get(i).appName);
+        //禁用為true 開訪則false
         if(appList.get(i).appStatus)
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
         else
