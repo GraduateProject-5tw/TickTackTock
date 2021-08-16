@@ -38,7 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import android.database.Cursor;
+
 import android.database.sqlite.SQLiteDatabase;
 
 
@@ -51,7 +51,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private Button stopBtn;
     private long recordTime;  //累計的時間
     private static boolean isCounting = false;
-    private static boolean setPermission = false;
     private int Preset = 0; //讀書科目
     private String GeneralStudyCourse;//記錄的讀書科目
     private AppBarConfiguration mAppBarConfiguration;
@@ -61,7 +60,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private String stopTime;
     private String totalTime;
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    DBTimeBlockerHelper DBHelper;
+    DBTimeBlockHelper DBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -237,30 +236,22 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     @Override
     public void onBackPressed() {  //當按back按紐時
         showDialog();
-        AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
-        alert.setTitle("離開");
-        alert.setMessage("確定要離開?");
-        //按"是",則退出應用程式
-        alert.setPositiveButton("是", (dialog, i) -> {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            startActivity(intent);
-        });
-        //按"否",則不執行任何操作
-        alert.setNegativeButton("否", (dialog, i) -> {
-        });
-        alert.show();//顯示訊息視窗
-        setPermission = false;
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (isCounting && !setPermission) {
+        if (isCounting) {
             startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
-            startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
+            //startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent myService = new Intent(GeneralTimerActivity.this, CheckFrontApp.class);
+        stopService(myService);
     }
 
     public void finishCounting(){
@@ -345,14 +336,29 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
 
     public void showDialog() {
-        setPermission = true;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             @SuppressWarnings("WrongConstant")
             UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
             long time = System.currentTimeMillis();
             List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
                     time - 1000 * 1000, time);
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
+            alert.setTitle("離開");
+            alert.setMessage("確定要離開?");
+            //按"是",則退出應用程式
+            alert.setPositiveButton("是", (dialog, i) -> {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                startActivity(intent);
+            });
+            //按"否",則不執行任何操作
+            alert.setNegativeButton("否", (dialog, i) -> {
+            });
+
             if (appList.size() == 0) {
+
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setTitle("Usage Access")
                         .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
@@ -364,19 +370,24 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                                 // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
+                                alert.show();//顯示訊息視窗
                             }
                         })
                         .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 // do nothing
                                 dialog.dismiss();
+                                alert.show();
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .create();
 
-                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                 alertDialog.show();
+            }
+            else{
+                alert.show();
             }
         }
     }
@@ -385,7 +396,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     //打開database
     private void openDB() {
-        DBHelper = new DBTimeBlockerHelper(this);
+        DBHelper = new DBTimeBlockHelper(this);
     }
 
     private void insertDB(String date ,String GeneralStudyCourse, String stratTime,String stopTime ,String totalTime ){

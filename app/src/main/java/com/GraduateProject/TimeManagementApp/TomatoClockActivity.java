@@ -66,7 +66,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private String   TomatoStudyCourse;//記錄的讀書科目
     private AnalogClockStyle timeButton;
     private AppBarConfiguration mAppBarConfiguration;
-    private DBTimeBlockerHelper DBHelper = null;
+    private DBTimeBlockHelper DBHelper = null;
     private String startTime;
     private String date;
     private String stopTime;
@@ -150,8 +150,7 @@ public class TomatoClockActivity extends AppCompatActivity {
             //設定單選列表
             timeConfirm.setSingleChoiceItems(studytime, -1, (dialog, which) -> {
                 // TODO Auto-generated method stub
-                Toast.makeText(TomatoClockActivity.this, studytime[which], Toast.LENGTH_SHORT).show();
-                int i = Integer.parseInt(studytime[which]);
+               int i = Integer.parseInt(studytime[which]);
                 studyInMillis = i*60000;
             });
             //設定取消按鈕並且設定響應事件
@@ -389,6 +388,13 @@ public class TomatoClockActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent myService = new Intent(TomatoClockActivity.this, CheckFrontApp.class);
+        stopService(myService);
+    }
+
     public static TomatoClockActivity getTomatoClockActivity(){
         return tomatoClockActivity;
     }
@@ -524,7 +530,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
     //打開database
     private void openDB() {
-        DBHelper = new DBTimeBlockerHelper(this);
+        DBHelper = new DBTimeBlockHelper(this);
     }
 
     private void insertDB(String date ,String TomatoStudyCourse, String startTime,String stopTime ,String totalTime){

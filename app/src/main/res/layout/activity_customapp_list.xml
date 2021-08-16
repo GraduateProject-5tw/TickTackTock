@@ -17,11 +17,10 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-        <FrameLayout
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:id="@+id/app_list">
-
-        </FrameLayout>
+        </androidx.recyclerview.widget.RecyclerView>>
 </LinearLayout>

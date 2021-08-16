@@ -38,16 +38,15 @@ public class LoadingApp extends AppCompatActivity {
     private static List<String> customApps = new ArrayList<>();
     private static List<String> defaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
-    private static List<String> commuApps = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
     private static List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
-    private static List<String> commuAppsList = new ArrayList<>();
+    private static int isCustom;
     private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
     private String userName;
-    private DBBannedAppsHelper dbBannedAppsHelper = null;
+    private DBBannedAppHelper dbBannedAppsHelper = null;
     private final String TABLE_APPS = "BannedApps";
     private static final String COL_USER = "_USER";
     private static final String COL_CHECK = "_ISCUSTOM";
@@ -76,6 +75,7 @@ public class LoadingApp extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
+                    setIsCustom(checkIfCustom(userName));
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
                     closeDB();
@@ -96,6 +96,7 @@ public class LoadingApp extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
+                    setIsCustom(checkIfCustom(userName));
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
                     closeDB();
@@ -112,13 +113,14 @@ public class LoadingApp extends AppCompatActivity {
                 try {
                     super.run();
                     setDefaultAllowedApps(startLoading());
-                    setAllowedApps(getDefaultAllowedApps());
+                    setAllowedApps(getDefaultAllowedApps()); //只要友直就是預設？
                     String updateString= gson.toJson(getDefaultAllowedApps());
                     Log.e("UPDATE", updateString);
                     defaultAppsUpdateDB(updateString);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
+                    setIsCustom(checkIfCustom(userName));
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
                     closeDB();
@@ -130,7 +132,6 @@ public class LoadingApp extends AppCompatActivity {
         if(isFirstRun){
             openDB();
             userName = Build.USER;
-            showDialog();
             boolean exist = checkIfUserExists(userName);
             Log.e("START", "LOAD APP, exist = "+ exist);
             getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
@@ -165,22 +166,19 @@ public class LoadingApp extends AppCompatActivity {
         List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
 
         for (ResolveInfo info : homeApps) {
-            String communication = "communication";
             AppInfo appInfo = new AppInfo();
             appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
             appInfo.setPackageName(info.activityInfo.packageName);
             appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
             String query_url = GOOGLE_URL + info.activityInfo.packageName + "&hl=en";
             category = getCategory(query_url).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+            Log.e("CATEGORY",category);
             if(banned.contains(category)){
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
-            }else if(category.equals(communication)){    //社交APP禁用開始操作
-                appInfo.setAppStatus(true);
-                Log.e("check",appInfo.getPackageName() + "is added");
-                commuApps.add(appInfo.getPackageName());
-            }else{
+            }
+            else{
                 appInfo.setAppStatus(false);
             }
             defaultAppsList.add(appInfo);
@@ -265,7 +263,7 @@ public class LoadingApp extends AppCompatActivity {
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .create();
 
-                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
                 alertDialog.show();
             }
         }
@@ -275,7 +273,7 @@ public class LoadingApp extends AppCompatActivity {
     //資料庫相關
     //打開database
     private void openDB() {
-        dbBannedAppsHelper = new DBBannedAppsHelper(this);
+        dbBannedAppsHelper = new DBBannedAppHelper(this);
         db = dbBannedAppsHelper.getWritableDatabase();
     }
 
@@ -335,6 +333,9 @@ public class LoadingApp extends AppCompatActivity {
 
 
     //更改
+    public static void setIsCustom(int custom){
+        isCustom = custom;
+    }
     public static void setCustomAllowedApps(List<String> app){
         customApps = app;
     }
@@ -355,14 +356,14 @@ public class LoadingApp extends AppCompatActivity {
     public static List<String> getAllowedApps(){
         return bannedApps;
     }
-    public static List<String> getAllowedCommuApps(){
-        return commuApps;
-    }
     public static List<String> getDefaultAllowedApps(){
         return defaultApps;
     }
     public static List<AppInfo> getAllowedAppInfos(){
         return bannedAppsList;
+    }
+    public static int getIsCustom(){
+        return isCustom;
     }
 }
 

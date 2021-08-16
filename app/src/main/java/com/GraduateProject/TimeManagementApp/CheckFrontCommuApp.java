@@ -70,7 +70,7 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
     public void onCreate () {
         Log. e ( TAG , "onCreate" );
         checkFrontCommuApp = this;
-        commuapps = LoadingApp.getAllowedCommuApps();
+        //commuapps = LoadingApp.getAllowedCommuApps();
     }
 
     @Override

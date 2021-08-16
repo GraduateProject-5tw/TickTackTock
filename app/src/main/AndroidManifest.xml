@@ -38,7 +38,7 @@
             android:name=".GeneralTimerActivity"
             android:launchMode="singleTask">
             <intent-filter>
-                <action android:name="android.intent.action.Main" />
+                <action android:name="android.intent.action" />
             </intent-filter>
         </activity>
         <activity
@@ -52,6 +52,7 @@
             android:name=".PopupMessage"
             android:excludeFromRecents="true"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.FOO" />

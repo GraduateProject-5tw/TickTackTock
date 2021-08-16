@@ -32,11 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CheckFrontApp extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
-    Timer timer ;
-    TimerTask timerTask ;
     String TAG = "Timers" ;
     private List<String> apps = new ArrayList<>();
-    private final List<AppInfo> appsList = new ArrayList<>();
     private ScheduledThreadPoolExecutor executor;
     private String frontApp;
 
@@ -65,14 +62,14 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     @Override //一旦離開app，建立server服務
     public void onCreate () {
         Log. e ( TAG , "onCreate" );
-        apps = LoadingApp.getAllowedApps();
     }
 
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
+        apps = LoadingApp.getAllowedApps();
         long period = 1000;
-        executor = new ScheduledThreadPoolExecutor(1);
+        executor = new ScheduledThreadPoolExecutor(2);
         executor.scheduleAtFixedRate(DetectFrontApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
