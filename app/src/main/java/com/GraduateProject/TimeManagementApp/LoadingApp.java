@@ -38,9 +38,11 @@ public class LoadingApp extends AppCompatActivity {
     private static List<String> customApps = new ArrayList<>();
     private static List<String> defaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
+    private static List<String> commuApps = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
     private static List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
+    private static List<String> commuAppsList = new ArrayList<>();
     private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
@@ -163,6 +165,7 @@ public class LoadingApp extends AppCompatActivity {
         List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
 
         for (ResolveInfo info : homeApps) {
+            String communication = "communication";
             AppInfo appInfo = new AppInfo();
             appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
             appInfo.setPackageName(info.activityInfo.packageName);
@@ -173,8 +176,11 @@ public class LoadingApp extends AppCompatActivity {
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
-            }
-            else{
+            }else if(category.equals(communication)){    //社交APP禁用開始操作
+                appInfo.setAppStatus(true);
+                Log.e("check",appInfo.getPackageName() + "is added");
+                commuApps.add(appInfo.getPackageName());
+            }else{
                 appInfo.setAppStatus(false);
             }
             defaultAppsList.add(appInfo);
@@ -348,6 +354,9 @@ public class LoadingApp extends AppCompatActivity {
     }
     public static List<String> getAllowedApps(){
         return bannedApps;
+    }
+    public static List<String> getAllowedCommuApps(){
+        return commuApps;
     }
     public static List<String> getDefaultAllowedApps(){
         return defaultApps;

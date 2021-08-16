@@ -10,18 +10,23 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication"
-        android:largeHeap="true"
-        android:hardwareAccelerated="false"
-        android:taskAffinity="">
+        android:taskAffinity=""
+        android:theme="@style/Theme.MyApplication">
+        <activity
+            android:name=".PopupMessageCommu"
+            android:exported="true" />
         <activity android:name=".LoadingApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,12 +34,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GeneralTimerActivity" android:launchMode="singleTask">
+        <activity
+            android:name=".GeneralTimerActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.Main" />
             </intent-filter>
         </activity>
-        <activity android:name=".TomatoClockActivity" android:launchMode="singleTask">
+        <activity
+            android:name=".TomatoClockActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action" />
             </intent-filter>
@@ -45,7 +54,8 @@
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
-                <action android:name="com.GraduateProject.TimeManagementApp.FOO"/>
+                <action android:name="com.GraduateProject.TimeManagementApp.FOO" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
@@ -61,17 +71,14 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings">
-
-        </activity>
+            android:label="@string/title_activity_settings"></activity>
         <activity android:name=".AppsListActivity">
             <intent-filter>
-                <action android:name="com.GraduateProject.TimeManagementApp.Banned"/>
+                <action android:name="com.GraduateProject.TimeManagementApp.Banned" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-
-
 
         <service
             android:name=".NotificationService"

@@ -259,6 +259,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         super.onPause();
         if (isCounting && !setPermission) {
             startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
+            startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
         }
     }
 
