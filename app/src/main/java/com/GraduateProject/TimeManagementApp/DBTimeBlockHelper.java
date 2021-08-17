@@ -41,5 +41,12 @@ public class DBTimeBlockHelper extends SQLiteOpenHelper {
         String SQL1 = "DROP TABLE " + _TableNameforTime;
         db.execSQL(SQL1);
     }
+
+    public Cursor ViewData(){
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from "+_TableNameforTime,null);
+        return cursor;
+    }
+
 }
 
