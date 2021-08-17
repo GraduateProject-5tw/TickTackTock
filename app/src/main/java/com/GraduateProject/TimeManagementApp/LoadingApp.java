@@ -1,12 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -14,13 +9,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.WindowManager;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -38,9 +31,11 @@ public class LoadingApp extends AppCompatActivity {
     private static List<String> customApps = new ArrayList<>();
     private static List<String> defaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
+    private static List<String> commuApps = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
     private static List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
+    private static List<String> commuAppsList = new ArrayList<>();
     private static int isCustom;
     private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
@@ -52,8 +47,13 @@ public class LoadingApp extends AppCompatActivity {
     private static final String COL_CHECK = "_ISCUSTOM";
     private SQLiteDatabase db = null;
     private Gson gson = new Gson();
+    private Thread loadingThread;
+    private Thread loadingThreadCustom;
+    private Thread loadingThreadDefault;
+    private boolean exist;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loadingapp);
@@ -61,7 +61,7 @@ public class LoadingApp extends AppCompatActivity {
         Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
 
         //先列出所有禁用App(新用戶)
-        Thread loadingThread = new Thread() {
+        loadingThread = new Thread() {
 
             @Override
             public void run() {
@@ -85,7 +85,7 @@ public class LoadingApp extends AppCompatActivity {
         };
 
         //先列出所有禁用App(custom)
-        Thread loadingThreadCustom = new Thread() {
+        loadingThreadCustom = new Thread() {
 
             @Override
             public void run() {
@@ -106,7 +106,7 @@ public class LoadingApp extends AppCompatActivity {
         };
 
         //先列出所有禁用App(default)
-        Thread loadingThreadDefault = new Thread() {
+        loadingThreadDefault = new Thread() {
 
             @Override
             public void run() {
@@ -132,9 +132,9 @@ public class LoadingApp extends AppCompatActivity {
         if(isFirstRun){
             openDB();
             userName = Build.USER;
-            boolean exist = checkIfUserExists(userName);
-            Log.e("START", "LOAD APP, exist = "+ exist);
             getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
+            exist = checkIfUserExists(userName);
+            Log.e("START", "LOAD APP, exist = "+ exist);
         }
     }
 
@@ -157,6 +157,7 @@ public class LoadingApp extends AppCompatActivity {
     protected List<String> startLoading(){
         Log.e("CATEGORY", "start checking");
         String category;
+        String communication = "communication";
         PackageManager packageManager = getPackageManager();
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
@@ -177,8 +178,11 @@ public class LoadingApp extends AppCompatActivity {
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
-            }
-            else{
+            }else if(category.equals(communication)){    //社交APP禁用開始操作
+                appInfo.setAppStatus(true);
+                Log.e("check",appInfo.getPackageName() + "is added");
+                commuApps.add(appInfo.getPackageName());
+            }else{
                 appInfo.setAppStatus(false);
             }
             defaultAppsList.add(appInfo);
@@ -231,44 +235,6 @@ public class LoadingApp extends AppCompatActivity {
         }
     }
 
-    public void showDialog()
-    {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-
-            @SuppressWarnings("WrongConstant")
-            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
-                    time - 1000 * 1000, time);
-            if (appList.size() == 0) {
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setTitle("Usage Access")
-                        .setMessage("此APP需要使用到部分權限，否則將無法使用部分功能。")
-                        .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                            public void onClick(DialogInterface dialog, int which) {
-                                // continue with delete
-                                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                                // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            }
-                        })
-                        .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                                dialog.dismiss();
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .create();
-
-                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
-                alertDialog.show();
-            }
-        }
-    }
-
 
     //資料庫相關
     //打開database
@@ -278,9 +244,19 @@ public class LoadingApp extends AppCompatActivity {
     }
 
     public boolean checkIfUserExists(String user) {
-        String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + user + "'";
+        /**String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + user + "'";
         Cursor cursor = db.rawQuery(Query, null);
         if(cursor.getCount() <= 0){
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;**/
+        String count = "SELECT count(*) FROM " + TABLE_APPS;
+        Cursor cursor = db.rawQuery(count, null);
+        cursor.moveToFirst();
+        int icount = cursor.getInt(0);
+        if(icount == 0){
             cursor.close();
             return false;
         }
@@ -348,6 +324,7 @@ public class LoadingApp extends AppCompatActivity {
     public static void setAllowedAppInfos(List<AppInfo> appList){
         bannedAppsList = appList;
     }
+    public static void setAllowedCommuApps(List<String> Commuapp){ commuAppsList = Commuapp; }
 
     //取得
     public static List<String> getCustomAllowedApps(){
@@ -364,6 +341,9 @@ public class LoadingApp extends AppCompatActivity {
     }
     public static int getIsCustom(){
         return isCustom;
+    }
+    public static List<String> getAllowedCommuApps(){
+        return commuApps;
     }
 }
 
