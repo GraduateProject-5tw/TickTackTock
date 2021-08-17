@@ -75,8 +75,7 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         taskAdapter = new ToDoAdapter(db, TodayToDoListActivity.this);
         tasksRecyclerView.setAdapter(taskAdapter);
 
-        Button today_btn = findViewById(R.id.today_btn);
-        Button all_btn = findViewById(R.id.all_btn);
+
         todayToDoListActivity = this;
 
         new_btn = findViewById(R.id.new_btn);
@@ -87,12 +86,6 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         taskList = db.getAllTasks();
         Collections.reverse(taskList);
         taskAdapter.setTasks(taskList);
-
-        all_btn.setEnabled(true);
-        all_btn.setBackgroundColor(-1); //白色
-
-        today_btn.setEnabled(false);
-        today_btn.setBackgroundColor(-3355444);
 
         new_btn.setOnClickListener(new View.OnClickListener() {
             @Override
