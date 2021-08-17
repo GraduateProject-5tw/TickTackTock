@@ -13,9 +13,10 @@ import java.util.List;
 
 public class DBToDoHelper extends SQLiteOpenHelper {
 
-    private static final int VERSION = 1;
+    private Context context;
+    private static final int VERSION = 2;
     private static final String NAME = "toDoListDatabase";
-    private static final String TODO_TABLE = "todo";
+    private static final String TODO_TABLE = "ToDo";
     private static final String ID = "id";
     private static final String TASK = "task";
     private static final String STATUS = "status";
@@ -26,11 +27,12 @@ public class DBToDoHelper extends SQLiteOpenHelper {
 
     public DBToDoHelper(Context context) {
         super(context, NAME, null, VERSION);
+        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TODO_TABLE);
+        db.execSQL( CREATE_TODO_TABLE );
     }
 
     @Override

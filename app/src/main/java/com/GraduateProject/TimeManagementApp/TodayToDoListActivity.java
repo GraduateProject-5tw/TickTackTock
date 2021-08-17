@@ -68,7 +68,7 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         assignViews();
 
         db = new DBToDoHelper(this);
-        db.getWritableDatabase();
+        db.openDatabase();
 
         tasksRecyclerView = findViewById(R.id.tasksRecyclerView);
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
