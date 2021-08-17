@@ -31,22 +31,23 @@ public class PopupMessage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_popup_message);
         super.onCreate(savedInstanceState);
-        Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
+        Log.e("POPUP", "create called");
+        //Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
         bg = findViewById(R.id.transparentBG);
         Button btn_yes = findViewById(R.id.btn_yes);
         Button btn_no = findViewById(R.id.btn_no);
         Intent intent = getIntent();
         String bannedApp = intent.getStringExtra("FrontApp");
 
-        bg.setBackground(wallpaper);
+        //bg.setBackground(wallpaper);
         setFullscreen();
 
-        ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
-        mActivityManager.killBackgroundProcesses(bannedApp);
+        //ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
+        //mActivityManager.killBackgroundProcesses(bannedApp);
 
         btn_yes.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed YES");
-            if(GeneralTimerActivity.getActivity().getIsCounting()){
+            if(GeneralTimerActivity.getIsCounting()){
             GeneralTimerActivity.getActivity().finishCounting();
             } else{
             TomatoClockActivity.getTomatoClockActivity().finishCounting();
@@ -59,7 +60,7 @@ public class PopupMessage extends AppCompatActivity {
         btn_no.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed NO");
             Intent intentHome = null;
-            if(GeneralTimerActivity.getActivity().getIsCounting()){
+            if(GeneralTimerActivity.getIsCounting()){
                 intentHome = new Intent(getApplicationContext(), GeneralTimerActivity.class);
             } else{
                 intentHome = new Intent(getApplicationContext(), TomatoClockActivity.class);

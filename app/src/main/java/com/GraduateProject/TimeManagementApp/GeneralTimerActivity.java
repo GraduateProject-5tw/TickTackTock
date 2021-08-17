@@ -5,9 +5,12 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -21,12 +24,14 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleObserver;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -62,6 +67,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private ActionBarDrawerToggle actionBarDrawerToggle;
     DBTimeBlockHelper DBHelper;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +80,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         generalTimerActivity = this;
         openDB();
         Stetho.initializeWithDefaults(this);
-
+        showDialogStart();
 
         //目錄相關
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -233,6 +239,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         general_btn.setBackgroundColor(-3355444);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onBackPressed() {  //當按back按紐時
         showDialog();
@@ -243,18 +250,29 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         super.onPause();
         if (isCounting) {
             startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
-            //startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
+            // Register mMessageReceiver to receive messages.
+            LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                    new IntentFilter("my-event"));
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Intent myService = new Intent(GeneralTimerActivity.this, CheckFrontApp.class);
-        stopService(myService);
+        // Register mMessageReceiver to receive messages.
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter("my-event"));
     }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finishCounting();
+        }
+    };
+
     public void finishCounting(){
+        Log.e("Finish", "finish counting");
         isCounting = false;
         chronometer.stop();
         chronometer.setBase(SystemClock.elapsedRealtime());
@@ -335,6 +353,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void showDialog() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             @SuppressWarnings("WrongConstant")
@@ -357,27 +376,54 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             alert.setNegativeButton("否", (dialog, i) -> {
             });
 
+            AlertDialog alert2 = new AlertDialog.Builder(this)
+                    .setTitle("Usage Access")
+                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
+                    .setPositiveButton("設定", new DialogInterface.OnClickListener() {
+                        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            alert.show();//顯示訊息視窗
+                        }
+                    })
+                    .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                            dialog.dismiss();
+                            alert.show();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .create();
+
             if (appList.size() == 0) {
 
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setTitle("Usage Access")
                         .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
                         .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                            @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.M)
                             public void onClick(DialogInterface dialog, int which) {
                                 // continue with delete
                                 Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
                                 // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
-                                alert.show();//顯示訊息視窗
+                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                                    alert2.show();//顯示訊息視窗
+                                }
                             }
                         })
                         .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.M)
                             public void onClick(DialogInterface dialog, int which) {
                                 // do nothing
                                 dialog.dismiss();
-                                alert.show();
+                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                                    alert2.show();//顯示訊息視窗
+                                }
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -386,11 +432,84 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                 alertDialog.show();
             }
-            else{
+            else if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                alert2.show();//顯示訊息視窗
+            } else{
                 alert.show();
             }
         }
     }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void showDialogStart() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            @SuppressWarnings("WrongConstant")
+            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+            long time = System.currentTimeMillis();
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                    time - 1000 * 1000, time);
+
+            AlertDialog alert2 = new AlertDialog.Builder(this)
+                    .setTitle("Usage Access")
+                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
+                    .setPositiveButton("設定", new DialogInterface.OnClickListener() {
+                        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // do nothing
+                            dialog.dismiss();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .create();
+
+            if (appList.size() == 0) {
+
+                AlertDialog alertDialog = new AlertDialog.Builder(this)
+                        .setTitle("Usage Access")
+                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
+                        .setPositiveButton("設定", new DialogInterface.OnClickListener() {
+                            @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.M)
+                            public void onClick(DialogInterface dialog, int which) {
+                                // continue with delete
+                                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                                // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                                    alert2.show();//顯示訊息視窗
+                                }
+                            }
+                        })
+                        .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
+                            @RequiresApi(api = Build.VERSION_CODES.M)
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                                dialog.dismiss();
+                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                                    alert2.show();//顯示訊息視窗
+                                }
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .create();
+
+                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                alertDialog.show();
+            }
+            else if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                alert2.show();//顯示訊息視窗
+            }
+        }
+    }
+
 
 
 
