@@ -1,12 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -14,14 +9,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.WindowManager;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.facebook.stetho.Stetho;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -39,9 +31,11 @@ public class LoadingApp extends AppCompatActivity {
     private static List<String> customApps = new ArrayList<>();
     private static List<String> defaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
+    private static List<String> commuApps = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
     private static List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
+    private static List<String> commuAppsList = new ArrayList<>();
     private static int isCustom;
     private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
@@ -163,6 +157,7 @@ public class LoadingApp extends AppCompatActivity {
     protected List<String> startLoading(){
         Log.e("CATEGORY", "start checking");
         String category;
+        String communication = "communication";
         PackageManager packageManager = getPackageManager();
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
@@ -183,8 +178,11 @@ public class LoadingApp extends AppCompatActivity {
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
-            }
-            else{
+            }else if(category.equals(communication)){    //社交APP禁用開始操作
+                appInfo.setAppStatus(true);
+                Log.e("check",appInfo.getPackageName() + "is added");
+                commuApps.add(appInfo.getPackageName());
+            }else{
                 appInfo.setAppStatus(false);
             }
             defaultAppsList.add(appInfo);
@@ -326,6 +324,7 @@ public class LoadingApp extends AppCompatActivity {
     public static void setAllowedAppInfos(List<AppInfo> appList){
         bannedAppsList = appList;
     }
+    public static void setAllowedCommuApps(List<String> Commuapp){ commuAppsList = Commuapp; }
 
     //取得
     public static List<String> getCustomAllowedApps(){
@@ -342,6 +341,9 @@ public class LoadingApp extends AppCompatActivity {
     }
     public static int getIsCustom(){
         return isCustom;
+    }
+    public static List<String> getAllowedCommuApps(){
+        return commuApps;
     }
 }
 

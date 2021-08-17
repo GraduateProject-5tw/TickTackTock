@@ -250,9 +250,12 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         super.onPause();
         if (isCounting) {
             startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
+            startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
             // Register mMessageReceiver to receive messages.
             LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                     new IntentFilter("my-event"));
+            LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                    new IntentFilter("my-commu-event"));
         }
     }
 
@@ -262,6 +265,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         // Register mMessageReceiver to receive messages.
         LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
                 new IntentFilter("my-event"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
+                new IntentFilter("my-commu-event"));
     }
 
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {

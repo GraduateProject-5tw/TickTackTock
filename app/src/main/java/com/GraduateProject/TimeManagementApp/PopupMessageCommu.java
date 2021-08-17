@@ -29,16 +29,21 @@ public class PopupMessageCommu extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_popup_message);
+        setContentView(R.layout.activity_popup_message_commu);
         super.onCreate(savedInstanceState);
-        Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
+        Log.e("POPUP", "create called");
+        //Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
         bg = findViewById(R.id.transparentBG);
         Button btn_yes = findViewById(R.id.btn_yes);
         Button btn_no = findViewById(R.id.btn_no);
         Intent intent = getIntent();
+        String bannedApp = intent.getStringExtra("frontCommuApp");
 
-        bg.setBackground(wallpaper);
+        //bg.setBackground(wallpaper);
         setFullscreen();
+
+        //ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
+        //mActivityManager.killBackgroundProcesses(bannedApp);
 
         btn_yes.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed YES");
@@ -47,22 +52,27 @@ public class PopupMessageCommu extends AppCompatActivity {
             } else{
                 TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(intent.getStringExtra("FrontApp"));
+            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(bannedApp);
             startActivity(launchIntent);
             finish();
         });
 
         btn_no.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed NO");
-            ActivityManager mActivityManager = (ActivityManager) PopupMessageCommu.this.getSystemService(Context.ACTIVITY_SERVICE);
-            mActivityManager.killBackgroundProcesses(getForegroundTask());
+            Intent intentHome = null;
+            if(GeneralTimerActivity.getIsCounting()){
+                intentHome = new Intent(getApplicationContext(), GeneralTimerActivity.class);
+            } else{
+                intentHome = new Intent(getApplicationContext(), TomatoClockActivity.class);
+            }
+            startActivity(intentHome);
             finish();
         });
     }
 
     private String getForegroundTask() {
         String currentApp = "NULL";
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             @SuppressLint("WrongConstant") UsageStatsManager usm = (UsageStatsManager)this.getSystemService("usagestats");
             long time = System.currentTimeMillis();
             List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
@@ -107,6 +117,6 @@ public class PopupMessageCommu extends AppCompatActivity {
     }
 
     public static boolean isImmersiveAvailable() {
-        return Build.VERSION.SDK_INT >= 19;
+        return android.os.Build.VERSION.SDK_INT >= 19;
     }
 }
