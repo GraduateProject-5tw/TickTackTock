@@ -1,7 +1,5 @@
 package com.GraduateProject.TimeManagementApp;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -9,30 +7,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.graphics.RectF;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.GraduateProject.TimeManagementApp.Adapters.ToDoAdapter;
-import com.GraduateProject.TimeManagementApp.ToDoModel;
-import com.GraduateProject.TimeManagementApp.DBToDoHelper;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.Objects;
 
 
 public class TodayToDoListActivity extends AppCompatActivity implements DialogCloseListener{
@@ -90,8 +75,7 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         taskAdapter = new ToDoAdapter(db, TodayToDoListActivity.this);
         tasksRecyclerView.setAdapter(taskAdapter);
 
-        Button today_btn = findViewById(R.id.today_btn);
-        Button all_btn = findViewById(R.id.all_btn);
+
         todayToDoListActivity = this;
 
         new_btn = findViewById(R.id.new_btn);
@@ -102,12 +86,6 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         taskList = db.getAllTasks();
         Collections.reverse(taskList);
         taskAdapter.setTasks(taskList);
-
-        all_btn.setEnabled(true);
-        all_btn.setBackgroundColor(-1); //白色
-
-        today_btn.setEnabled(false);
-        today_btn.setBackgroundColor(-3355444);
 
         new_btn.setOnClickListener(new View.OnClickListener() {
             @Override

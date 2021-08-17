@@ -1,5 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -12,24 +14,22 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
-import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class PopupMessage extends AppCompatActivity {
+public class PopupMessageCommu extends AppCompatActivity {
 
     LinearLayout bg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_popup_message);
+        setContentView(R.layout.activity_popup_message_commu);
         super.onCreate(savedInstanceState);
         Log.e("POPUP", "create called");
         //Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
@@ -37,7 +37,7 @@ public class PopupMessage extends AppCompatActivity {
         Button btn_yes = findViewById(R.id.btn_yes);
         Button btn_no = findViewById(R.id.btn_no);
         Intent intent = getIntent();
-        String bannedApp = intent.getStringExtra("FrontApp");
+        String bannedApp = intent.getStringExtra("frontCommuApp");
 
         //bg.setBackground(wallpaper);
         setFullscreen();
@@ -48,9 +48,9 @@ public class PopupMessage extends AppCompatActivity {
         btn_yes.setOnClickListener(v -> {
             Log.v("shuffTest", "Pressed YES");
             if(GeneralTimerActivity.getIsCounting()){
-            GeneralTimerActivity.getActivity().finishCounting();
+                GeneralTimerActivity.getActivity().finishCounting();
             } else{
-            TomatoClockActivity.getTomatoClockActivity().finishCounting();
+                TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(bannedApp);
             startActivity(launchIntent);

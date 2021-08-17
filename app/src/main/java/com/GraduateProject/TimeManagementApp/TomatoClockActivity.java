@@ -1,8 +1,12 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.icu.util.Calendar;
@@ -10,10 +14,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -34,6 +40,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class TomatoClockActivity extends AppCompatActivity {
@@ -59,7 +66,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private String   TomatoStudyCourse;//記錄的讀書科目
     private AnalogClockStyle timeButton;
     private AppBarConfiguration mAppBarConfiguration;
-    private DBTimeBlockerHelper DBHelper = null;
+    private DBTimeBlockHelper DBHelper = null;
     private String startTime;
     private String date;
     private String stopTime;
@@ -71,6 +78,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         tomatoClockActivity = this;
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
+        showDialog();
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
         startBtn = findViewById(R.id.tstart_btn);
         stopBtn = findViewById(R.id.tstop_btn);     //可用K停止
@@ -142,8 +150,7 @@ public class TomatoClockActivity extends AppCompatActivity {
             //設定單選列表
             timeConfirm.setSingleChoiceItems(studytime, -1, (dialog, which) -> {
                 // TODO Auto-generated method stub
-                Toast.makeText(TomatoClockActivity.this, studytime[which], Toast.LENGTH_SHORT).show();
-                int i = Integer.parseInt(studytime[which]);
+               int i = Integer.parseInt(studytime[which]);
                 studyInMillis = i*60000;
             });
             //設定取消按鈕並且設定響應事件
@@ -354,6 +361,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        showDialog();
         AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
         alert.setTitle("離開");
         alert.setMessage("確定要離開?");
@@ -378,6 +386,13 @@ public class TomatoClockActivity extends AppCompatActivity {
         if(isCounting){
             startService(new Intent(TomatoClockActivity.this, CheckFrontApp.class));
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent myService = new Intent(TomatoClockActivity.this, CheckFrontApp.class);
+        stopService(myService);
     }
 
     public static TomatoClockActivity getTomatoClockActivity(){
@@ -449,6 +464,44 @@ public class TomatoClockActivity extends AppCompatActivity {
         recordTime=0;
     }
 
+    public void showDialog()
+    {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+
+            @SuppressWarnings("WrongConstant")
+            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+            long time = System.currentTimeMillis();
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                    time - 1000 * 1000, time);
+            if (appList.size() == 0) {
+                AlertDialog alertDialog = new AlertDialog.Builder(this)
+                        .setTitle("Usage Access")
+                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
+                        .setPositiveButton("設定", new DialogInterface.OnClickListener() {
+                            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                            public void onClick(DialogInterface dialog, int which) {
+                                // continue with delete
+                                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                                // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                            }
+                        })
+                        .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // do nothing
+                                dialog.dismiss();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .create();
+
+                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                alertDialog.show();
+            }
+        }
+    }
+
     //目錄相關操作
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -476,7 +529,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
     //打開database
     private void openDB() {
-        DBHelper = new DBTimeBlockerHelper(this);
+        DBHelper = new DBTimeBlockHelper(this);
     }
 
     private void insertDB(String date ,String TomatoStudyCourse, String startTime,String stopTime ,String totalTime){

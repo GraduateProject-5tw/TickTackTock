@@ -17,6 +17,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -41,56 +42,47 @@ import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class CheckFrontApp extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
+public class CheckFrontCommuApp extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
     private String TAG = "Timers" ;
     private Timer timer ;
     private TimerTask timerTask ;
-    private List<String> apps = new ArrayList<>();
+    private List<String> commuapps = new ArrayList<>();
     private ScheduledThreadPoolExecutor executor;
-    private String frontApp;
-    public static final String NOTIFICATION_CHANNEL_ID = "10001" ;
+    private String frontCommuApp;
+    public static final String NOTIFICATION_CHANNEL_ID = "10002" ;
     private final static String default_notification_channel_id = "default" ;
     private NotificationManager mNotificationManager ;
     private NotificationCompat.Builder mBuilder;
     private boolean normal = true;
+    private int i=0;
+    private CountDownTimer CommuTimer = new CountDownTimer(600000, 1000) {
+        @Override
+        public void onTick(long millisUntilFinished) {
+            Log.e("Countdown", "開始倒數計時10分鐘");
+        }
 
+        @Override
+        public void onFinish() {
+            createNotification();
+        }
+    };
 
-    private Thread DetectFrontApp = new Thread(new Runnable() {
+    private Thread DetectFrontCommuApp = new Thread(new Runnable() {
         @Override
         public void run() {
-            frontApp = getForegroundTask().replaceAll("\\s+","");
+            frontCommuApp = getForegroundTask().replaceAll("\\s+","");
 
-            if(apps.contains(frontApp)){
-                Log.e("check", "Detect App Press");
+            if(commuapps.contains(frontCommuApp)){
+                Log.e("check", "Detect Communication App Press");
                 executor.shutdown();
-                createNotification();
-                /**Intent intent = new Intent("com.GraduateProject.TimeManagementApp.FOO");
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("FrontApp", frontApp);
-                startActivity(intent);
-                /**try {
-                    createNotification();
-                    executor.wait(60000);
-                    executor.notify();
-                    //vibration();
-                    String newFront = getForegroundTask().replaceAll("\\s+","");
-                    Log.e("check", "new front app is :"+ newFront);
-                    if(frontApp == newFront){
-                        Log.e("check","still in app");
-                        //GeneralTimerActivity.getActivity().finishCounting();
-                        sendMessage();
-                    }
-                    else{
-                        executor = new ScheduledThreadPoolExecutor(1);
-                        executor.scheduleAtFixedRate(DetectFrontApp, 0, 1000, TimeUnit.MILLISECONDS);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }**/
+                if(i==0){
+                    CommuTimer.start();
+                    i+=1;
+                }else{
+                    CommuTimer.cancel();
+                }
             }
-
-            //else if()
         }
     });
 
@@ -109,10 +101,10 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
-        apps = LoadingApp.getAllowedApps();
+        commuapps = LoadingApp.getAllowedCommuApps();
         long period = 1000;
         executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(DetectFrontApp, 0, period, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(DetectFrontCommuApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }
@@ -174,16 +166,16 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
 
     //跳出通知
     public void createNotification(){
-        Intent fullScreenIntent = new Intent(this, PopupMessage.class);
+        Intent fullScreenIntent = new Intent(this, PopupMessageCommu.class);
         PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
                 fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Intent notifyIntent = new Intent(this, PopupMessage.class);
         notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-       PendingIntent notifyPendingIntent = PendingIntent.getActivity(
+        PendingIntent notifyPendingIntent = PendingIntent.getActivity(
                 this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        mBuilder.setContentTitle( "讀書期間APP禁用" ) ;
+        mBuilder.setContentTitle( "讀書期間此類通訊APP只允許使用10分鐘" ) ;
         mBuilder.setContentText( "通知消失後前次紀錄將作廢，請點選通知進行選擇。" ) ;
         mBuilder.setContentIntent(notifyPendingIntent);
         mBuilder.setSmallIcon(R.drawable.ic_lock) ;
@@ -191,12 +183,12 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
         mBuilder.setColor(Color.RED) ;
         mBuilder.setTimeoutAfter(60000);
         /**if(GeneralTimerActivity.getIsCounting()){
-            mBuilder.addAction(R.drawable.ic_lock_open, "繼續使用", other);
-            mBuilder.addAction(R.drawable.ic_lock, "放棄使用", general);
-        } else{
-            mBuilder.addAction(R.drawable.ic_lock_open, "繼續使用", other);
-            mBuilder.addAction(R.drawable.ic_lock, "放棄使用", tomato);
-        }**/
+         mBuilder.addAction(R.drawable.ic_lock_open, "繼續使用", other);
+         mBuilder.addAction(R.drawable.ic_lock, "放棄使用", general);
+         } else{
+         mBuilder.addAction(R.drawable.ic_lock_open, "繼續使用", other);
+         mBuilder.addAction(R.drawable.ic_lock, "放棄使用", tomato);
+         }**/
         mBuilder.setCategory(NotificationCompat.CATEGORY_CALL);
         mBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
         mBuilder.setFullScreenIntent(fullScreenPendingIntent, true);

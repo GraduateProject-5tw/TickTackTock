@@ -9,7 +9,7 @@ public class AppInfo {
     String appName;
     String appCategory;
     Drawable appLogo;
-    boolean appStatus = false; //禁用為true 開訪則false
+    boolean appStatus; //禁用為true 開訪則false
 
     @Override
     public boolean equals(Object o){
