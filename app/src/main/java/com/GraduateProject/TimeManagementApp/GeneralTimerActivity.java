@@ -305,23 +305,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 " 秒");
     }
 
-    public static String getTotalTime(long millis) {
-        if (millis < 0) {
-            throw new IllegalArgumentException("Duration must be greater than zero!");
-        }
 
-        long hours = TimeUnit.MILLISECONDS.toHours(millis);
-        millis -= TimeUnit.HOURS.toMillis(hours);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
-        millis -= TimeUnit.MINUTES.toMillis(minutes);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
-
-        return (hours +
-                " : " +
-                minutes +
-                " : " +
-                seconds );
-    }
 
     public static GeneralTimerActivity getActivity() {
         return generalTimerActivity;
@@ -338,6 +322,23 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     public String getTime(){
         String nowTime= new SimpleDateFormat("HH:mm:ss").format(new Date());
         return nowTime ;
+    }
+    public static String getTotalTime(long millis) {
+        if (millis < 0) {
+            throw new IllegalArgumentException("Duration must be greater than zero!");
+        }
+
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+        return (hours +
+                " : " +
+                minutes +
+                " : " +
+                seconds );
     }
 
 
