@@ -30,12 +30,12 @@ public class LoadingApp extends AppCompatActivity {
 
     private static List<String> customApps = new ArrayList<>();
     private static List<String> defaultApps = new ArrayList<>();
+    private static List<String> realDefaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
-    private static List<String> commuApps = new ArrayList<>();
+    private static final List<String> commuApps = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
-    private static List<AppInfo> defaultAppsList = new ArrayList<>();
+    private static final List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
-    private static List<String> commuAppsList = new ArrayList<>();
     private static int isCustom;
     private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
@@ -46,10 +46,7 @@ public class LoadingApp extends AppCompatActivity {
     private static final String COL_USER = "_USER";
     private static final String COL_CHECK = "_ISCUSTOM";
     private SQLiteDatabase db = null;
-    private Gson gson = new Gson();
-    private Thread loadingThread;
-    private Thread loadingThreadCustom;
-    private Thread loadingThreadDefault;
+    private static final Gson gson = new Gson();
     private boolean exist;
 
 
@@ -58,24 +55,26 @@ public class LoadingApp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loadingapp);
 
-        Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
+        boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
 
         //先列出所有禁用App(新用戶)
-        loadingThread = new Thread() {
+        Thread loadingThread = new Thread() {
 
             @Override
             public void run() {
                 try {
                     super.run();
-                    setDefaultAllowedApps(startLoading());
-                    setAllowedApps(getDefaultAllowedApps());
-                    String inputString= gson.toJson(getDefaultAllowedApps());
+                    defaultApps = startLoading();
+                    realDefaultApps = startLoading();
+                    bannedApps = defaultApps;
+                    customApps = defaultApps;
+                    String inputString = gson.toJson(defaultApps);
                     Log.e("INSERT", inputString);
-                    insertDB(userName, 0, inputString, inputString);
+                    insertDB(userName, inputString, inputString);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    setIsCustom(checkIfCustom(userName));
+                    isCustom = checkIfCustom(userName);
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
                     closeDB();
@@ -85,14 +84,16 @@ public class LoadingApp extends AppCompatActivity {
         };
 
         //先列出所有禁用App(custom)
-        loadingThreadCustom = new Thread() {
+        Thread loadingThreadCustom = new Thread() {
 
             @Override
             public void run() {
                 try {
                     super.run();
-                    setCustomAllowedApps(getCustomApps());
-                    startLoadingCustom(getCustomAllowedApps());
+                    customApps = getCustomApps();
+                    realDefaultApps = startLoadingDefault();
+                    bannedApps = customApps;
+                    startLoadingCustom(customApps);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -106,21 +107,24 @@ public class LoadingApp extends AppCompatActivity {
         };
 
         //先列出所有禁用App(default)
-        loadingThreadDefault = new Thread() {
+        Thread loadingThreadDefault = new Thread() {
 
             @Override
             public void run() {
                 try {
                     super.run();
-                    setDefaultAllowedApps(startLoading());
-                    setAllowedApps(getDefaultAllowedApps()); //只要友直就是預設？
-                    String updateString= gson.toJson(getDefaultAllowedApps());
+                    defaultApps = startLoadingDefault();
+                    realDefaultApps = startLoadingDefault();
+                    customApps = getCustomApps();
+                    bannedApps = defaultApps;
+                    startLoadingCustom(customApps);
+                    String updateString = gson.toJson(getDefaultAllowedApps());
                     Log.e("UPDATE", updateString);
                     defaultAppsUpdateDB(updateString);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    setIsCustom(checkIfCustom(userName));
+                    isCustom = checkIfCustom(userName);
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
                     closeDB();
@@ -132,14 +136,14 @@ public class LoadingApp extends AppCompatActivity {
         if(isFirstRun){
             openDB();
             userName = Build.USER;
-            getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
-            exist = checkIfUserExists(userName);
+            exist = checkIfUserExists();
             Log.e("START", "LOAD APP, exist = "+ exist);
+            getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
         }
     }
 
     private void getApps(Thread thread1, Thread thread2, Thread thread3, boolean exist){
-        if(exist == false) {
+        if(!exist) {
             Log.e("GET", "user not exist, add USER");
             thread1.start();
         }
@@ -155,6 +159,7 @@ public class LoadingApp extends AppCompatActivity {
 
     //取得預設禁用APP
     protected List<String> startLoading(){
+        List<String> defaultApps = new ArrayList<>();
         Log.e("CATEGORY", "start checking");
         String category;
         String communication = "communication";
@@ -188,6 +193,37 @@ public class LoadingApp extends AppCompatActivity {
             defaultAppsList.add(appInfo);
         }
         setAllowedAppInfos(defaultAppsList);
+        customAppsList = defaultAppsList;
+        return defaultApps;
+    }
+
+
+    //取得預設禁用APP
+    protected List<String> startLoadingDefault(){
+        List<String> defaultApps = new ArrayList<>();
+        Log.e("CATEGORY", "start checking");
+        String category;
+        String communication = "communication";
+        PackageManager packageManager = getPackageManager();
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        @SuppressLint("QueryPermissionsNeeded")
+        List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
+
+        for (ResolveInfo info : homeApps) {
+            String query_url = GOOGLE_URL + info.activityInfo.packageName + "&hl=en";
+            category = getCategory(query_url).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+            Log.e("CATEGORY",category);
+            if(banned.contains(category)){
+                Log.e("check",info.activityInfo.packageName + "is added to main");
+                defaultApps.add(info.activityInfo.packageName);
+            }else if(category.equals(communication)){    //社交APP禁用開始操作
+                Log.e("check",info.activityInfo.packageName + "is added to communication");
+                commuApps.add(info.activityInfo.packageName);
+            }
+        }
         return defaultApps;
     }
 
@@ -217,6 +253,7 @@ public class LoadingApp extends AppCompatActivity {
             }
             customAppsList.add(appInfo);
         }
+        setAllowedAppInfos(customAppsList);
     }
 
     private String getCategory(String query_url) {
@@ -243,15 +280,7 @@ public class LoadingApp extends AppCompatActivity {
         db = dbBannedAppsHelper.getWritableDatabase();
     }
 
-    public boolean checkIfUserExists(String user) {
-        /**String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + user + "'";
-        Cursor cursor = db.rawQuery(Query, null);
-        if(cursor.getCount() <= 0){
-            cursor.close();
-            return false;
-        }
-        cursor.close();
-        return true;**/
+    public boolean checkIfUserExists() {
         String count = "SELECT count(*) FROM " + TABLE_APPS;
         Cursor cursor = db.rawQuery(count, null);
         cursor.moveToFirst();
@@ -267,15 +296,17 @@ public class LoadingApp extends AppCompatActivity {
     public int checkIfCustom(String user) {
         String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + user + "'";
         Cursor cursor = db.rawQuery(Query, null);
-        int isCustom = cursor.getColumnIndex(COL_CHECK);
+        cursor.moveToFirst();
+        int isCustom = cursor.getInt(cursor.getColumnIndex(COL_CHECK));
+        setIsCustom(isCustom);
         cursor.close();
         return isCustom;
     }
 
-    private void insertDB(String user ,int isCustom, String defaults, String customs){
+    private void insertDB(String user, String defaults, String customs){
         ContentValues values = new ContentValues();
         values.put("_USER ",user);
-        values.put("_ISCUSTOM",isCustom);
+        values.put("_ISCUSTOM", 0);
         values.put("_DEFAULT", defaults);
         values.put("_CUSTOM", customs);
         db.insert(TABLE_APPS,null,values);
@@ -287,17 +318,23 @@ public class LoadingApp extends AppCompatActivity {
         db.update(TABLE_APPS,values,COL_USER + " = " + "'" + userName + "'", null);
     }
 
-    public void customAppsUpdateDB(String customs){
-        ContentValues values = new ContentValues();
-        values.put("_CUSTOM", customs);
-        db.update(TABLE_APPS,values,COL_USER + " = " + "'" + userName + "'", null);
-    }
-
     private ArrayList<String> getCustomApps(){
         String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + userName + "'";
         Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
         Type type = new TypeToken<ArrayList<String>>() {}.getType();
-        String app = cursor.getString(4);
+        String app = cursor.getString(cursor.getColumnIndex("_CUSTOM"));
+        ArrayList<String>  apps = gson.fromJson(app, type);
+        cursor.close();
+        return apps;
+    }
+
+    private ArrayList<String> getDefaultApps(){
+        String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + userName + "'";
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        String app = cursor.getString(cursor.getColumnIndex("_DEFAULT"));
         ArrayList<String>  apps = gson.fromJson(app, type);
         cursor.close();
         return apps;
@@ -315,30 +352,36 @@ public class LoadingApp extends AppCompatActivity {
     public static void setCustomAllowedApps(List<String> app){
         customApps = app;
     }
-    public static void setAllowedApps(List<String> app){
-        bannedApps = app;
-    }
-    private static void setDefaultAllowedApps(List<String> app){
-        defaultApps = app;
+    public static void setAllowedApps(){
+        if(getIsCustom() == 1){
+            bannedApps = getCustomAllowedApps();
+        }
+        else{
+            bannedApps = getDefaultAllowedApps();
+        }
+
     }
     public static void setAllowedAppInfos(List<AppInfo> appList){
         bannedAppsList = appList;
     }
-    public static void setAllowedCommuApps(List<String> Commuapp){ commuAppsList = Commuapp; }
+    public static void setAllowedCommuApps(List<String> Commuapp){
+    }
 
     //取得
     public static List<String> getCustomAllowedApps(){
         return customApps;
     }
     public static List<String> getAllowedApps(){
+        Log.e("UPDATE DATA CHECK", gson.toJson(bannedApps));
         return bannedApps;
     }
     public static List<String> getDefaultAllowedApps(){
-        return defaultApps;
+        return realDefaultApps;
     }
     public static List<AppInfo> getAllowedAppInfos(){
         return bannedAppsList;
     }
+
     public static int getIsCustom(){
         return isCustom;
     }

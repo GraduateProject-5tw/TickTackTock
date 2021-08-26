@@ -12,7 +12,7 @@ import java.util.List;
 
 public class DBBannedAppHelper extends SQLiteOpenHelper {
     private final static int _DBVersion = 1; //<-- 版本
-    private final static String _DBName = "TimeManagementApp.db";  //<-- db name
+    private final static String _DBName = "BannedApp.db";  //<-- db name
     private final static String _TableNameforBanned = "BannedApps"; //<-- table name
 
     public DBBannedAppHelper(Context context) {

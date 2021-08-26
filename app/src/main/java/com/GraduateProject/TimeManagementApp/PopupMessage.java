@@ -38,10 +38,11 @@ public class PopupMessage extends AppCompatActivity {
         Button btn_no = findViewById(R.id.btn_no);
         Intent intent = getIntent();
         String bannedApp = intent.getStringExtra("FrontApp");
+        stopService(new Intent(this, CheckFrontCommuApp.class));
+        stopService(new Intent(this, CheckFrontApp.class));
 
         //bg.setBackground(wallpaper);
         setFullscreen();
-
         //ActivityManager mActivityManager = (ActivityManager) PopupMessage.this.getSystemService(Context.ACTIVITY_SERVICE);
         //mActivityManager.killBackgroundProcesses(bannedApp);
 
@@ -52,8 +53,8 @@ public class PopupMessage extends AppCompatActivity {
             } else{
             TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
-            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(bannedApp);
-            startActivity(launchIntent);
+            //Intent launchIntent = getPackageManager().getLaunchIntentForPackage(bannedApp);
+            //startActivity(launchIntent);
             finish();
         });
 

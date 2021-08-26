@@ -48,51 +48,65 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
     private TimerTask timerTask ;
     private List<String> apps = new ArrayList<>();
     private ScheduledThreadPoolExecutor executor;
+    private ScheduledThreadPoolExecutor executor2;
     private String frontApp;
+    private String newfrontApp;
     public static final String NOTIFICATION_CHANNEL_ID = "10001" ;
     private final static String default_notification_channel_id = "default" ;
     private NotificationManager mNotificationManager ;
     private NotificationCompat.Builder mBuilder;
     private boolean normal = true;
-
+    private static Vibrator v;
+    private int id;
 
     private Thread DetectFrontApp = new Thread(new Runnable() {
         @Override
         public void run() {
-            frontApp = getForegroundTask().replaceAll("\\s+","");
+            frontApp = getForegroundTask().replaceAll("\\s+", "");
 
-            if(apps.contains(frontApp)){
-                Log.e("check", "Detect App Press");
-                executor.shutdown();
-                createNotification();
-                /**Intent intent = new Intent("com.GraduateProject.TimeManagementApp.FOO");
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("FrontApp", frontApp);
-                startActivity(intent);
-                /**try {
+            if (normal) {
+                if (apps.contains(frontApp)) {
                     createNotification();
-                    executor.wait(60000);
-                    executor.notify();
-                    //vibration();
-                    String newFront = getForegroundTask().replaceAll("\\s+","");
-                    Log.e("check", "new front app is :"+ newFront);
-                    if(frontApp == newFront){
-                        Log.e("check","still in app");
-                        //GeneralTimerActivity.getActivity().finishCounting();
-                        sendMessage();
+                    newfrontApp = frontApp;
+                    Log.e("check", "Detect App Press :" + newfrontApp);
+                    normal = false;
+                    try {
+                        Thread.sleep(60 * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                    else{
-                        executor = new ScheduledThreadPoolExecutor(1);
-                        executor.scheduleAtFixedRate(DetectFrontApp, 0, 1000, TimeUnit.MILLISECONDS);
+                }
+            } else {
+                if (newfrontApp.contains(frontApp)) {
+                    Log.e("check", "Still in App");
+                    v.cancel();
+                    executor.shutdown();
+                    stopSelf();
+                } else if (frontApp == "com.example.myapplicationCategory" && !normal) {
+                    Log.e("check", "My own app");
+                    v.cancel();
+                    executor.shutdown();
+                    stopSelf();
+                }
+                else if (apps.contains(frontApp)) {
+                    createNotification();
+                    newfrontApp = frontApp;
+                    Log.e("check", "Detect App Press 2 :" + newfrontApp);
+                    normal = false;
+                    try {
+                        Thread.sleep(60 * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }**/
+                }
+                else{
+                    Log.e("check", "not banned");
+                }
             }
-
-            //else if()
         }
     });
+    private boolean restartservice = false;
+
 
     @Override
     public IBinder onBind (Intent arg0) {  //將app綁定server服務
@@ -150,7 +164,6 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
             }
             currentApp = tasks.get(0).processName;
         }
-        Log.e("adapter", "Current App in foreground is: " + currentApp + "Category is:"  + getCategory("https://play.google.com/store/apps/details?id="+currentApp));
         return currentApp;
     }
 
@@ -184,22 +197,19 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
                 this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentTitle( "讀書期間APP禁用" ) ;
-        mBuilder.setContentText( "通知消失後前次紀錄將作廢，請點選通知進行選擇。" ) ;
+        mBuilder.setContentText( "一分鐘後讀書計時將作廢，請點選此通知進行其他動作。" ) ;
         mBuilder.setContentIntent(notifyPendingIntent);
         mBuilder.setSmallIcon(R.drawable.ic_lock) ;
         mBuilder.setAutoCancel(false);
         mBuilder.setColor(Color.RED) ;
-        mBuilder.setTimeoutAfter(60000);
-        /**if(GeneralTimerActivity.getIsCounting()){
-            mBuilder.addAction(R.drawable.ic_lock_open, "繼續使用", other);
-            mBuilder.addAction(R.drawable.ic_lock, "放棄使用", general);
-        } else{
-            mBuilder.addAction(R.drawable.ic_lock_open, "繼續使用", other);
-            mBuilder.addAction(R.drawable.ic_lock, "放棄使用", tomato);
-        }**/
+        mBuilder.setTimeoutAfter(15000);
         mBuilder.setCategory(NotificationCompat.CATEGORY_CALL);
         mBuilder.setPriority(NotificationCompat.PRIORITY_HIGH);
         mBuilder.setFullScreenIntent(fullScreenPendingIntent, true);
+
+        v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        long[] pattern = { 150, 150, 350, 350};
+        mBuilder.setVibrate(pattern);
 
         if (android.os.Build.VERSION. SDK_INT >= android.os.Build.VERSION_CODES. O ) {
             int importance = NotificationManager.IMPORTANCE_HIGH ;
@@ -211,7 +221,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
 
         assert mNotificationManager != null;
 
-        int id = (int)System.currentTimeMillis ();
+        id = (int)System.currentTimeMillis ();
         Notification notification = mBuilder.build();
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         mNotificationManager.notify(id, notification);
@@ -219,18 +229,11 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
 
         new Handler(Looper.getMainLooper()).postDelayed (() -> {
             mNotificationManager.cancel(id);
-        }, 60000);
+        }, 15000);
     }
 
-    public Vibrator vibration() {
-
-        Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-
-        long[] pattern = { 1000, 1000, 2000, 2000};
-
-        v.vibrate(pattern, 1);
-        return v;
-
+    public static void cancelVibration(){
+        v.cancel();
     }
 
     // Send an Intent with an action named "my-event".

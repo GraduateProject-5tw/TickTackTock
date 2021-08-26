@@ -78,7 +78,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         tomatoClockActivity = this;
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
-        showDialog();
+        showDialogStart();
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
         startBtn = findViewById(R.id.tstart_btn);
         stopBtn = findViewById(R.id.tstop_btn);     //可用K停止
@@ -359,25 +359,10 @@ public class TomatoClockActivity extends AppCompatActivity {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onBackPressed() {
         showDialog();
-        AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this); //創建訊息方塊
-        alert.setTitle("離開");
-        alert.setMessage("確定要離開?");
-        //按"是",則退出應用程式
-        alert.setPositiveButton("是", (dialog, i) -> {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            startActivity(intent);
-        });
-
-        //按"否",則不執行任何操作
-        alert.setNegativeButton("否", (dialog, i) -> { });
-        alert.show();//顯示訊息視窗
-
-
     }
 
     @Override
@@ -385,14 +370,15 @@ public class TomatoClockActivity extends AppCompatActivity {
         super.onPause();
         if(isCounting){
             startService(new Intent(TomatoClockActivity.this, CheckFrontApp.class));
+            startService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Intent myService = new Intent(TomatoClockActivity.this, CheckFrontApp.class);
-        stopService(myService);
+        stopService(new Intent(this, CheckFrontApp.class));
+        stopService(new Intent(this, CheckFrontCommuApp.class));
     }
 
     public static TomatoClockActivity getTomatoClockActivity(){
@@ -448,40 +434,127 @@ public class TomatoClockActivity extends AppCompatActivity {
         recordTime=0;
     }
 
-    public void showDialog()
-    {
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void showDialog() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-
             @SuppressWarnings("WrongConstant")
             UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
             long time = System.currentTimeMillis();
             List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
                     time - 1000 * 1000, time);
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
+            alert.setTitle("離開");
+            alert.setMessage("確定要離開?");
+            alert.setCancelable(false);
+            //按"是",則退出應用程式
+            alert.setPositiveButton("是", (dialog, i) -> {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_HOME);
+                startActivity(intent);
+            });
+            //按"否",則不執行任何操作
+            alert.setNegativeButton("否", (dialog, i) -> {
+            });
+
+            AlertDialog alert2 = new AlertDialog.Builder(this)
+                    .setTitle("Usage Access")
+                    .setCancelable(false)
+                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
+                    .setPositiveButton("設定", (dialog, which) -> {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        alert.show();//顯示訊息視窗
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .create();
+
             if (appList.size() == 0) {
+
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setTitle("Usage Access")
+                        .setCancelable(false)
                         .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                            public void onClick(DialogInterface dialog, int which) {
-                                // continue with delete
-                                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                                // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            }
-                        })
-                        .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                                dialog.dismiss();
+                        .setPositiveButton("設定", (dialog, which) -> {
+                            // continue with delete
+                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                                alert2.show();//顯示訊息視窗
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .create();
 
-                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
                 alertDialog.show();
+            }
+            else if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                alert2.show();//顯示訊息視窗
+            } else{
+                alert.show();
+            }
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void showDialogStart() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            @SuppressWarnings("WrongConstant")
+            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+            long time = System.currentTimeMillis();
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                    time - 1000 * 1000, time);
+
+            AlertDialog alert2 = new AlertDialog.Builder(this)
+                    .setTitle("Usage Access")
+                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
+                    .setPositiveButton("設定", (dialog, which) -> {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("放棄", (dialog, which) -> {
+                        // do nothing
+                        dialog.dismiss();
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .create();
+
+            if (appList.size() == 0) {
+
+                AlertDialog alertDialog = new AlertDialog.Builder(this)
+                        .setTitle("Usage Access")
+                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
+                        .setPositiveButton("設定", (dialog, which) -> {
+                            // continue with delete
+                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                                alert2.show();//顯示訊息視窗
+                            }
+                        })
+                        .setNegativeButton("放棄", (dialog, which) -> {
+                            // do nothing
+                            dialog.dismiss();
+                            if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                                alert2.show();//顯示訊息視窗
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .create();
+
+                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+                alertDialog.show();
+            }
+            else if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                alert2.show();//顯示訊息視窗
             }
         }
     }
