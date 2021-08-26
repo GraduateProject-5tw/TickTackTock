@@ -85,6 +85,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         else if(password1.equals(password2)){
                             Toast.makeText(getApplication(),"註冊成功",Toast.LENGTH_SHORT).show();
                             String password = md5(password1);
+                            Intent intent2 = new Intent(this, LoginActivity.class);
+                            startActivity(intent2);
+
                         }
                         else{
                             Toast.makeText(getApplication(),"密碼有錯",Toast.LENGTH_SHORT).show();

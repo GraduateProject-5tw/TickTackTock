@@ -69,6 +69,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         }
                         else{
                             Toast.makeText(getApplicationContext(), "登入成功", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, GeneralTimerActivity.class));
+
 
                         }
                     }

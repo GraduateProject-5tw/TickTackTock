@@ -10,7 +10,7 @@
         android:id="@+id/rl_register_activity_top"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="@color/teal_200"
+        android:background="@color/purple_200"
         >
         <ImageView
             android:id="@+id/iv_register_activity_back"
@@ -63,6 +63,7 @@
                 android:hint="請输入信箱"
                 android:gravity="center_vertical"
                 android:layout_marginLeft="10dp"
+                android:inputType="textEmailAddress"
                 />
         </LinearLayout>
         <!-- 第二个文本编辑框  输入密码 -->
