@@ -15,8 +15,14 @@
         android:label="activity_time_blocker"
         tools:layout="@layout/activity_time_blocker" />
     <fragment
-        android:id="@+id/toDoListActivity"
-        android:name="com.GraduateProject.TimeManagementApp.ToDoListActivity"
+        android:id="@+id/loginActivity"
+        android:name="com.GraduateProject.TimeManagementApp.LoginActivity"
+        android:label="activity_login"
+        tools:layout="@layout/activity_login" />
+    <fragment
+        android:id="@+id/todayToDoListActivity"
+        android:name="com.GraduateProject.TimeManagementApp.TodayToDoListActivity"
         android:label="activity_todolist"
         tools:layout="@layout/activity_todolist" />
+
 </navigation>

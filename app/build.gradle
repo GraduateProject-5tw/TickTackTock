@@ -52,4 +52,5 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.facebook.stetho:stetho:1.6.0'
 
+
 }

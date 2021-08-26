@@ -98,7 +98,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         //to make the Navigation drawer icon always appear on the action bar
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
+                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,6 +111,10 @@ public class TomatoClockActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
                 switch (item.getItemId()) {
+                    //lunch login activity
+                    case R.id.nav_login:
+                        startActivity(new Intent(TomatoClockActivity.this, LoginActivity.class));
+                        break;
                     // launch general timer
                     case R.id.nav_home:
                         break;
