@@ -170,14 +170,14 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(this, 0,
                 fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent notifyIntent = new Intent(this, PopupMessage.class);
-        notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        PendingIntent notifyPendingIntent = PendingIntent.getActivity(
-                this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //Intent notifyIntent = new Intent(this, PopupMessage.class);
+        //notifyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //PendingIntent notifyPendingIntent = PendingIntent.getActivity(
+        //        this, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mBuilder.setContentTitle( "讀書期間此類通訊APP只允許使用10分鐘" ) ;
         mBuilder.setContentText( "通知消失後前次紀錄將作廢，請點選通知進行選擇。" ) ;
-        mBuilder.setContentIntent(notifyPendingIntent);
+        //mBuilder.setContentIntent(notifyPendingIntent);
         mBuilder.setSmallIcon(R.drawable.ic_lock) ;
         mBuilder.setAutoCancel(false);
         mBuilder.setColor(Color.RED) ;

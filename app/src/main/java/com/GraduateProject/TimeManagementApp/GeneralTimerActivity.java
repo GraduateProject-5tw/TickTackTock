@@ -1,29 +1,22 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
-import android.content.BroadcastReceiver;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,20 +24,16 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleObserver;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import com.facebook.stetho.Stetho;
 import com.google.android.material.navigation.NavigationView;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import android.database.sqlite.SQLiteDatabase;
 
 
 public class GeneralTimerActivity extends AppCompatActivity implements LifecycleObserver {
@@ -59,13 +48,14 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private int Preset = 0; //讀書科目
     private String GeneralStudyCourse;//記錄的讀書科目
     private AppBarConfiguration mAppBarConfiguration;
-    private Calendar calendar;
     private String date;
     private String startTime;
     private String stopTime;
     private String totalTime;
-    private ActionBarDrawerToggle actionBarDrawerToggle;
     DBTimeBlockHelper DBHelper;
+
+    public GeneralTimerActivity() {
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -79,7 +69,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         generalTimerActivity = this;
         openDB();
-        Stetho.initializeWithDefaults(this);
         showDialogStart();
 
         //目錄相關
@@ -87,50 +76,41 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Toolbar toolbar = findViewById(R.id.mytoolbar);
         setSupportActionBar(toolbar);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.nav_open, R.string.nav_close);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.nav_open, R.string.nav_close);
         drawer.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         //to make the Navigation drawer icon always appear on the action bar
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawer.openDrawer(navigationView);
-            }
-        });
-        //toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) drawer);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+        toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
+        navigationView.setNavigationItemSelectedListener(item -> {
 
-                switch (item.getItemId()) {
-                    //lunch login activity
-                    case R.id.nav_login:
-                        startActivity(new Intent(GeneralTimerActivity.this, LoginActivity.class));
-                        break;
-                    // launch general timer
-                    case R.id.nav_home:
-                        break;
-                        // launch to do list
-                    case R.id.todolist:
-                        Log.e("Menu", "to do list");
-                        startActivity(new Intent(GeneralTimerActivity.this, TodayToDoListActivity.class));
-                        break;
-                        // launch time block
-                    case R.id.studytime:
-                        startActivity(new Intent(GeneralTimerActivity.this, TimeBlockerActivity.class));
-                        break;
-                        // launch settings activity
-                    case R.id.setting:
-                        startActivity(new Intent(GeneralTimerActivity.this, SettingsActivity.class));
-                        break;
-                    }
-
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
+            switch (item.getItemId()) {
+                //lunch login activity
+                case R.id.nav_login:
+                    startActivity(new Intent(GeneralTimerActivity.this, LoginActivity.class));
+                    break;
+                // launch general timer
+                case R.id.nav_home:
+                    break;
+                // launch to do list
+                case R.id.todolist:
+                    Log.e("Menu", "to do list");
+                    startActivity(new Intent(GeneralTimerActivity.this, TodayToDoListActivity.class));
+                    break;
+                // launch time block
+                case R.id.studytime:
+                    startActivity(new Intent(GeneralTimerActivity.this, TimeBlockerActivity.class));
+                    break;
+                // launch settings activity
+                case R.id.setting:
+                    startActivity(new Intent(GeneralTimerActivity.this, SettingsActivity.class));
+                    break;
             }
+
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
         });
         navigationView.setCheckedItem(R.id.nav_home);
 
@@ -253,32 +233,22 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     public void onPause() {
         super.onPause();
         if (isCounting) {
-            startService(new Intent(GeneralTimerActivity.this, CheckFrontApp.class));
-            startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
-            // Register mMessageReceiver to receive messages.
-            LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                    new IntentFilter("my-event"));
-            LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                    new IntentFilter("my-commu-event"));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(new Intent(this, CheckFrontApp.class));
+            } else {
+                startService(new Intent(this, CheckFrontApp.class));
+            }
+            //startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Register mMessageReceiver to receive messages.
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                new IntentFilter("my-event"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver,
-                new IntentFilter("my-commu-event"));
+        stopService(new Intent(this, CheckFrontApp.class));
+        stopService(new Intent(this, DialogShow.class));
+        stopService(new Intent(this, CheckFrontCommuApp.class));
     }
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            finishCounting();
-        }
-    };
 
     public void finishCounting(){
         Log.e("Finish", "finish counting");
@@ -373,6 +343,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
             AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
             alert.setTitle("離開");
+            alert.setCancelable(false);
             alert.setMessage("確定要離開?");
             //按"是",則退出應用程式
             alert.setPositiveButton("是", (dialog, i) -> {
@@ -387,22 +358,13 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
             AlertDialog alert2 = new AlertDialog.Builder(this)
                     .setTitle("Usage Access")
+                    .setCancelable(false)
                     .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
-                    .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            alert.show();//顯示訊息視窗
-                        }
-                    })
-                    .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // do nothing
-                            dialog.dismiss();
-                            alert.show();
-                        }
+                    .setPositiveButton("設定", (dialog, which) -> {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        alert.show();//顯示訊息視窗
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .create();
@@ -411,28 +373,16 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setTitle("Usage Access")
+                        .setCancelable(false)
                         .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                            @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.M)
-                            public void onClick(DialogInterface dialog, int which) {
-                                // continue with delete
-                                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                                // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                                    alert2.show();//顯示訊息視窗
-                                }
-                            }
-                        })
-                        .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.M)
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                                dialog.dismiss();
-                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                                    alert2.show();//顯示訊息視窗
-                                }
+                        .setPositiveButton("設定", (dialog, which) -> {
+                            // continue with delete
+                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                                alert2.show();//顯示訊息視窗
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
@@ -462,19 +412,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             AlertDialog alert2 = new AlertDialog.Builder(this)
                     .setTitle("Usage Access")
                     .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
-                    .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                        @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                        }
-                    })
-                    .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // do nothing
-                            dialog.dismiss();
-                        }
+                    .setCancelable(false)
+                    .setPositiveButton("設定", (dialog, which) -> {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
                     })
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .create();
@@ -484,27 +426,15 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setTitle("Usage Access")
                         .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setPositiveButton("設定", new DialogInterface.OnClickListener() {
-                            @androidx.annotation.RequiresApi(api = Build.VERSION_CODES.M)
-                            public void onClick(DialogInterface dialog, int which) {
-                                // continue with delete
-                                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                                // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                                    alert2.show();//顯示訊息視窗
-                                }
-                            }
-                        })
-                        .setNegativeButton("放棄", new DialogInterface.OnClickListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.M)
-                            public void onClick(DialogInterface dialog, int which) {
-                                // do nothing
-                                dialog.dismiss();
-                                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                                    alert2.show();//顯示訊息視窗
-                                }
+                        .setCancelable(false)
+                        .setPositiveButton("設定", (dialog, which) -> {
+                            // continue with delete
+                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                                alert2.show();//顯示訊息視窗
                             }
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)

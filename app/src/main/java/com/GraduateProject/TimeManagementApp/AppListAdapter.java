@@ -37,7 +37,6 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         //禁用為true 開訪則false
         if(appList.get(i).appStatus) {
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
-            Log.e("EDIT", "add banned : " + appList.get(i).packageName);
         }
         else
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock_open);

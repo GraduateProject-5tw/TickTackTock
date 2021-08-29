@@ -1,12 +1,10 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.icu.util.Calendar;
@@ -17,14 +15,11 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +36,7 @@ import com.google.android.material.navigation.NavigationView;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class TomatoClockActivity extends AppCompatActivity {
@@ -85,6 +81,7 @@ public class TomatoClockActivity extends AppCompatActivity {
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         timeButton = findViewById(R.id.clock); //clock image
+        openDB();
 
 
         //目錄相關
@@ -96,46 +93,38 @@ public class TomatoClockActivity extends AppCompatActivity {
         drawer.addDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         //to make the Navigation drawer icon always appear on the action bar
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setDrawerLayout(drawer).build();
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                drawer.openDrawer(navigationView);
-            }
-        });
-        //toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) drawer);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+        toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
 
-                switch (item.getItemId()) {
-                    //lunch login activity
-                    case R.id.nav_login:
-                        startActivity(new Intent(TomatoClockActivity.this, LoginActivity.class));
-                        break;
-                    // launch general timer
-                    case R.id.nav_home:
-                        break;
-                    // launch to do list
-                    case R.id.todolist:
-                        Log.e("Menu", "to do list");
-                        startActivity(new Intent(TomatoClockActivity.this, TodayToDoListActivity.class));
-                        break;
-                    // launch time block
-                    case R.id.studytime:
-                        startActivity(new Intent(TomatoClockActivity.this, TimeBlockerActivity.class));
-                        break;
-                    // launch settings activity
-                    case R.id.setting:
-                        startActivity(new Intent(TomatoClockActivity.this, SettingsActivity.class));
-                        break;
-                }
+        navigationView.setNavigationItemSelectedListener(item -> {
 
-                drawer.closeDrawer(GravityCompat.START);
-                return true;
+            switch (item.getItemId()) {
+                //lunch login activity
+                case R.id.nav_login:
+                    startActivity(new Intent(TomatoClockActivity.this, LoginActivity.class));
+                    break;
+                // launch general timer
+                case R.id.nav_home:
+                    break;
+                // launch to do list
+                case R.id.todolist:
+                    Log.e("Menu", "to do list");
+                    startActivity(new Intent(TomatoClockActivity.this, TodayToDoListActivity.class));
+                    break;
+                // launch time block
+                case R.id.studytime:
+                    startActivity(new Intent(TomatoClockActivity.this, TimeBlockerActivity.class));
+                    break;
+                // launch settings activity
+                case R.id.setting:
+                    startActivity(new Intent(TomatoClockActivity.this, SettingsActivity.class));
+                    break;
             }
+
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
         });
         navigationView.setCheckedItem(R.id.nav_home);
 
@@ -373,7 +362,11 @@ public class TomatoClockActivity extends AppCompatActivity {
     public void onPause(){
         super.onPause();
         if(isCounting){
-            startService(new Intent(TomatoClockActivity.this, CheckFrontApp.class));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(new Intent(this, CheckFrontApp.class));
+            } else {
+                startService(new Intent(this, CheckFrontApp.class));
+            }
             startService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
         }
     }
@@ -382,6 +375,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         stopService(new Intent(this, CheckFrontApp.class));
+        stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
     }
 

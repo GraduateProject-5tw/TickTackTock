@@ -27,6 +27,7 @@ public class DBBannedAppHelper extends SQLiteOpenHelper {
                 "_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "_USER VARCHAR(255) NOT NULL, " +
                 "_ISCUSTOM INTEGER NOT NULL, " +
+                "_ALL VARCHAR(2048) NOT NULL, " +
                 "_DEFAULT VARCHAR(1024) NOT NULL, " +
                 "_CUSTOM VARCHAR(1024) NOT NULL"+
                 ");";

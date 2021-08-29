@@ -10,17 +10,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +28,7 @@ public class LoadingApp extends AppCompatActivity {
     private static List<String> defaultApps = new ArrayList<>();
     private static List<String> realDefaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
+    private static final List<String> allApps = new ArrayList<>();
     private static final List<String> commuApps = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
     private static final List<AppInfo> defaultAppsList = new ArrayList<>();
@@ -47,7 +44,6 @@ public class LoadingApp extends AppCompatActivity {
     private static final String COL_CHECK = "_ISCUSTOM";
     private SQLiteDatabase db = null;
     private static final Gson gson = new Gson();
-    private boolean exist;
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -65,12 +61,14 @@ public class LoadingApp extends AppCompatActivity {
                 try {
                     super.run();
                     defaultApps = startLoading();
-                    realDefaultApps = startLoading();
                     bannedApps = defaultApps;
                     customApps = defaultApps;
-                    String inputString = gson.toJson(defaultApps);
-                    Log.e("INSERT", inputString);
-                    insertDB(userName, inputString, inputString);
+                    String inputString1 = gson.toJson(defaultApps);
+                    String inputString2 = gson.toJson(allApps);
+                    Log.e("INSERT", inputString1);
+                    Log.e("INSERT", inputString2);
+                    insertDB(userName, inputString2, inputString1, inputString1);
+                    realDefaultApps = getDefaultApps();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -91,7 +89,12 @@ public class LoadingApp extends AppCompatActivity {
                 try {
                     super.run();
                     customApps = getCustomApps();
-                    realDefaultApps = startLoadingDefault();
+                    if(checkNewApps()){
+                        realDefaultApps = startLoadingDefault();
+                    }
+                    else{
+                        realDefaultApps = getDefaultApps();
+                    }
                     bannedApps = customApps;
                     startLoadingCustom(customApps);
                 } catch (Exception e) {
@@ -113,14 +116,20 @@ public class LoadingApp extends AppCompatActivity {
             public void run() {
                 try {
                     super.run();
-                    defaultApps = startLoadingDefault();
-                    realDefaultApps = startLoadingDefault();
+                    if(checkNewApps()){
+                        realDefaultApps = startLoadingDefault();
+                        defaultApps = startLoadingDefault();
+                        String updateString = gson.toJson(getDefaultAllowedApps());
+                        Log.e("UPDATE", updateString);
+                        defaultAppsUpdateDB(updateString);
+                    }
+                    else{
+                        defaultApps = getDefaultApps();
+                        realDefaultApps = getDefaultApps();
+                    }
                     customApps = getCustomApps();
                     bannedApps = defaultApps;
                     startLoadingCustom(customApps);
-                    String updateString = gson.toJson(getDefaultAllowedApps());
-                    Log.e("UPDATE", updateString);
-                    defaultAppsUpdateDB(updateString);
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
@@ -136,7 +145,7 @@ public class LoadingApp extends AppCompatActivity {
         if(isFirstRun){
             openDB();
             userName = Build.USER;
-            exist = checkIfUserExists();
+            boolean exist = checkIfUserExists();
             Log.e("START", "LOAD APP, exist = "+ exist);
             getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
         }
@@ -156,6 +165,30 @@ public class LoadingApp extends AppCompatActivity {
             thread3.start();
         }
     }
+
+
+    //取得預設禁用APP
+    protected boolean checkNewApps(){
+        Log.e("NEW", "start checking");
+        PackageManager packageManager = getPackageManager();
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        @SuppressLint("QueryPermissionsNeeded")
+        List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
+
+        List<String> databaseDefaults = getAllApps();
+        if(homeApps.size() != databaseDefaults.size()){
+            Log.e("NEW", "new apps found? true "+homeApps.size()+" database "+databaseDefaults.size());
+            return true;
+        }
+        else{
+            Log.e("NEW", "new apps found? false");
+            return false;
+        }
+    }
+
 
     //取得預設禁用APP
     protected List<String> startLoading(){
@@ -190,6 +223,7 @@ public class LoadingApp extends AppCompatActivity {
             }else{
                 appInfo.setAppStatus(false);
             }
+            allApps.add(appInfo.getPackageName());
             defaultAppsList.add(appInfo);
         }
         setAllowedAppInfos(defaultAppsList);
@@ -201,7 +235,7 @@ public class LoadingApp extends AppCompatActivity {
     //取得預設禁用APP
     protected List<String> startLoadingDefault(){
         List<String> defaultApps = new ArrayList<>();
-        Log.e("CATEGORY", "start checking");
+        Log.e("CATEGORY DEFAULT", "start checking");
         String category;
         String communication = "communication";
         PackageManager packageManager = getPackageManager();
@@ -230,7 +264,7 @@ public class LoadingApp extends AppCompatActivity {
 
     //取得自訂禁用APP
     protected void startLoadingCustom(List<String> customs){
-        Log.e("CATEGORY", "change status");
+        Log.e("CATEGORY CUSTOM", "change status");
         PackageManager packageManager = getPackageManager();
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
@@ -255,6 +289,7 @@ public class LoadingApp extends AppCompatActivity {
         }
         setAllowedAppInfos(customAppsList);
     }
+
 
     private String getCategory(String query_url) {
 
@@ -303,10 +338,11 @@ public class LoadingApp extends AppCompatActivity {
         return isCustom;
     }
 
-    private void insertDB(String user, String defaults, String customs){
+    private void insertDB(String user, String all, String defaults, String customs){
         ContentValues values = new ContentValues();
         values.put("_USER ",user);
         values.put("_ISCUSTOM", 0);
+        values.put("_ALL", all);
         values.put("_DEFAULT", defaults);
         values.put("_CUSTOM", customs);
         db.insert(TABLE_APPS,null,values);
@@ -316,6 +352,17 @@ public class LoadingApp extends AppCompatActivity {
         ContentValues values = new ContentValues();
         values.put("_DEFAULT", defaults);
         db.update(TABLE_APPS,values,COL_USER + " = " + "'" + userName + "'", null);
+    }
+
+    private ArrayList<String> getAllApps(){
+        String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + userName + "'";
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        String app = cursor.getString(cursor.getColumnIndex("_ALL"));
+        ArrayList<String>  apps = gson.fromJson(app, type);
+        cursor.close();
+        return apps;
     }
 
     private ArrayList<String> getCustomApps(){
