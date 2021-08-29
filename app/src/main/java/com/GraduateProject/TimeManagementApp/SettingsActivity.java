@@ -37,11 +37,11 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.settings_activity);
         openDB();
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.settings_toolbar);
+        Toolbar myToolbar = findViewById(R.id.settings_toolbar);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("設定");
+        getSupportActionBar().setTitle("設 定");
 
         // load settings fragment
         getSupportFragmentManager().beginTransaction().replace(R.id.settings_container, new MainPreferenceFragment()).commit();
