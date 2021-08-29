@@ -27,7 +27,7 @@
             android:id="@+id/mytoolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:title="一 般 模 式"
+            app:title="一般模式"
             app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
             style="@style/Widget.MaterialComponents.Toolbar.Primary"
             app:titleTextAppearance="@style/Toolbar.TitleText">

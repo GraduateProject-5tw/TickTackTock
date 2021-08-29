@@ -156,7 +156,6 @@ public class TomatoClockActivity extends AppCompatActivity {
                 StoptimeConfirm.setTitle("休息時間設置:(分鐘)");
                 StoptimeConfirm.setSingleChoiceItems(resttime, -1, (dialog1, which1) -> {
                     // TODO Auto-generated method stub
-                    Toast.makeText(TomatoClockActivity.this, resttime[which1], Toast.LENGTH_SHORT).show();
                     int j = Integer.parseInt(resttime[which1]);
                     stopInMillis = j*60000;
                 });
@@ -379,6 +378,15 @@ public class TomatoClockActivity extends AppCompatActivity {
         stopService(new Intent(this, CheckFrontCommuApp.class));
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        if(!isCounting){
+            startBtn.setVisibility(View.GONE);
+            Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
+        }
+    }
+
     public static TomatoClockActivity getTomatoClockActivity(){
         return tomatoClockActivity;
     }
@@ -558,13 +566,6 @@ public class TomatoClockActivity extends AppCompatActivity {
     }
 
     //目錄相關操作
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.nav_menuitem, menu);
-        return true;
-    }
-
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment2);
