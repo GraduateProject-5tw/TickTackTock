@@ -36,26 +36,7 @@ public class DialogShow extends Service {    //server是一個在背景執行的
 
     private String TAG = "Timers" ;
     private List<String> apps = new ArrayList<>();
-    private ScheduledThreadPoolExecutor executor;
     WindowBanned windowBanned;
-
-    private final Thread DetectFrontApp = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            String frontApp = getForegroundTask().replaceAll("\\s+", "");
-            if (!apps.contains(frontApp)) {
-                Log.e("check", "Leave app :" + frontApp);
-                windowBanned.close();
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(new Intent(DialogShow.this, CheckFrontApp.class));
-                } else {
-                    startService(new Intent(DialogShow.this, CheckFrontApp.class));
-                }
-                executor.shutdown();
-                stopSelf();
-            }
-        }
-    });
 
     @Override
     public IBinder onBind (Intent arg0) {  //將app綁定server服務
@@ -74,12 +55,8 @@ public class DialogShow extends Service {    //server是一個在背景執行的
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
-        windowBanned = new WindowBanned(this);
+        windowBanned = new WindowBanned(getApplicationContext());
         windowBanned.open();
-        apps = LoadingApp.getAllowedApps();
-        long period = 1000;
-        executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(DetectFrontApp, 0, period, TimeUnit.MILLISECONDS);
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }
@@ -88,7 +65,6 @@ public class DialogShow extends Service {    //server是一個在背景執行的
     public void onDestroy () {
         Log. e ( TAG , "onDestroy" ) ;
         super.onDestroy() ;
-        executor.shutdown();
         this.stopSelf();
     }
 

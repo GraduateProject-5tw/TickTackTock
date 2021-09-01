@@ -53,6 +53,18 @@ public class AppsListActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Log.e("Update from adapter", gson.toJson(AppListAdapter.getEditedApps()));
+        customAppsUpdateDB(gson.toJson(AppListAdapter.getEditedApps()));
+        LoadingApp.setCustomAllowedApps(AppListAdapter.getEditedApps());
+        LoadingApp.setAllowedAppInfos(AppListAdapter.getEditedAppInfos());
+        closeDB();
+        finishAndRemoveTask();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             Log.e("Update from adapter", gson.toJson(AppListAdapter.getEditedApps()));

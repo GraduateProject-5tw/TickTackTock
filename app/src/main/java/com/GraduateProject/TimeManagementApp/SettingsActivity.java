@@ -54,22 +54,10 @@ public class SettingsActivity extends AppCompatActivity {
         super.onBackPressed();
         Log.e("UPDATE", Integer.toString(LoadingApp.getIsCustom()));
         customAppsUpdateDB(LoadingApp.getIsCustom());
-        AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
-        alert.setTitle("離開");
-        alert.setMessage("尚未儲存變更，確定要離開設定?");
-        alert.setCancelable(false);
-        //按"是",則退出應用程式
-        alert.setPositiveButton("立即儲存", (dialog, i) -> {
-            Intent intent = new Intent(SettingsActivity.this, GeneralTimerActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            finishAndRemoveTask();
-        });
-        //按"否",則不執行任何操作
-        alert.setNegativeButton("否", (dialog, i) -> {
-        });
-
-        alert.show();
+        Intent intent = new Intent(SettingsActivity.this, GeneralTimerActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finishAndRemoveTask();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
