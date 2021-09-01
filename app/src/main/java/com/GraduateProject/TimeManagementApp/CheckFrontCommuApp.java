@@ -31,7 +31,7 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
     private List<String> commuapps = new ArrayList<>();
     private ScheduledThreadPoolExecutor executor;
     private int i=0;
-    private CountDownTimer CommuTimer = new CountDownTimer(600000, 1000) {
+    private CountDownTimer CommuTimer = new CountDownTimer(600000, 10000) {
         @Override
         public void onTick(long millisUntilFinished) {
             Log.e("Countdown", "開始倒數計時10分鐘");
