@@ -20,23 +20,41 @@ public class WindowBannedCommu {
     private final View mView;
     private final WindowManager.LayoutParams mParams;
     private final WindowManager mWindowManager;
-    private final int layoutType;
+    //private final int layoutType;
 
     public WindowBannedCommu(Context context){
         this.context=context;
 
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            layoutType = WindowManager.LayoutParams.TYPE_PHONE;
-        } else {
-            layoutType = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.e("VERSION", "ABOVE 26");
+            // set the layout parameters of the window
+            mParams = new WindowManager.LayoutParams(
+                    // Shrink the window to wrap the content rather
+                    // than filling the screen
+                    WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
+                    // Display it on top of other application windows
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    // Don't let it grab the input focus
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    // Make the underlying application window visible
+                    // through any transparent parts
+                    PixelFormat.TRANSLUCENT);
+
         }
-        mParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                layoutType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-        );
+        else{
+            Log.e("VERSION", "BELOW 26");
+            mParams = new WindowManager.LayoutParams(
+                    // Shrink the window to wrap the content rather
+                    // than filling the screen
+                    WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
+                    // Display it on top of other application windows-
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                    // Don't let it grab the input focus
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    // Make the underlying application window visible
+                    // through any transparent parts
+                    PixelFormat.TRANSLUCENT);
+        }
 
 
         // getting a LayoutInflater
