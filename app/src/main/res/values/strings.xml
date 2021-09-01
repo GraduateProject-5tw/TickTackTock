@@ -9,6 +9,7 @@
     <string name="no">No</string>
     <string name="yes">Yes</string>
     <string name="confirmTitle">確 認</string>
+    <string name="menu_login">登入</string>
     <string name="menu_home">計時器</string>
     <string name="menu_todolist">To Do List</string>
     <string name="menu_readtime">讀書時間</string>

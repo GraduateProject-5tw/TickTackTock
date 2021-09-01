@@ -5,64 +5,38 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
-import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Vibrator;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class CheckFrontCommuApp extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
+public class DialogShow extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
-    private String TAG = "Timers社交" ;
-    private List<String> commuapps = new ArrayList<>();
-    private ScheduledThreadPoolExecutor executor;
-    private int i=0;
-    private CountDownTimer CommuTimer = new CountDownTimer(600000, 10000) {
-        @Override
-        public void onTick(long millisUntilFinished) {
-            Log.e("Countdown", "開始倒數計時10分鐘");
-        }
-
-        @Override
-        public void onFinish() {
-            Log.e("Timer", "finish");
-            startService(new Intent(CheckFrontCommuApp.this,DialogShowCommu.class));
-            executor.shutdown();
-            stopSelf();
-        }
-    };
-
-    private Thread DetectFrontCommuApp = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            String frontCommuApp = getForegroundTask().replaceAll("\\s+","");
-
-            if(commuapps.contains(frontCommuApp)){
-                Log.e("checkCommu", "Detect Communication App Press");
-                executor.shutdown();
-                if(i==0){
-                    CommuTimer.start();
-                    i+=1;
-                }else{
-                    CommuTimer.cancel();
-                }
-            }
-        }
-    });
+    private String TAG = "Timers" ;
+    private List<String> apps = new ArrayList<>();
+    WindowBanned windowBanned;
 
     @Override
     public IBinder onBind (Intent arg0) {  //將app綁定server服務
@@ -81,10 +55,8 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
-        commuapps = LoadingApp.getAllowedCommuApps();
-        long period = 1000;
-        executor = new ScheduledThreadPoolExecutor(1);
-        executor.scheduleAtFixedRate(DetectFrontCommuApp, 0, period, TimeUnit.MILLISECONDS);
+        windowBanned = new WindowBanned(getApplicationContext());
+        windowBanned.open();
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }
@@ -93,7 +65,6 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
     public void onDestroy () {
         Log. e ( TAG , "onDestroy" ) ;
         super.onDestroy() ;
-        executor.shutdown();
         this.stopSelf();
     }
 
@@ -119,6 +90,7 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
             }
             currentApp = tasks.get(0).processName;
         }
+        Log.e("CHECK", currentApp);
         return currentApp;
     }
 
@@ -136,7 +108,7 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
                 .setContentTitle("偵測中")
-                .setContentText("正在偵測使用中的社交APP")
+                .setContentText("正在偵測使用中的APP")
 
                 // this is important, otherwise the notification will show the way
                 // you want i.e. it will show some default notification

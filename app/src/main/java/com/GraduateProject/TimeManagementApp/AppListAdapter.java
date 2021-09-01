@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHolder> {
@@ -20,18 +18,16 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     private Context context;
 
     AppListAdapter(List<AppInfo> appInfos, List<String> apps){
-        this.appList=appInfos;
-        this.apps = apps;
+        appList=appInfos;
+        AppListAdapter.apps = apps;
     }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i){
-        apps = LoadingApp.getAllowedApps();
         if(context==null)
             context=viewGroup.getContext();
         View view= LayoutInflater.from(context).inflate(R.layout.customapp_format,viewGroup,false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -41,25 +37,21 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         //禁用為true 開訪則false
         if(appList.get(i).appStatus) {
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
-            Log.e("EDIT", "add banned : " + appList.get(i).packageName);
         }
         else
             viewHolder.appStatus.setImageResource(R.drawable.ic_lock_open);
 
-        viewHolder.appStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(appList.get(i).appStatus) {
-                    appList.get(i).appStatus = false;
-                    viewHolder.appStatus.setImageResource(R.drawable.ic_lock_open);
-                    apps.remove(appList.get(i).packageName);
-                    Log.e("EDIT", "remove banned : " + appList.get(i).packageName);
-                }else {
-                    appList.get(i).appStatus = true;
-                    viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
-                    apps.add(appList.get(i).packageName);
-                    Log.e("EDIT", "add banned : " + appList.get(i).packageName);
-                }
+        viewHolder.appStatus.setOnClickListener(v -> {
+            if(appList.get(i).appStatus) {
+                appList.get(i).appStatus = false;
+                viewHolder.appStatus.setImageResource(R.drawable.ic_lock_open);
+                apps.remove(appList.get(i).packageName);
+                Log.e("EDIT", "remove banned : " + appList.get(i).packageName);
+            }else {
+                appList.get(i).appStatus = true;
+                viewHolder.appStatus.setImageResource(R.drawable.ic_lock);
+                apps.add(appList.get(i).packageName);
+                Log.e("EDIT", "add banned : " + appList.get(i).packageName);
             }
         });
     }
@@ -77,7 +69,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
         return appList;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder{
         ImageView appLogo,appStatus;
         TextView appName;
         public ViewHolder(@NonNull View itemView){

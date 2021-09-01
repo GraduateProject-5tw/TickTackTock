@@ -33,7 +33,7 @@ public class PopupMessageCommu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.e("POPUP", "create called");
         //Drawable wallpaper = WallpaperManager.getInstance(this).getDrawable();
-        bg = findViewById(R.id.transparentBG);
+        //bg = findViewById(R.id.transparentBG);
         Button btn_yes = findViewById(R.id.btn_yes);
         Button btn_no = findViewById(R.id.btn_no);
         Intent intent = getIntent();
