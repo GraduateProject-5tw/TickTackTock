@@ -20,7 +20,7 @@ public class WindowBannedCommu {
     private final View mView;
     private final WindowManager.LayoutParams mParams;
     private final WindowManager mWindowManager;
-    //private final int layoutType;
+    //private final int layoutType 測試用;
 
     public WindowBannedCommu(Context context){
         this.context=context;
