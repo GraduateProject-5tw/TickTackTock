@@ -236,6 +236,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 startForegroundService(new Intent(this, CheckFrontApp.class));
             } else {
                 startService(new Intent(this, CheckFrontApp.class));
+                startService(new Intent(this, CheckFrontCommuApp.class));
             }
             //startService(new Intent(GeneralTimerActivity.this, CheckFrontCommuApp.class));
         }
