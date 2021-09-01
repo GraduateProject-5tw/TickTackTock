@@ -334,12 +334,23 @@ public class TomatoClockActivity extends AppCompatActivity {
             builder.setSingleChoiceItems(course, Preset, (dialog, which) -> Preset = which);
             builder.setPositiveButton("確認", (dialog, which) -> {
                 if (Preset ==5) {
-                    AlertDialog.Builder alert = new AlertDialog.Builder(TomatoClockActivity.this);
-                    alert.setCancelable(false);
-                    alert.setTitle("輸入讀書科目");
-                    alert.setView(editText);
-                    alert.setPositiveButton("確定", (dialogInterface, i) -> TomatoStudyCourse = editText.getText().toString());
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(TomatoClockActivity.this);
+                    alertDialog.setTitle("輸入讀書科目");
+                    alertDialog.setView(editText);
+                    alertDialog.setPositiveButton("確定",((dialogs, i) -> {}));
+                    AlertDialog alert = alertDialog.create();
                     alert.show();
+                    alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+                        if(editText.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),"讀書科目不可空白",Toast.LENGTH_SHORT).show();}
+                        else {
+                            TomatoStudyCourse = editText.getText().toString();
+                            alert.dismiss();
+                        }
+                    }));
+
+                    alert.setCancelable(false);
+                    alert.setCanceledOnTouchOutside(false);
                 }
                 else{
                     TomatoStudyCourse= course[Preset];
