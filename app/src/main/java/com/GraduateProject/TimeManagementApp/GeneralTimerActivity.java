@@ -54,7 +54,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private String startTime;
     private String stopTime;
     private String totalTime;
-    DBTimeBlockHelper DBHelper;
+    DBTotalHelper DBHelper;
 
     public GeneralTimerActivity() {
     }
@@ -461,8 +461,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     //打開database
     private void openDB() {
-        DBHelper = new DBTimeBlockHelper(this);
-    }
+        DBHelper = new DBTotalHelper(this);
+    }  //原:new DBTimeBlockHelper
 
     private void insertDB(String date ,String GeneralStudyCourse, String stratTime,String stopTime ,String totalTime ){
 

@@ -62,7 +62,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private String   TomatoStudyCourse;//記錄的讀書科目
     private AnalogClockStyle timeButton;
     private AppBarConfiguration mAppBarConfiguration;
-    private DBTimeBlockHelper DBHelper = null;
+    private DBTotalHelper DBHelper = null;
     private String startTime;
     private String date;
     private String stopTime;
@@ -613,7 +613,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
     //打開database
     private void openDB() {
-        DBHelper = new DBTimeBlockHelper(this);
+        DBHelper = new DBTotalHelper(this);
     }
 
     private void insertDB(String date ,String TomatoStudyCourse, String startTime,String stopTime ,String totalTime){
