@@ -39,6 +39,7 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
 
         @Override
         public void onFinish() {
+            Log.e("Timer", "finish");
             startService(new Intent(CheckFrontCommuApp.this,DialogShowCommu.class));
             executor.shutdown();
             stopSelf();

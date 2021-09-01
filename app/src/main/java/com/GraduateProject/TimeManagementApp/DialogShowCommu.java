@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 public class DialogShowCommu extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
     private String TAG = "TimersCommu" ;
-    private List<String> Commuapps = new ArrayList<>();
     WindowBannedCommu windowBannedCommu;
 
     @Override
@@ -49,7 +48,6 @@ public class DialogShowCommu extends Service {    //server是一個在背景執�
         Log. e ( TAG , "onStartCommand" ) ;
         windowBannedCommu = new WindowBannedCommu(getApplicationContext());
         windowBannedCommu.open();
-        Commuapps = LoadingApp.getAllowedCommuApps();
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }

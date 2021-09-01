@@ -34,7 +34,7 @@ public class LoadingApp extends AppCompatActivity {
     private static final List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
     private static int isCustom;
-    private final String[] bannedCat = {"artdesign", "shopping", "games", "social", "entertainment", "videoplayerseditors", "comics"};
+    private final String[] bannedCat = {"artdesign", "shopping", "casual","puzzle", "social", "adventure", "casino", "sports", "card", "simulation", "music", "board", "strategy", "action", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
     private String userName;
@@ -269,6 +269,7 @@ public class LoadingApp extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        String communication = "communication";
 
         @SuppressLint("QueryPermissionsNeeded")
         List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
@@ -278,9 +279,15 @@ public class LoadingApp extends AppCompatActivity {
             appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
             appInfo.setPackageName(info.activityInfo.packageName);
             appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
+            String query_url = GOOGLE_URL + info.activityInfo.packageName + "&hl=en";
+            String category = getCategory(query_url).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
             if(customs.contains(appInfo.getPackageName())){
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "change to banned");
+            }
+            else if(category.equals(communication)){    //社交APP禁用開始操作
+                Log.e("check",info.activityInfo.packageName + "is added to communication");
+                commuApps.add(info.activityInfo.packageName);
             }
             else{
                 appInfo.setAppStatus(false);
