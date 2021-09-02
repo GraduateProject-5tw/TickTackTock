@@ -25,7 +25,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected static SwitchPreference mSwitchPreference;
     protected static Preference editButton;
     protected static String userName;
-    private static DBBannedAppHelper dbBannedAppsHelper = null;
+    private static DBTotalHelper dbBannedAppsHelper = null;
     private static final String TABLE_APPS = "BannedApps";
     private static final String COL_USER = "_USER";
     private static SQLiteDatabase db = null;
@@ -90,7 +90,7 @@ public class SettingsActivity extends AppCompatActivity {
     //資料庫相關
     //打開database
     private void openDB() {
-        dbBannedAppsHelper = new DBBannedAppHelper(this);
+        dbBannedAppsHelper = new DBTotalHelper(this);
         db = dbBannedAppsHelper.getWritableDatabase();
     }
 

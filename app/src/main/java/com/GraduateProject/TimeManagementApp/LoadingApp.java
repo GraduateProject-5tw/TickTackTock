@@ -38,7 +38,7 @@ public class LoadingApp extends AppCompatActivity {
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
     private String userName;
-    private DBBannedAppHelper dbBannedAppsHelper = null;
+    private DBTotalHelper dbBannedAppsHelper = null;
     private final String TABLE_APPS = "BannedApps";
     private static final String COL_USER = "_USER";
     private static final String COL_CHECK = "_ISCUSTOM";
@@ -318,7 +318,7 @@ public class LoadingApp extends AppCompatActivity {
     //資料庫相關
     //打開database
     private void openDB() {
-        dbBannedAppsHelper = new DBBannedAppHelper(this);
+        dbBannedAppsHelper = new DBTotalHelper(this);
         db = dbBannedAppsHelper.getWritableDatabase();
     }
 
