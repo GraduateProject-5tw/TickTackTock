@@ -2,10 +2,13 @@ package com.GraduateProject.TimeManagementApp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.database.Cursor;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,6 +28,48 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_blocker);
         assignViews();
+
+        DBTotalHelper dbTimeBlockHelper=new DBTotalHelper(this);
+        TextView textView = findViewById(R.id.weekdayview);
+        Cursor cursor = dbTimeBlockHelper.ViewData();
+
+        int theID = 0;
+        List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
+        while (cursor.moveToNext()){
+            //int EventID = cursor.getInt(0);
+            String Date = cursor.getString(1);
+            String Course = cursor.getString(2);
+            String starTime = cursor.getString(3);
+            String stopTime = cursor.getString(4);
+
+            int theYear = Integer.parseInt(Date.substring(0,4));
+            int theMonth = Integer.parseInt(Date.substring(5,7));
+            Date=Date+"0";
+            int theDay = Integer.parseInt(Date.substring(8,10));
+
+            String[] starts = starTime.split(":");
+            int starHour = Integer.parseInt(starts[0]);
+            int starMinute = Integer.parseInt(starts[1]);
+            String[] ends = stopTime.split(":");
+            int endHour = Integer.parseInt(ends[0]);
+            int endMinute = Integer.parseInt(ends[1]);
+
+
+            Calendar startTime = Calendar.getInstance();
+            startTime.set(Calendar.HOUR_OF_DAY, starHour);
+            startTime.set(Calendar.MINUTE, starMinute);
+            startTime.set(Calendar.DAY_OF_MONTH, theDay);
+            startTime.set(Calendar.MONTH, theMonth);
+            startTime.set(Calendar.YEAR, theYear);
+            Calendar endTime = (Calendar) startTime.clone();
+            endTime.set(Calendar.HOUR_OF_DAY, endHour);
+            endTime.set(Calendar.MINUTE, endMinute);
+            WeekViewEvent event = new WeekViewEvent(theID, Course, startTime, endTime);
+            event.setColor(getResources().getColor(R.color.red));
+            events.add(event);
+
+            theID=theID+1;
+        }
     }
     private void assignViews() {
         mWeekView = (WeekDayView) findViewById(R.id.weekdayview);
@@ -82,6 +127,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
 // Populate the week view with some events.
         List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
+
         Calendar startTime = Calendar.getInstance();
         startTime.set(Calendar.HOUR_OF_DAY, 3);
         startTime.set(Calendar.MINUTE, 0);
@@ -93,6 +139,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         WeekViewEvent event = new WeekViewEvent(1, "This is a Event!!", startTime, endTime);
         event.setColor(getResources().getColor(R.color.black));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.HOUR_OF_DAY, 3);
         startTime.set(Calendar.MINUTE, 30);
@@ -105,6 +152,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(10, getEventTitle(startTime), startTime, endTime);
         event.setColor(getResources().getColor(R.color.red));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.HOUR_OF_DAY, 4);
         startTime.set(Calendar.MINUTE, 20);
@@ -116,6 +164,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(10, getEventTitle(startTime), startTime, endTime);
         event.setColor(getResources().getColor(R.color.purple_200));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.HOUR_OF_DAY, 5);
         startTime.set(Calendar.MINUTE, 30);
@@ -127,6 +176,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(2, getEventTitle(startTime), startTime, endTime);
         event.setColor(getResources().getColor(R.color.light_slate_Blue));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.HOUR_OF_DAY, 5);
         startTime.set(Calendar.MINUTE, 30);
@@ -138,6 +188,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(2, "dddd", startTime, endTime);
         event.setColor(getResources().getColor(R.color.design_default_color_primary_dark));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.HOUR_OF_DAY, 5);
         startTime.set(Calendar.MINUTE, 0);
@@ -150,6 +201,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(3, getEventTitle(startTime), startTime, endTime);
         event.setColor(getResources().getColor(R.color.purple_200));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.DAY_OF_MONTH, 15);
         startTime.set(Calendar.HOUR_OF_DAY, 3);
@@ -161,6 +213,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(4, getEventTitle(startTime), startTime, endTime);
         event.setColor(getResources().getColor(R.color.light_slate_Blue));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.DAY_OF_MONTH, 1);
         startTime.set(Calendar.HOUR_OF_DAY, 3);
@@ -172,6 +225,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         event = new WeekViewEvent(5, getEventTitle(startTime), startTime, endTime);
         event.setColor(getResources().getColor(R.color.design_default_color_primary));
         events.add(event);
+
         startTime = Calendar.getInstance();
         startTime.set(Calendar.DAY_OF_MONTH, startTime.getActualMaximum(Calendar.DAY_OF_MONTH));
         startTime.set(Calendar.HOUR_OF_DAY, 15);

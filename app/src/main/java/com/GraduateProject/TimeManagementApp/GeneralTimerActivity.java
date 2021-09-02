@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -16,6 +17,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
+import android.widget.Toast;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,7 +54,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private String startTime;
     private String stopTime;
     private String totalTime;
-    DBTimeBlockHelper DBHelper;
+    DBTotalHelper DBHelper;
 
     public GeneralTimerActivity() {
     }
@@ -147,12 +150,23 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             builder.setSingleChoiceItems(course, Preset, (dialog, which) -> Preset = which);
             builder.setPositiveButton("確認", (dialog, which) -> {
                 if (Preset == 5) {
-                    AlertDialog.Builder alert = new AlertDialog.Builder(GeneralTimerActivity.this);
-                    alert.setCancelable(false);
-                    alert.setTitle("輸入讀書科目");
-                    alert.setView(editText);
-                    alert.setPositiveButton("確定", (dialogInterface, i) -> GeneralStudyCourse = editText.getText().toString());
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(GeneralTimerActivity.this);
+                    alertDialog.setTitle("輸入讀書科目");
+                    alertDialog.setView(editText);
+                    alertDialog.setPositiveButton("確定",((dialogs, i) -> {}));
+                    AlertDialog alert = alertDialog.create();
                     alert.show();
+                    alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+                        if(editText.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),"讀書科目不可空白",Toast.LENGTH_SHORT).show();}
+                        else {
+                            GeneralStudyCourse = editText.getText().toString();
+                            alert.dismiss();
+                        }
+                    }));
+
+                    alert.setCancelable(false);
+                    alert.setCanceledOnTouchOutside(false);
                 }
                 else {
                     GeneralStudyCourse = course[Preset];
@@ -447,8 +461,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     //打開database
     private void openDB() {
-        DBHelper = new DBTimeBlockHelper(this);
-    }
+        DBHelper = new DBTotalHelper(this);
+    }  //原:new DBTimeBlockHelper
 
     private void insertDB(String date ,String GeneralStudyCourse, String stratTime,String stopTime ,String totalTime ){
 
@@ -470,6 +484,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         super.onDestroy();
         closeDB();
     }
+
 
 }
 
