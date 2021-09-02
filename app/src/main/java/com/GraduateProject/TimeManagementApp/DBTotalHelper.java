@@ -58,7 +58,7 @@ public class DBTotalHelper extends SQLiteOpenHelper {
     }
 
     public void onDelete(SQLiteDatabase db, int oldVersion,int newVersion){
-
+    //
     }
 
 }
