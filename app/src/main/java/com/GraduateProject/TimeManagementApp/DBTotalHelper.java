@@ -57,8 +57,16 @@ public class DBTotalHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+
     public void onDelete(SQLiteDatabase db, int oldVersion,int newVersion){
     //
     }
 
+    public Cursor ViewData(){
+        SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from "+_TableNameforTime,null);
+        return cursor;
+    }
+
 }
+

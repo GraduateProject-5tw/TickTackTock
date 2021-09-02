@@ -29,7 +29,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         setContentView(R.layout.activity_time_blocker);
         assignViews();
 
-        DBTimeBlockHelper dbTimeBlockHelper=new DBTimeBlockHelper(this);
+        DBTotalHelper dbTimeBlockHelper=new DBTotalHelper(this);
         TextView textView = findViewById(R.id.weekdayview);
         Cursor cursor = dbTimeBlockHelper.ViewData();
 
