@@ -1,10 +1,12 @@
 package com.GraduateProject.TimeManagementApp;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class ToDoModel {
     private int id, status;
-    private String task, date;
+    private String task;
+    private String nowDate;
 
     public int getId() {
         return id;
@@ -27,6 +29,10 @@ public class ToDoModel {
         this.task = task;
     }
 
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
+    //抓當下日期
+    public String getDay(){
+        nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        return nowDate;
+    }
+    public void setDay(String nowDate){ this.nowDate = nowDate; }
 }

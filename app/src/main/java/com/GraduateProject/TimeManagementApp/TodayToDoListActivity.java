@@ -16,6 +16,7 @@ import com.GraduateProject.TimeManagementApp.Adapters.ToDoAdapter;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,34 +33,10 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
     private List<ToDoModel> taskList;
 
     private WeekHeaderView mWeekHeaderView;
+    private WeekDayView mWeekView; //是否新增to do
     private TextView mTv_date;
 
-    private void assignViews() {
-        mWeekHeaderView= (WeekHeaderView) findViewById(R.id.weekheaderview);
-        mTv_date =(TextView)findViewById(R.id.tv_date);
-//init WeekView
-        /*
-        mWeekHeaderView.setDateSelectedChangeListener(new WeekHeaderView.DateSelectedChangeListener() {
-            @Override
-            public void onDateSelectedChange(Calendar oldSelectedDay, Calendar newSelectedDay) {
-                mWeekView.goToDate(newSelectedDay);
-            }
-        });
-
-         */
-        setupDateTimeInterpreter(false);
-    }
-    /**
-     * Set up a date time interpreter which will show short date values when in week view and long
-     * date values otherwise.
-     *
-     * @param shortDate True if the date values should be short.
-     */
-    private void setupDateTimeInterpreter(final boolean shortDate) {
-        final String[] weekLabels={"日","一","二","三","四","五","六"};
-    }
-
-
+//to do list建立
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,12 +72,48 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         });
     }
 
+//標頭
     @Override
     public void handleDialogClose(DialogInterface dialog){
         taskList = db.getAllTasks();
         Collections.reverse(taskList);
         taskAdapter.setTasks(taskList);
         taskAdapter.notifyDataSetChanged();
+    }
+
+    private void assignViews() {
+        mWeekHeaderView= (WeekHeaderView) findViewById(R.id.weekheaderview);
+        mTv_date =(TextView)findViewById(R.id.tv_date);
+
+        //補標頭
+/*
+        mWeekHeaderView.setDateSelectedChangeListener(new WeekHeaderView.DateSelectedChangeListener() {
+            @Override
+            public void onDateSelectedChange(Calendar oldSelectedDay, Calendar newSelectedDay) {
+                mWeekView.goToDate(newSelectedDay);
+            }
+        });
+
+ */
+
+
+        setupDateTimeInterpreter(false);
+    }
+    //mtv_date測能不能跑
+    /*
+    public void onSelectedDaeChange(Calendar selectedDate) {
+        mWeekHeaderView.setSelectedDay(selectedDate);
+        mTv_date.setText(selectedDate.get(Calendar.YEAR)+"年"+(selectedDate.get(Calendar.MONTH))+"月");
+    }
+     */
+    /**
+     * Set up a date time interpreter which will show short date values when in week view and long
+     * date values otherwise.
+     *
+     * @param shortDate True if the date values should be short.
+     */
+    private void setupDateTimeInterpreter(final boolean shortDate) {
+        final String[] weekLabels={"日","一","二","三","四","五","六"};
     }
 }
 

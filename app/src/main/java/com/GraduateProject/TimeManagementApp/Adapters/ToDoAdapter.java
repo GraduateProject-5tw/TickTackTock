@@ -22,7 +22,7 @@ import java.util.List;
 
 
 public class ToDoAdapter extends RecyclerView.Adapter<ToDoAdapter.ViewHolder> {
-
+//功能實作
     private List<ToDoModel> todoList;
     private DBToDoHelper db;
     private TodayToDoListActivity activity;
