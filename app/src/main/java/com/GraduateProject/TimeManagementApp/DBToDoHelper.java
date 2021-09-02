@@ -16,7 +16,6 @@ public class DBToDoHelper extends SQLiteOpenHelper {
 
     private Calendar mSelectedDay;
 
-
     private Context context;
     private static final int VERSION = 3;
     private static final String NAME = "toDoListDatabase";
