@@ -1,72 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center"
-    tools:context=".PopupMessageCommu"
-    android:theme="@style/Theme.Transparent"
-    android:orientation="vertical">
+    android:padding="15dp"
+    android:background="@null">
 
-    <LinearLayout
-        android:layout_width="300dp"
+    <androidx.cardview.widget.CardView
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="250dp"
-        android:orientation="vertical"
-        android:background="@color/white">
-        <TextView
-            android:id="@+id/txt_tit"
-            android:layout_width="match_parent"
+        app:cardCornerRadius="15dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/confirmTitle"
-            android:textColor="@android:color/black"
-            android:textSize="20sp"
-            android:background="#f8f7fc"/>
-        <TextView
-            android:id="@+id/txt_dia"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:paddingBottom="15dp"
-            android:gravity="center|top"
-            android:text="「社交」類APP僅可使用10分鐘，\n\n您的使用時間已超過\n\n現在是讀書時間唷，確定要使用嗎？\n\n若使用，計時將會停止。"
-            android:textColor="@android:color/black"
-            android:textSize="15sp"/>
-    </LinearLayout>
+            android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="horizontal" >
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:background="@color/white">
+                <TextView
+                    android:id="@+id/txt_tit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="\t確 認"
+                    android:textColor="@color/light_slate_Blue"
+                    android:textSize="20sp"
+                    android:background="#f8f7fc"/>
+                <TextView
+                    android:id="@+id/txt_dia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:paddingBottom="15dp"
+                    android:gravity="center|top"
+                    android:text="「社交」類APP僅可使用10分鐘，\n\n您的使用時間已超過\n\n現在是讀書時間，是否要繼續使用？\n\n若使用，計時將會停止。"
+                    android:textColor="@color/light_slate_Blue"
+                    android:textSize="15sp"/>
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_yes"
-            android:layout_width="150dp"
-            android:layout_height="35dp"
-            android:background="@drawable/button_border"
-            android:clickable="true"
-            android:text="確 定 使 用"
-            android:textColor="@color/light_slate_Blue"
-            android:textStyle="bold"
-            android:textSize="13dp"
-            android:focusable="true" />
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/btn_no"
-            android:layout_width="150dp"
-            android:layout_height="35dp"
-            android:background="@drawable/button_border"
-            android:clickable="true"
-            android:text="放 棄 使 用"
-            android:textColor="@color/light_slate_Blue"
-            android:textStyle="bold"
-            android:textSize="13dp"
-            android:focusable="true" />
-    </LinearLayout>
+                <Button
+                    android:id="@+id/btn_yes"
+                    android:layout_width="150dp"
+                    android:layout_height="35dp"
+                    android:background="@drawable/button_border"
+                    android:clickable="true"
+                    android:text="確 定 使 用"
+                    android:textColor="@color/light_slate_Blue"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:focusable="true" />
 
-</LinearLayout>
+                <Button
+                    android:id="@+id/btn_no"
+                    android:layout_width="150dp"
+                    android:layout_height="35dp"
+                    android:background="@drawable/button_border"
+                    android:clickable="true"
+                    android:text="放 棄 使 用"
+                    android:textColor="@color/light_slate_Blue"
+                    android:textStyle="bold"
+                    android:textSize="13sp"
+                    android:focusable="true" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</RelativeLayout>

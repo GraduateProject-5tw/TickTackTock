@@ -34,12 +34,13 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
             String frontApp = getForegroundTask().replaceAll("\\s+", "");
             if (apps.contains(frontApp)) {
                 Log.e("check", "Detect App Press :" + frontApp);
-                startService(new Intent(CheckFrontApp.this, DialogShow.class));
+                stopService(new Intent(CheckFrontApp.this, CheckFrontCommuApp.class));
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_MAIN);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addCategory(Intent.CATEGORY_HOME);
                 startActivity(intent);
+                startService(new Intent(CheckFrontApp.this, DialogShow.class));
                 executor.shutdown();
                 stopSelf();
             }
