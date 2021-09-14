@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="MissingConstraints"
+        android:gravity="fill_horizontal"
+        android:weightSum="1.0"
+        android:paddingTop="20dp"
+        android:paddingHorizontal="20dp">
+
+        <TextView
+            android:id="@+id/course_name"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:text="App Name"/>
+
+        <RelativeLayout
+            android:id="@+id/color_layout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_toStartOf="@id/text_layout"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/course_color"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:text=" \t"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/text_layout"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/text_color"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:text=" \t"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
