@@ -5,8 +5,8 @@ import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,8 +29,11 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
 import com.google.android.material.navigation.NavigationView;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -47,14 +49,16 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private Button stopBtn;
     private long recordTime;  //累計的時間
     private static boolean isCounting = false;
-    private int Preset = 0; //讀書科目
+    private int Preset = -1; //讀書科目
     private String GeneralStudyCourse;//記錄的讀書科目
     private AppBarConfiguration mAppBarConfiguration;
     private String date;
     private String startTime;
     private String stopTime;
     private String totalTime;
-    DBTotalHelper DBHelper;
+    private DBTotalHelper DBHelper;
+    private final String TABLE_APPS = "Courses";
+    private final ArrayList<String> courses = new ArrayList<>();
 
     public GeneralTimerActivity() {
     }
@@ -139,50 +143,120 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             totalTime = getTotalTime(recordTime);
             startBtn.setVisibility(View.VISIBLE);
             stopBtn.setVisibility(View.GONE);
-
-
             //跳出視窗
-            final String[] course = {"國文", "英文", "數學", "社會", "自然", "其他"};
+            getCoursesInfo();
+            courses.add("新增科目");
+            final String[] coursesArray = courses.toArray(new String[0]);
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
-            AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
-            builder.setCancelable(false);
-            builder.setTitle("本次累積：" + Time);
-            builder.setSingleChoiceItems(course, Preset, (dialog, which) -> Preset = which);
-            builder.setPositiveButton("確認", (dialog, which) -> {
-                if (Preset == 5) {
-                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(GeneralTimerActivity.this);
-                    alertDialog.setTitle("輸入讀書科目");
-                    alertDialog.setView(editText);
-                    alertDialog.setPositiveButton("確定",((dialogs, i) -> {}));
-                    AlertDialog alert = alertDialog.create();
-                    alert.show();
-                    alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
-                        if(editText.getText().toString().isEmpty()){
-                            Toast.makeText(getApplicationContext(),"讀書科目不可空白",Toast.LENGTH_SHORT).show();}
-                        else {
-                            GeneralStudyCourse = editText.getText().toString();
-                            alert.dismiss();
+            if (recordTime < 15 * 6000) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
+                builder.setCancelable(false);
+                builder.setTitle("紀錄確認");
+                builder.setMessage("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
+                builder.setPositiveButton("是", (dialog12, which) -> {
+                    //顯示紀錄時間
+                    AlertDialog.Builder b = new AlertDialog.Builder(GeneralTimerActivity.this);
+                    b.setCancelable(false);
+                    b.setTitle("本次累積：" + Time);
+                    b.setSingleChoiceItems(coursesArray, Preset, (dialoga, whichi) -> Preset = whichi);
+                    b.setPositiveButton("確認", ((dialoga, whichi) -> { }));
+                    AlertDialog a = b.create();
+                    a.show();
+                    a.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x1 -> {
+                        Log.e("INDEX", ": " + Preset);
+                        if(Preset < 0){
+                            Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
                         }
+                        else if(coursesArray[Preset].equals("新增科目")) {
+                            a.dismiss();
+                            AlertDialog.Builder courseDialog = new AlertDialog.Builder(GeneralTimerActivity.this);
+                            courseDialog.setTitle("輸入讀書科目");
+                            courseDialog.setView(editText);
+                            courseDialog.setPositiveButton("確定", ((dialogs, y) -> { }));
+                            AlertDialog alert = courseDialog.create();
+                            alert.show();
+                            alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+                                if (editText.getText().toString().isEmpty()) {
+                                    Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    GeneralStudyCourse = editText.getText().toString();
+                                    Log.e("COURSE", "selected course is " + GeneralStudyCourse);
+                                    insertCourse(GeneralStudyCourse);
+                                    insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                                    alert.dismiss();
+                                }
+                            }));
+                            alert.setCancelable(false);
+                            alert.setCanceledOnTouchOutside(false);
+                        }else {
+                            a.dismiss();
+                            GeneralStudyCourse = coursesArray[Preset];
+                            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                        }
+                        courses.clear();
+                        recordTime = 0;
+                        chronometer.setBase(SystemClock.elapsedRealtime());
                     }));
-
-                    alert.setCancelable(false);
-                    alert.setCanceledOnTouchOutside(false);
-                }
-                else {
-                    GeneralStudyCourse = course[Preset];
-                }
-            });
-            builder.show();
-            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
-            recordTime = 0;
-            chronometer.setBase(SystemClock.elapsedRealtime()); //將計時器歸0
-
+                });
+                builder.setNegativeButton("否", (dialog13, which) -> {
+                    courses.clear();
+                    recordTime = 0;
+                    chronometer.setBase(SystemClock.elapsedRealtime());
+                });
+                builder.show();
+            } else {
+                //顯示紀錄時間
+                AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
+                builder.setCancelable(false);
+                builder.setTitle("本次累積：" + Time);
+                builder.setSingleChoiceItems(coursesArray, Preset, (dialoga, which) -> Preset = which);
+                builder.setPositiveButton("確認", ((dialoga, which) -> { }));
+                AlertDialog a = builder.create();
+                a.show();
+                a.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x1 -> {
+                    if(Preset == -1){
+                        Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                    }else if (coursesArray[Preset].equals("新增科目")) {
+                        a.dismiss();
+                        AlertDialog.Builder courseDialog = new AlertDialog.Builder(GeneralTimerActivity.this);
+                        courseDialog.setTitle("輸入讀書科目");
+                        courseDialog.setView(editText);
+                        courseDialog.setPositiveButton("確定", ((dialogs, y) -> { }));
+                        AlertDialog alert = courseDialog.create();
+                        alert.show();
+                        alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+                            if (editText.getText().toString().isEmpty()) {
+                                Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                            } else {
+                                GeneralStudyCourse = editText.getText().toString();
+                                Log.e("COURSE", "selected course is " + GeneralStudyCourse);
+                                insertCourse(GeneralStudyCourse);
+                                insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                                alert.dismiss();
+                            }
+                        }));
+                        alert.setCancelable(false);
+                        alert.setCanceledOnTouchOutside(false);
+                    }else {
+                        a.dismiss();
+                        GeneralStudyCourse = coursesArray[Preset];
+                        insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                    }
+                    courses.clear();
+                    recordTime = 0;
+                    chronometer.setBase(SystemClock.elapsedRealtime());
+                }));
+            }
         });
 
         tomato_btn.setEnabled(true);
         tomato_btn.setBackgroundColor(-1); //白色
         tomato_btn.setOnClickListener(view ->
         {
+            getCoursesInfo();
+            courses.add("新增科目");
+            final String[] coursesArray = courses.toArray(new String[0]);
+            final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
             if (isCounting) {
                 AlertDialog.Builder change = new AlertDialog.Builder(GeneralTimerActivity.this);
                 change.setTitle("番茄時鐘");
@@ -196,19 +270,146 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     //tomato的切換頁面
                     Intent intent = new Intent();
                     intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
-                    //顯示紀錄時間
-                    AlertDialog.Builder record = new AlertDialog.Builder(GeneralTimerActivity.this); //創建訊息方塊
-                    record.setTitle("紀錄時間");
-                    record.setMessage("讀書時間：\n\n" + Time);
-                    record.setPositiveButton("ok", (dialog1, which) -> {
-                        chronometer.setBase(SystemClock.elapsedRealtime());
-                        recordTime = 0;
-                        startActivity(intent);
-                    });
-                    record.show();
+                    //跳出視窗
+                    if (recordTime < 15 * 6000) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
+                        builder.setCancelable(false);
+                        builder.setTitle("紀錄確認");
+                        builder.setMessage("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
+                        builder.setPositiveButton("是", (dialog12, which) -> {
+                            //顯示紀錄時間
+                            AlertDialog.Builder b = new AlertDialog.Builder(GeneralTimerActivity.this);
+                            b.setCancelable(false);
+                            b.setTitle("本次累積：" + Time);
+                            b.setSingleChoiceItems(coursesArray, Preset, (dialoga, whicho) -> Preset = whicho);
+                            b.setPositiveButton("確認", ((dialoga, whicho) -> { }));
+                            AlertDialog a = b.create();
+                            a.show();
+                            a.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x1 -> {
+                                if(Preset == -1){
+                                    Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                                }else if (coursesArray[Preset].equals("新增科目")) {
+                                    a.dismiss();
+                                    AlertDialog.Builder courseDialog = new AlertDialog.Builder(GeneralTimerActivity.this);
+                                    courseDialog.setTitle("輸入讀書科目");
+                                    courseDialog.setView(editText);
+                                    courseDialog.setPositiveButton("確定", ((dialogs, y) -> { }));
+                                    AlertDialog alert = courseDialog.create();
+                                    alert.show();
+                                    alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+                                        if (editText.getText().toString().isEmpty()) {
+                                            Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            GeneralStudyCourse = editText.getText().toString();
+                                            Log.e("COURSE", "selected course is " + GeneralStudyCourse);
+                                            insertCourse(GeneralStudyCourse);
+                                            insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                                            alert.dismiss();
+                                            //tomato的切換頁面
+                                            courses.clear();
+                                            Intent intent2 = new Intent();
+                                            intent2.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                                            startBtn.setVisibility(View.VISIBLE);
+                                            stopBtn.setVisibility(View.GONE);
+                                            startActivity(intent2);
+                                            GeneralTimerActivity.this.finish();
+                                        }
+                                    }));
+                                    alert.setCancelable(false);
+                                    alert.setCanceledOnTouchOutside(false);
+                                }else {
+                                    a.dismiss();
+                                    GeneralStudyCourse = coursesArray[Preset];
+                                    insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                                    //tomato的切換頁面
+                                    courses.clear();
+                                    Intent intent2 = new Intent();
+                                    intent2.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                                    startBtn.setVisibility(View.VISIBLE);
+                                    stopBtn.setVisibility(View.GONE);
+                                    startActivity(intent2);
+                                    GeneralTimerActivity.this.finish();
+                                }
+                                recordTime = 0;
+                                chronometer.setBase(SystemClock.elapsedRealtime());
+                            }));
+                        });
+                        builder.setNegativeButton("否", (dialog13, which) -> {
+                            //tomato的切換頁面
+                            courses.clear();
+                            Intent intent2 = new Intent();
+                            intent2.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                            startBtn.setVisibility(View.VISIBLE);
+                            stopBtn.setVisibility(View.GONE);
+                            startActivity(intent2);
+                            GeneralTimerActivity.this.finish();
+                            recordTime = 0;
+                            chronometer.setBase(SystemClock.elapsedRealtime());
+                        });
+                        builder.show();
+                    } else {
+                        //顯示紀錄時間
+                        AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
+                        builder.setCancelable(false);
+                        builder.setTitle("本次累積：" + Time);
+                        builder.setSingleChoiceItems(coursesArray, Preset, (dialoga, which) -> Preset = which);
+                        builder.setPositiveButton("確認", ((dialoga, which) -> { }));
+                        AlertDialog a = builder.create();
+                        a.show();
+                        a.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x1 -> {
+                            if(Preset == -1){
+                                Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                            }else if (coursesArray[Preset].equals("新增科目")) {
+                                a.dismiss();
+                                AlertDialog.Builder courseDialog = new AlertDialog.Builder(GeneralTimerActivity.this);
+                                courseDialog.setTitle("輸入讀書科目");
+                                courseDialog.setView(editText);
+                                courseDialog.setPositiveButton("確定", ((dialogs, y) -> { }));
+                                AlertDialog alert = courseDialog.create();
+                                alert.show();
+                                alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+                                    if (editText.getText().toString().isEmpty()) {
+                                        Toast.makeText(getApplicationContext(), "讀書科目不可空白", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        GeneralStudyCourse = editText.getText().toString();
+                                        Log.e("COURSE", "selected course is " + GeneralStudyCourse);
+                                        insertCourse(GeneralStudyCourse);
+                                        insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                                        alert.dismiss();
+                                        //tomato的切換頁面
+                                        courses.clear();
+                                        Intent intent2 = new Intent();
+                                        intent2.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                                        startBtn.setVisibility(View.VISIBLE);
+                                        stopBtn.setVisibility(View.GONE);
+                                        startActivity(intent2);
+                                        GeneralTimerActivity.this.finish();
+                                    }
+                                }));
+                                alert.setCancelable(false);
+                                alert.setCanceledOnTouchOutside(false);
+                            }else {
+                                a.dismiss();
+                                GeneralStudyCourse = coursesArray[Preset];
+                                insertDB(date,GeneralStudyCourse,startTime,stopTime,totalTime);
+                                //tomato的切換頁面
+                                courses.clear();
+                                Intent intent2 = new Intent();
+                                intent2.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
+                                startBtn.setVisibility(View.VISIBLE);
+                                stopBtn.setVisibility(View.GONE);
+                                startActivity(intent2);
+                                GeneralTimerActivity.this.finish();
+                            }
+                            recordTime = 0;
+                            isCounting = false;
+                            chronometer.setBase(SystemClock.elapsedRealtime());
+                        }));
+                    }
                 });
                 //否的話留在一般
                 change.setNegativeButton("否", (dialog, i) -> {
+                    courses.clear();
                     startBtn.setVisibility(View.GONE);
                     stopBtn.setVisibility(View.VISIBLE);
                     double temp = Double.parseDouble(chronometer.getText().toString().split(":")[1]) * 1000;
@@ -219,6 +420,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 change.show();
             } else {
                 //tomato的切換頁面
+                courses.clear();
                 Intent intent = new Intent();
                 intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
                 isCounting = false;
@@ -227,7 +429,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 stopBtn.setVisibility(View.GONE);
                 recordTime = 0;
                 startActivity(intent);
-
             }
         });
 
@@ -262,6 +463,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         stopService(new Intent(this, CheckFrontApp.class));
         stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
+        stopService(new Intent(this, DialogShow.class));
     }
 
     public void finishCounting(){
@@ -465,7 +667,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }  //原:new DBTimeBlockHelper
 
     private void insertDB(String date ,String GeneralStudyCourse, String stratTime,String stopTime ,String totalTime ){
-
+        Log.e("COURSE", "insert in timeblock " + GeneralStudyCourse);
         SQLiteDatabase db = DBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("_DATE ",date);
@@ -476,13 +678,39 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         db.insert("TimeBlocker",null,values);
 
     }
+
+    private void insertCourse(String course){
+
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("_COURSE",course);
+        values.put("_COLOR", -3825153);
+        values.put("_TEXT",-1);
+        db.insert(TABLE_APPS,null,values);
+
+    }
+
+    private void getCoursesInfo(){
+        String Query = "Select * from " + TABLE_APPS;
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int icount = cursor.getCount();
+        if(icount > 0) {
+            do{
+                String course = cursor.getString(cursor.getColumnIndex("_COURSE"));
+                courses.add(course);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+    }
+
     private void closeDB() {
         DBHelper.close();
     }
 
     private void onDestory(){
         super.onDestroy();
-        closeDB();
     }
 
 

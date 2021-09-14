@@ -29,6 +29,7 @@ import androidx.core.view.ViewCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -78,7 +79,7 @@ public class WeekDayView extends View {
     private Direction mCurrentFlingDirection = Direction.NONE;
 
     // Attributes and their default values.
-    private int mHourHeight = 50;
+    private int mHourHeight = 200;
     private int mColumnGap = 10;
     private int mFirstDayOfWeek = Calendar.MONDAY;
     private int mTextSize = 12;
@@ -89,7 +90,7 @@ public class WeekDayView extends View {
     private int mHeaderRowBackgroundColor = Color.WHITE;
     private int mDayBackgroundColor = Color.rgb(245, 245, 245);
     private int mHourSeparatorColor = Color.rgb(230, 230, 230);
-    private int mTodayBackgroundColor = Color.rgb(239, 247, 254);
+    private int mTodayBackgroundColor = Color.rgb(254, 250, 239);
     private int mCurrentTimeTextColor = Color.RED;
     private int mHourSeparatorHeight = 2;
     private int mTodayHeaderTextColor = Color.rgb(39, 137, 228);
@@ -495,6 +496,7 @@ public class WeekDayView extends View {
                 SimpleDateFormat weekdayNameFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
                 String time = weekdayNameFormat.format(System.currentTimeMillis());
                 Calendar now = Calendar.getInstance();
+                //getMoreEvents(day);
                 now.setTimeInMillis(System.currentTimeMillis());
                 float top = (mHourHeight * 24 / 1440) * (60 * now.get(Calendar.HOUR_OF_DAY) + now.get(Calendar.MINUTE)) + mTimeTextHeight + mCurrentOrigin.y;
                 Log.d(TAG, "drawTimeColumnAndAxes ===" + time);
@@ -529,25 +531,6 @@ public class WeekDayView extends View {
             // In the next iteration, start from the next day.
             startPixel += mWidthPerDay + mColumnGap;
         }
-
-        // Draw the header background.
-//        canvas.drawRect(0, 0, getWidth(), 0, mHeaderBackgroundPaint);
-
-        // Draw the header row texts.
-        startPixel = startFromPixel;
-//        for (int dayNumber=leftDaysWithGaps+1; dayNumber <= leftDaysWithGaps + mNumberOfVisibleDays + 1; dayNumber++) {
-//            // Check if the day is today.
-//            day = (Calendar) mToday.clone();
-//            day.add(Calendar.DATE, dayNumber - 1);
-//            boolean sameDay = isSameDay(day, mToday);
-//
-//            // Draw the day labels.
-//            String dayLabel = getDateTimeInterpreter().interpretDate(day);
-//            if (dayLabel == null)
-//                throw new IllegalStateException("A DateTimeInterpreter must not return null date");
-////            canvas.drawText(dayLabel, startPixel + mWidthPerDay / 2, mHeaderTextHeight + mHeaderRowPadding, sameDay ? mTodayHeaderTextPaint : mHeaderTextPaint);
-////            startPixel += mWidthPerDay + mColumnGap;
-//        }
 
     }
 
@@ -593,8 +576,9 @@ public class WeekDayView extends View {
     private void drawEvents(Calendar date, float startFromPixel, Canvas canvas) {
         if (mEventRects != null && mEventRects.size() > 0) {
             for (int i = 0; i < mEventRects.size(); i++) {
+                Log.e("EVENT", "event date : " + mEventRects.get(i).event.getStartTime().get(Calendar.DAY_OF_YEAR) + " selected date : " + date.get(Calendar.DAY_OF_YEAR));
                 if (isSameDay(mEventRects.get(i).event.getStartTime(), date)) {
-
+                    Log.e("EVENT", "same date");
                     // Calculate top.
                     float top = mHourHeight * 24 * mEventRects.get(i).top / 1440 + mCurrentOrigin.y + 0 + mHeaderMarginBottom + mTimeTextHeight / 2 + mEventMarginVertical;
                     float originalTop = top;
@@ -623,13 +607,21 @@ public class WeekDayView extends View {
                             eventRectF.bottom > 0 + mTimeTextHeight / 2 + mHeaderMarginBottom &&
                             eventRectF.top < getHeight() &&
                             left < right
-                            ) {
+                    ) {
+                        Log.e("EVENT", "draw event " + mEventRects.get(i).event.getName());
                         mEventRects.get(i).rectF = eventRectF;
                         mEventBackgroundPaint.setColor(mEventRects.get(i).event.getColor() == 0 ? mDefaultEventColor : mEventRects.get(i).event.getColor());
                         canvas.drawRect(mEventRects.get(i).rectF, mEventBackgroundPaint);
-                        drawText(mEventRects.get(i).event.getName(), mEventRects.get(i).rectF, canvas, originalTop, originalLeft);
-                    } else
+                        if (mEventRects.get(i).event.getName() == null) {
+                            drawText("subject", mEventRects.get(i).rectF, canvas, originalTop, originalLeft);
+
+                        } else {
+                            drawText(mEventRects.get(i).event.getName(), mEventRects.get(i).rectF, canvas, originalTop, originalLeft);
+                        }
+                    }else {
                         mEventRects.get(i).rectF = null;
+                        Log.e("EVENT", "fail to draw event " + mEventRects.get(i).event.getName());
+                    }
                 }
             }
         }
@@ -816,6 +808,7 @@ public class WeekDayView extends View {
             mEventRects.add(new EventRect(event2, event, null));
         } else
             mEventRects.add(new EventRect(event, event, null));
+            Log.e("EVENT","add event " + event.getName());
     }
 
     /**
@@ -1409,7 +1402,7 @@ public class WeekDayView extends View {
             mSelectedDate = (Calendar) mToday.clone();
             mSelectedDate.add(Calendar.DATE, -leftDays);
             if (mSelectedDate.get(Calendar.DAY_OF_YEAR) != mLastSelectedDate.get(Calendar.DAY_OF_YEAR)) {
-                mScrollListener.onSelectedDaeChange(mSelectedDate);
+                mScrollListener.onSelectedDateChange(mSelectedDate);
             }
             mCurrentScrollDirection = Direction.NONE;
         }
@@ -1570,7 +1563,7 @@ public class WeekDayView extends View {
          */
         public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay);
 
-        public void onSelectedDaeChange(Calendar selectedDate);
+        public void onSelectedDateChange(Calendar selectedDate);
     }
 
 
@@ -1604,6 +1597,12 @@ public class WeekDayView extends View {
      */
     private boolean isSameDay(Calendar dayOne, Calendar dayTwo) {
         return dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR) == dayTwo.get(Calendar.DAY_OF_YEAR);
+    }
+
+    private boolean isSameDayEvent(Calendar dayOne, Calendar dayTwo) {
+        String[] month = {"1", "3", "5", "7", "8", "10", "12"};
+        List<String> months = Arrays.asList(month);
+        return dayOne.get(Calendar.YEAR) == dayTwo.get(Calendar.YEAR) && dayOne.get(Calendar.DAY_OF_YEAR)-dayOne.getActualMaximum(Calendar.DAY_OF_MONTH) == dayTwo.get(Calendar.DAY_OF_YEAR);
     }
 
 }

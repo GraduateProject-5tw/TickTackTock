@@ -29,11 +29,14 @@ public class LoadingApp extends AppCompatActivity {
     private static List<String> realDefaultApps = new ArrayList<>();
     private static List<String> bannedApps = new ArrayList<>();
     private static final List<String> allApps = new ArrayList<>();
-    private static final List<String> commuApps = new ArrayList<>();
+    private static List<String> commuApps = new ArrayList<>();
+    private static List<String> bannedCommuApps = new ArrayList<>();
+    private static List<String> commuAppsNull = new ArrayList<>();
     private static List<AppInfo> customAppsList = new ArrayList<>();
     private static final List<AppInfo> defaultAppsList = new ArrayList<>();
     private static List<AppInfo> bannedAppsList = new ArrayList<>();
     private static int isCustom;
+    private static int commuBanned;
     private final String[] bannedCat = {"artdesign", "shopping", "casual","puzzle", "social", "adventure", "casino", "sports", "card", "simulation", "music", "board", "strategy", "action", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
@@ -50,7 +53,6 @@ public class LoadingApp extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loadingapp);
-
         boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
 
         //先列出所有禁用App(新用戶)
@@ -65,17 +67,19 @@ public class LoadingApp extends AppCompatActivity {
                     customApps = defaultApps;
                     String inputString1 = gson.toJson(defaultApps);
                     String inputString2 = gson.toJson(allApps);
+                    String inputString3 = gson.toJson(commuApps);
                     Log.e("INSERT", inputString1);
                     Log.e("INSERT", inputString2);
-                    insertDB(userName, inputString2, inputString1, inputString1);
+                    insertDB(userName, inputString2, inputString3, inputString1, inputString1);
                     realDefaultApps = getDefaultApps();
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     isCustom = checkIfCustom(userName);
+                    commuBanned = checkIfBannedCommu(userName);
+                    setAllowedCommuApps();
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
-                    closeDB();
                     finish();
                 }
             }
@@ -91,9 +95,16 @@ public class LoadingApp extends AppCompatActivity {
                     customApps = getCustomApps();
                     if(checkNewApps()){
                         realDefaultApps = startLoadingDefault();
+                        String updateString = gson.toJson(getDefaultAllowedApps());
+                        String updateString2 = gson.toJson(commuApps);
+                        String updateString3 = gson.toJson(allApps);
+                        Log.e("UPDATE", updateString);
+                        Log.e("UPDATE", updateString2);
+                        defaultAppsUpdateDB(updateString, updateString2, updateString3);
                     }
                     else{
                         realDefaultApps = getDefaultApps();
+                        commuApps = getCommuApps();
                     }
                     bannedApps = customApps;
                     startLoadingCustom(customApps);
@@ -101,9 +112,10 @@ public class LoadingApp extends AppCompatActivity {
                     e.printStackTrace();
                 } finally {
                     setIsCustom(checkIfCustom(userName));
+                    setIfBannedCommu(checkIfBannedCommu(userName));
+                    setAllowedCommuApps();
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
-                    closeDB();
                     finish();
                 }
             }
@@ -120,12 +132,16 @@ public class LoadingApp extends AppCompatActivity {
                         realDefaultApps = startLoadingDefault();
                         defaultApps = startLoadingDefault();
                         String updateString = gson.toJson(getDefaultAllowedApps());
+                        String updateString2 = gson.toJson(commuApps);
+                        String updateString3 = gson.toJson(allApps);
                         Log.e("UPDATE", updateString);
-                        defaultAppsUpdateDB(updateString);
+                        Log.e("UPDATE", updateString2);
+                        defaultAppsUpdateDB(updateString, updateString2, updateString3);
                     }
                     else{
                         defaultApps = getDefaultApps();
                         realDefaultApps = getDefaultApps();
+                        commuApps = getCommuApps();
                     }
                     customApps = getCustomApps();
                     bannedApps = defaultApps;
@@ -134,9 +150,10 @@ public class LoadingApp extends AppCompatActivity {
                     e.printStackTrace();
                 } finally {
                     isCustom = checkIfCustom(userName);
+                    setIfBannedCommu(checkIfBannedCommu(userName));
+                    setAllowedCommuApps();
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
-                    closeDB();
                     finish();
                 }
             }
@@ -217,7 +234,7 @@ public class LoadingApp extends AppCompatActivity {
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
             }else if(category.equals(communication)){    //社交APP禁用開始操作
-                appInfo.setAppStatus(true);
+                appInfo.setAppStatus(false);
                 Log.e("check",appInfo.getPackageName() + "is added");
                 commuApps.add(appInfo.getPackageName());
             }else{
@@ -257,6 +274,7 @@ public class LoadingApp extends AppCompatActivity {
                 Log.e("check",info.activityInfo.packageName + "is added to communication");
                 commuApps.add(info.activityInfo.packageName);
             }
+            allApps.add(info.activityInfo.packageName);
         }
         return defaultApps;
     }
@@ -269,7 +287,6 @@ public class LoadingApp extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        String communication = "communication";
 
         @SuppressLint("QueryPermissionsNeeded")
         List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
@@ -279,20 +296,15 @@ public class LoadingApp extends AppCompatActivity {
             appInfo.setAppLogo(info.activityInfo.loadIcon(packageManager));
             appInfo.setPackageName(info.activityInfo.packageName);
             appInfo.setAppName((String) info.activityInfo.loadLabel(packageManager));
-            String query_url = GOOGLE_URL + info.activityInfo.packageName + "&hl=en";
-            String category = getCategory(query_url).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
             if(customs.contains(appInfo.getPackageName())){
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "change to banned");
-            }
-            else if(category.equals(communication)){    //社交APP禁用開始操作
-                Log.e("check",info.activityInfo.packageName + "is added to communication");
-                commuApps.add(info.activityInfo.packageName);
             }
             else{
                 appInfo.setAppStatus(false);
             }
             customAppsList.add(appInfo);
+            allApps.add(appInfo.getPackageName());
         }
         setAllowedAppInfos(customAppsList);
     }
@@ -323,10 +335,10 @@ public class LoadingApp extends AppCompatActivity {
     }
 
     public boolean checkIfUserExists() {
-        String count = "SELECT count(*) FROM " + TABLE_APPS;
+        String count = "SELECT * FROM " + TABLE_APPS;
         Cursor cursor = db.rawQuery(count, null);
         cursor.moveToFirst();
-        int icount = cursor.getInt(0);
+        int icount = cursor.getCount();
         if(icount == 0){
             cursor.close();
             return false;
@@ -345,19 +357,33 @@ public class LoadingApp extends AppCompatActivity {
         return isCustom;
     }
 
-    private void insertDB(String user, String all, String defaults, String customs){
+    public int checkIfBannedCommu(String user) {
+        String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + user + "'";
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int commuBanned = cursor.getInt(cursor.getColumnIndex("_BANNEDCOMMU"));
+        setIfBannedCommu(commuBanned);
+        cursor.close();
+        return commuBanned;
+    }
+
+    private void insertDB(String user, String all, String commu, String defaults, String customs){
         ContentValues values = new ContentValues();
         values.put("_USER ",user);
         values.put("_ISCUSTOM", 0);
+        values.put("_BANNEDCOMMU", 1);
         values.put("_ALL", all);
+        values.put("_COMMUNICATE", commu);
         values.put("_DEFAULT", defaults);
         values.put("_CUSTOM", customs);
         db.insert(TABLE_APPS,null,values);
     }
 
-    public void defaultAppsUpdateDB(String defaults){
+    public void defaultAppsUpdateDB(String defaults, String commus, String alls){
         ContentValues values = new ContentValues();
+        values.put("_COMMUNICATE", commus);
         values.put("_DEFAULT", defaults);
+        values.put("_ALL", alls);
         db.update(TABLE_APPS,values,COL_USER + " = " + "'" + userName + "'", null);
     }
 
@@ -394,6 +420,17 @@ public class LoadingApp extends AppCompatActivity {
         return apps;
     }
 
+    private ArrayList<String> getCommuApps(){
+        String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + userName + "'";
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        String app = cursor.getString(cursor.getColumnIndex("_COMMUNICATE"));
+        ArrayList<String>  apps = gson.fromJson(app, type);
+        cursor.close();
+        return apps;
+    }
+
     private void closeDB() {
         dbBannedAppsHelper.close();
     }
@@ -402,6 +439,9 @@ public class LoadingApp extends AppCompatActivity {
     //更改
     public static void setIsCustom(int custom){
         isCustom = custom;
+    }
+    public static void setIfBannedCommu(int banned){
+        commuBanned = banned;
     }
     public static void setCustomAllowedApps(List<String> app){
         customApps = app;
@@ -418,7 +458,13 @@ public class LoadingApp extends AppCompatActivity {
     public static void setAllowedAppInfos(List<AppInfo> appList){
         bannedAppsList = appList;
     }
-    public static void setAllowedCommuApps(List<String> Commuapp){
+    public static void setAllowedCommuApps(){
+        if(getIsBannedCommu() == 1){
+            bannedCommuApps = commuApps;
+        }
+        else{
+            bannedCommuApps = commuAppsNull;
+        }
     }
 
     //取得
@@ -439,8 +485,13 @@ public class LoadingApp extends AppCompatActivity {
     public static int getIsCustom(){
         return isCustom;
     }
+
+    public static int getIsBannedCommu(){
+        return commuBanned;
+    }
+
     public static List<String> getAllowedCommuApps(){
-        return commuApps;
+        return bannedCommuApps;
     }
 }
 

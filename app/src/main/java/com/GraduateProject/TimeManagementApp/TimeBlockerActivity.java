@@ -1,12 +1,24 @@
 package com.GraduateProject.TimeManagementApp;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.navigation.NavigationView;
 
 import org.w3c.dom.Text;
 
@@ -15,83 +27,89 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class TimeBlockerActivity extends AppCompatActivity implements WeekDayView.MonthChangeListener,
         WeekDayView.EventClickListener, WeekDayView.EventLongPressListener,WeekDayView.EmptyViewClickListener,WeekDayView.EmptyViewLongPressListener,WeekDayView.ScrollListener {
     //view
     private WeekDayView mWeekView;
-    private WeekHeaderView mWeekHeaderView;
-    private TextView mTv_date;
+    private static WeekHeaderView mWeekHeaderView;
+    private static Toolbar toolbar;
+    private int currentYear = 0;
+    private int currentMonth = 0;
     List<WeekViewEvent> mNewEvent = new ArrayList<WeekViewEvent>();
+    private AppBarConfiguration mAppBarConfiguration;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_blocker);
         assignViews();
 
-        DBTotalHelper dbTimeBlockHelper=new DBTotalHelper(this);
-        TextView textView = findViewById(R.id.weekdayview);
-        Cursor cursor = dbTimeBlockHelper.ViewData();
+        //目錄相關
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        toolbar = findViewById(R.id.mytoolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitleMarginStart(20);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.nav_open, R.string.nav_close);
+        drawer.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        //to make the Navigation drawer icon always appear on the action bar
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+        toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
+        navigationView.setNavigationItemSelectedListener(item -> {
 
-        int theID = 0;
-        List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
-        while (cursor.moveToNext()){
-            //int EventID = cursor.getInt(0);
-            String Date = cursor.getString(1);
-            String Course = cursor.getString(2);
-            String starTime = cursor.getString(3);
-            String stopTime = cursor.getString(4);
+            switch (item.getItemId()) {
+                //lunch login activity
+                case R.id.nav_login:
+                    startActivity(new Intent(TimeBlockerActivity.this, LoginActivity.class));
+                    break;
+                // launch general timer
+                case R.id.nav_home:
+                    startActivity(new Intent(TimeBlockerActivity.this, GeneralTimerActivity.class));
+                    break;
+                // launch to do list
+                case R.id.todolist:
+                    Log.e("Menu", "to do list");
+                    startActivity(new Intent(TimeBlockerActivity.this, TodayToDoListActivity.class));
+                    break;
+                // launch time block
+                case R.id.studytime:
+                    break;
+                // launch settings activity
+                case R.id.setting:
+                    startActivity(new Intent(TimeBlockerActivity.this, SettingsActivity.class));
+                    break;
+            }
 
-            int theYear = Integer.parseInt(Date.substring(0,4));
-            int theMonth = Integer.parseInt(Date.substring(5,7));
-            Date=Date+"0";
-            int theDay = Integer.parseInt(Date.substring(8,10));
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        });
+        navigationView.setCheckedItem(R.id.nav_home);
 
-            String[] starts = starTime.split(":");
-            int starHour = Integer.parseInt(starts[0]);
-            int starMinute = Integer.parseInt(starts[1]);
-            String[] ends = stopTime.split(":");
-            int endHour = Integer.parseInt(ends[0]);
-            int endMinute = Integer.parseInt(ends[1]);
-
-
-            Calendar startTime = Calendar.getInstance();
-            startTime.set(Calendar.HOUR_OF_DAY, starHour);
-            startTime.set(Calendar.MINUTE, starMinute);
-            startTime.set(Calendar.DAY_OF_MONTH, theDay);
-            startTime.set(Calendar.MONTH, theMonth);
-            startTime.set(Calendar.YEAR, theYear);
-            Calendar endTime = (Calendar) startTime.clone();
-            endTime.set(Calendar.HOUR_OF_DAY, endHour);
-            endTime.set(Calendar.MINUTE, endMinute);
-            WeekViewEvent event = new WeekViewEvent(theID, Course, startTime, endTime);
-            event.setColor(getResources().getColor(R.color.red));
-            events.add(event);
-
-            theID=theID+1;
-        }
     }
+
+    //目錄相關操作
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
+
     private void assignViews() {
         mWeekView = (WeekDayView) findViewById(R.id.weekdayview);
         mWeekHeaderView= (WeekHeaderView) findViewById(R.id.weekheaderview);
-        mTv_date =(TextView)findViewById(R.id.tv_date);
-//init WeekView
+        //init WeekView
         mWeekView.setMonthChangeListener(this);
         mWeekView.setEventLongPressListener(this);
         mWeekView.setOnEventClickListener(this);
         mWeekView.setScrollListener(this);
-        mWeekHeaderView.setDateSelectedChangeListener(new WeekHeaderView.DateSelectedChangeListener() {
-            @Override
-            public void onDateSelectedChange(Calendar oldSelectedDay, Calendar newSelectedDay) {
-                mWeekView.goToDate(newSelectedDay);
-            }
-        });
-        mWeekHeaderView.setScrollListener(new WeekHeaderView.ScrollListener() {
-            @Override
-            public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
-                mWeekView.goToDate(mWeekHeaderView.getSelectedDay());
-            }
-        });
+        mWeekHeaderView.setDateSelectedChangeListener((oldSelectedDay, newSelectedDay) -> mWeekView.goToDate(newSelectedDay));
+        mWeekHeaderView.setScrollListener((newFirstVisibleDay, oldFirstVisibleDay) -> mWeekView.goToDate(mWeekHeaderView.getSelectedDay()));
         setupDateTimeInterpreter(false);
     }
     /**
@@ -126,118 +144,54 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     @Override
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
 // Populate the week view with some events.
+
+        DBTotalHelper dbTimeBlockHelper=new DBTotalHelper(this);
+        Cursor cursor = dbTimeBlockHelper.ViewData();
+        cursor.moveToFirst();
+
+        int theID = 0;
         List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
+        int rotation = 1;
+        do{
+            //int EventID = cursor.getInt(0);
+            String Date = cursor.getString(1);
+            String Course = cursor.getString(2);
+            String starTime = cursor.getString(3);
+            String stopTime = cursor.getString(4);
 
-        Calendar startTime = Calendar.getInstance();
-        startTime.set(Calendar.HOUR_OF_DAY, 3);
-        startTime.set(Calendar.MINUTE, 0);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        Calendar endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR, 1);
-        endTime.set(Calendar.MONTH, newMonth - 1);
-        WeekViewEvent event = new WeekViewEvent(1, "This is a Event!!", startTime, endTime);
-        event.setColor(getResources().getColor(R.color.black));
-        events.add(event);
+            int theYear = Integer.parseInt(Date.substring(0,4));
+            int theMonth = Integer.parseInt(Date.substring(5,7)) - 1;
+            //Date=Date+"0";
+            int theDay = Integer.parseInt(Date.substring(8,10));
 
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.HOUR_OF_DAY, 3);
-        startTime.set(Calendar.MINUTE, 30);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.set(Calendar.HOUR_OF_DAY, 4);
-        endTime.set(Calendar.MINUTE, 30);
-        endTime.set(Calendar.MONTH, newMonth - 1);
-        event = new WeekViewEvent(10, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.red));
-        events.add(event);
+            if(theMonth == newMonth){
+                String[] starts = starTime.split(":");
+                int starHour = Integer.parseInt(starts[0]);
+                int starMinute = Integer.parseInt(starts[1]);
+                String[] ends = stopTime.split(":");
+                int endHour = Integer.parseInt(ends[0]);
+                int endMinute = Integer.parseInt(ends[1]);
 
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.HOUR_OF_DAY, 4);
-        startTime.set(Calendar.MINUTE, 20);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.set(Calendar.HOUR_OF_DAY, 5);
-        endTime.set(Calendar.MINUTE, 0);
-        event = new WeekViewEvent(10, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.purple_200));
-        events.add(event);
 
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.HOUR_OF_DAY, 5);
-        startTime.set(Calendar.MINUTE, 30);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR_OF_DAY, 2);
-        endTime.set(Calendar.MONTH, newMonth - 1);
-        event = new WeekViewEvent(2, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.light_slate_Blue));
-        events.add(event);
+                Calendar startTime = Calendar.getInstance();
+                startTime.set(Calendar.HOUR_OF_DAY, starHour);
+                startTime.set(Calendar.MINUTE, starMinute);
+                startTime.set(Calendar.DAY_OF_MONTH, theDay);
+                startTime.set(Calendar.MONTH, theMonth);
+                startTime.set(Calendar.YEAR, theYear);
+                Calendar endTime = (Calendar) startTime.clone();
+                endTime.set(Calendar.HOUR_OF_DAY, endHour);
+                endTime.set(Calendar.MINUTE, endMinute);
+                WeekViewEvent event = new WeekViewEvent(theID, Course, startTime, endTime);
+                event.setColor(getResources().getColor(R.color.purple_200));
+                events.add(event);
 
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.HOUR_OF_DAY, 5);
-        startTime.set(Calendar.MINUTE, 30);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR_OF_DAY, 2);
-        endTime.set(Calendar.MONTH, newMonth - 1);
-        event = new WeekViewEvent(2, "dddd", startTime, endTime);
-        event.setColor(getResources().getColor(R.color.design_default_color_primary_dark));
-        events.add(event);
+                Log.e("TIME BLOCK", "回數：" + rotation + " 科目：" + Course + " 日期：" + Date);
+            }
 
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.HOUR_OF_DAY, 5);
-        startTime.set(Calendar.MINUTE, 0);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        startTime.add(Calendar.DATE, 1);
-        endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR_OF_DAY, 3);
-        endTime.set(Calendar.MONTH, newMonth - 1);
-        event = new WeekViewEvent(3, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.purple_200));
-        events.add(event);
-
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.DAY_OF_MONTH, 15);
-        startTime.set(Calendar.HOUR_OF_DAY, 3);
-        startTime.set(Calendar.MINUTE, 0);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR_OF_DAY, 3);
-        event = new WeekViewEvent(4, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.light_slate_Blue));
-        events.add(event);
-
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.DAY_OF_MONTH, 1);
-        startTime.set(Calendar.HOUR_OF_DAY, 3);
-        startTime.set(Calendar.MINUTE, 0);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR_OF_DAY, 3);
-        event = new WeekViewEvent(5, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.design_default_color_primary));
-        events.add(event);
-
-        startTime = Calendar.getInstance();
-        startTime.set(Calendar.DAY_OF_MONTH, startTime.getActualMaximum(Calendar.DAY_OF_MONTH));
-        startTime.set(Calendar.HOUR_OF_DAY, 15);
-        startTime.set(Calendar.MINUTE, 0);
-        startTime.set(Calendar.MONTH, newMonth - 1);
-        startTime.set(Calendar.YEAR, newYear);
-        endTime = (Calendar) startTime.clone();
-        endTime.add(Calendar.HOUR_OF_DAY, 3);
-        event = new WeekViewEvent(5, getEventTitle(startTime), startTime, endTime);
-        event.setColor(getResources().getColor(R.color.design_default_color_error));
-        events.add(event);
-        events.addAll(mNewEvent);
+            theID=theID+1;
+        }
+        while (cursor.moveToNext());
         return events;
     }
     private String getEventTitle(Calendar time) {
@@ -263,8 +217,14 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     public void onFirstVisibleDayChanged(Calendar newFirstVisibleDay, Calendar oldFirstVisibleDay) {
     }
     @Override
-    public void onSelectedDaeChange(Calendar selectedDate) {
+    public void onSelectedDateChange(Calendar selectedDate) {
         mWeekHeaderView.setSelectedDay(selectedDate);
-        mTv_date.setText(selectedDate.get(Calendar.YEAR)+"年"+(selectedDate.get(Calendar.MONTH))+"月");
+        Log.e("DATE", selectedDate.get(Calendar.YEAR)+" 年 "+(selectedDate.get(Calendar.MONTH)+1)+" 月 ");
+        toolbar.setTitle(selectedDate.get(Calendar.YEAR)+" 年 "+(selectedDate.get(Calendar.MONTH) + 1)+" 月 ");
+    }
+
+    public static void onSelectedDateChangeHeader(Calendar selectedDate) {
+        Log.e("DATE", selectedDate.get(Calendar.YEAR)+" 年 "+(selectedDate.get(Calendar.MONTH)+1)+" 月 ");
+        toolbar.setTitle(selectedDate.get(Calendar.YEAR)+" 年 "+(selectedDate.get(Calendar.MONTH) + 1 )+" 月 ");
     }
 }

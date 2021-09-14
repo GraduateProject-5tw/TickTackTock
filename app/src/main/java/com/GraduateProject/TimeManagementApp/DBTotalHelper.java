@@ -15,9 +15,9 @@ public class DBTotalHelper extends SQLiteOpenHelper {
     private final static String _DBName = "AllDataHere.db";  //<-- db name
     private final static String _TableNameforTime = "TimeBlocker"; //<-- table name
     private final static String _TableNameforBanned = "BannedApps"; //<-- table name
+    private final static String _TableNameforCourse = "Courses"; //<-- table name
 
     public DBTotalHelper(Context context) {
-
         super(context, _DBName, null, _DBVersion);
         // TODO Auto-generated constructor stub
     }
@@ -37,14 +37,22 @@ public class DBTotalHelper extends SQLiteOpenHelper {
                 "_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "_USER VARCHAR(255) NOT NULL, " +
                 "_ISCUSTOM INTEGER NOT NULL, " +
+                "_BANNEDCOMMU INTEGER NOT NULL," +
                 "_ALL VARCHAR(2048) NOT NULL, " +
+                "_COMMUNICATE VARCHAR(1024) NOT NULL, " +
                 "_DEFAULT VARCHAR(1024) NOT NULL, " +
                 "_CUSTOM VARCHAR(1024) NOT NULL"+
                 ");";
         //db.execSql(SQL3);  for todolist
+        String SQL4 = "CREATE TABLE IF NOT EXISTS " + _TableNameforCourse + "( " +
+                "_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "_COURSE TEXT NOT NULL, " +
+                "_COLOR INTEGER NOT NULL, " +
+                "_TEXT INTEGER NOT NULL " +
+                ");";
         db.execSQL(SQL2);
         db.execSQL(SQL1);
-
+        db.execSQL(SQL4);
     }
 
     @Override
@@ -52,8 +60,10 @@ public class DBTotalHelper extends SQLiteOpenHelper {
         // TODO Auto-generated method stub
         String SQL1 = "DROP TABLE " + _TableNameforTime;
         String SQL2 = "DROP TABLE " + _TableNameforBanned;
+        String SQL4 = "DROP TABLE " + _TableNameforCourse;
         db.execSQL(SQL1);
         db.execSQL(SQL2);
+        db.execSQL(SQL4);
         onCreate(db);
     }
 
@@ -65,6 +75,7 @@ public class DBTotalHelper extends SQLiteOpenHelper {
     public Cursor ViewData(){
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         Cursor cursor = sqLiteDatabase.rawQuery("select * from "+_TableNameforTime,null);
+        cursor.moveToFirst();
         return cursor;
     }
 

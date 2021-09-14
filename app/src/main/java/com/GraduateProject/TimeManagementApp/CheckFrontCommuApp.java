@@ -35,6 +35,10 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         @Override
         public void onTick(long millisUntilFinished) {
             Log.e("Countdown", "開始倒數計時10分鐘");
+            String frontCommuApp = getForegroundTask().replaceAll("\\s+","");
+            if(!commuapps.contains(frontCommuApp)){
+                CommuTimer.cancel();
+            }
         }
 
         @Override
@@ -50,7 +54,6 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         @Override
         public void run() {
             String frontCommuApp = getForegroundTask().replaceAll("\\s+","");
-
             if(commuapps.contains(frontCommuApp)){
                 Log.e("checkCommu", "Detect Communication App Press");
                 executor.shutdown();

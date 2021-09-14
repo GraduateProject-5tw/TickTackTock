@@ -4,12 +4,25 @@
     <PreferenceCategory android:title="禁用模式">
         <SwitchPreference
             android:key="isCustomApp"
-            android:title="開啟自訂"/>
+            android:title="開啟自訂禁用app模式"
+            android:summary="未開啟時，禁用app為預設之娛樂、社交與購物app"/>
 
         <Preference
             android:title="編輯禁用app"
             android:key="editCustomApp"
             android:shouldDisableView="true"/>
+
+        <SwitchPreference
+            android:key="bannedCommuApp"
+            android:title="開啟通訊app禁用模式"
+            android:summary="此模式開啟時，通訊app可有10分鐘之連續使用時限。"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="讀書科目">
+        <Preference
+            android:title="編輯讀書科目"
+            android:key="editCourses"/>
 
     </PreferenceCategory>
 

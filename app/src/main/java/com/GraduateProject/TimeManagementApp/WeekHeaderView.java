@@ -107,10 +107,9 @@ public class WeekHeaderView extends View {
         public boolean onSingleTapConfirmed(MotionEvent e) {
             Calendar newSelectedDay = getDateFromPoint(e.getX(), e.getY());
             SimpleDateFormat format = new SimpleDateFormat("yyyy MM dd", Locale.getDefault());
-            if (null != newSelectedDay)
-                Toast.makeText(mContext, "time =====" + format.format(newSelectedDay.getTime()), Toast.LENGTH_LONG).show();
             if (null != newSelectedDay && mDateSelectedChangeListener != null) {
                 mDateSelectedChangeListener.onDateSelectedChange(mSelectedDay, newSelectedDay);
+                TimeBlockerActivity.onSelectedDateChangeHeader(newSelectedDay);
             }
             mSelectedDay = (Calendar) newSelectedDay.clone();
             ViewCompat.postInvalidateOnAnimation(WeekHeaderView.this);
@@ -278,6 +277,7 @@ public class WeekHeaderView extends View {
         mLastVisibleDay.add(Calendar.DATE, 6);
         if (!mFirstVisibleDay.equals(oldFirstVisibleDay) && mScrollListener != null) {
             mScrollListener.onFirstVisibleDayChanged(mFirstVisibleDay, oldFirstVisibleDay);
+            TimeBlockerActivity.onSelectedDateChangeHeader(mSelectedDay);
         }
         // Draw the header background.
         canvas.drawRect(0, 0, getWidth(), mHeaderHeight, mHeaderBackgroundPaint);
@@ -602,6 +602,7 @@ public class WeekHeaderView extends View {
         this.mScrollListener = mScrollListener;
         invalidate();
     }
+
 
     public Calendar getSelectedDay() {
         return mSelectedDay;

@@ -75,7 +75,7 @@ public class WeekView extends View {
     private Direction mCurrentFlingDirection = Direction.NONE;
 
     // Attributes and their default values.
-    private int mHourHeight = 50;
+    private int mHourHeight = 150;
     private int mColumnGap = 10;
     private int mFirstDayOfWeek = Calendar.MONDAY;
     private int mTextSize = 12;
@@ -86,7 +86,7 @@ public class WeekView extends View {
     private int mHeaderRowBackgroundColor = Color.WHITE;
     private int mDayBackgroundColor = Color.rgb(245, 245, 245);
     private int mHourSeparatorColor = Color.rgb(230, 230, 230);
-    private int mTodayBackgroundColor = Color.rgb(239, 247, 254);
+    private int mTodayBackgroundColor = Color.rgb(254, 250, 239);
     private int mHourSeparatorHeight = 2;
     private int mTodayHeaderTextColor = Color.rgb(39, 137, 228);
     private int mEventTextSize = 12;

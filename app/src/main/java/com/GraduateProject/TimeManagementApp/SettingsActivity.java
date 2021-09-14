@@ -23,7 +23,9 @@ import com.google.gson.Gson;
 public class SettingsActivity extends AppCompatActivity {
 
     protected static SwitchPreference mSwitchPreference;
+    protected static SwitchPreference mSwitchPreferenceCommu;
     protected static Preference editButton;
+    protected static Preference editCourse;
     protected static String userName;
     private static DBTotalHelper dbBannedAppsHelper = null;
     private static final String TABLE_APPS = "BannedApps";
@@ -53,7 +55,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         Log.e("UPDATE", Integer.toString(LoadingApp.getIsCustom()));
-        customAppsUpdateDB(LoadingApp.getIsCustom());
+        customAppsUpdateDB(LoadingApp.getIsCustom(), LoadingApp.getIsBannedCommu());
         Intent intent = new Intent(SettingsActivity.this, GeneralTimerActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
@@ -65,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             Log.e("UPDATE", Integer.toString(LoadingApp.getIsCustom()));
-            customAppsUpdateDB(LoadingApp.getIsCustom());
+            customAppsUpdateDB(LoadingApp.getIsCustom(), LoadingApp.getIsBannedCommu());
             AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
             alert.setTitle("離開");
             alert.setMessage("尚未儲存變更，確定要離開設定?");
@@ -75,7 +77,6 @@ public class SettingsActivity extends AppCompatActivity {
                 Intent intent = new Intent(SettingsActivity.this, GeneralTimerActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-                closeDB();
                 finishAndRemoveTask();
             });
             //按"否",則不執行任何操作
@@ -94,9 +95,10 @@ public class SettingsActivity extends AppCompatActivity {
         db = dbBannedAppsHelper.getWritableDatabase();
     }
 
-    public void customAppsUpdateDB(int isCustom){
+    public void customAppsUpdateDB(int isCustom, int isBanned){
         ContentValues values = new ContentValues();
         values.put("_ISCUSTOM", isCustom);
+        values.put("_BANNEDCOMMU", isBanned);
         db.update(TABLE_APPS,values,null, null);
     }
 
@@ -109,13 +111,16 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class MainPreferenceFragment extends PreferenceFragmentCompat {
         private static int isCustom;
+        private static int bannedCommu;
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.main_setttings, rootKey);
 
             mSwitchPreference = (SwitchPreference) findPreference("isCustomApp"); //Preference Key
+            mSwitchPreferenceCommu = (SwitchPreference) findPreference("bannedCommuApp");
             editButton = findPreference("editCustomApp");
+            editCourse = findPreference("editCourses");
 
             if(LoadingApp.getIsCustom() == 1){
                 mSwitchPreference.setChecked(true);
@@ -126,6 +131,14 @@ public class SettingsActivity extends AppCompatActivity {
                 editButton.setEnabled(false);
             }
             LoadingApp.setAllowedApps();
+
+            if(LoadingApp.getIsBannedCommu() == 1){
+                mSwitchPreferenceCommu.setChecked(true);
+            }
+            else{
+                mSwitchPreferenceCommu.setChecked(false);
+            }
+            LoadingApp.setAllowedCommuApps();
 
             mSwitchPreference.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (newValue.equals(true)) {
@@ -152,10 +165,30 @@ public class SettingsActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             });
-        }
 
-        public static int getIsCustom() {
-            return isCustom;
+            mSwitchPreferenceCommu.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (newValue.equals(true)) {
+                    bannedCommu = 1;
+                    mSwitchPreferenceCommu.setChecked(true);
+                    LoadingApp.setIfBannedCommu(bannedCommu);
+                    LoadingApp.setAllowedCommuApps();
+                } else {
+                    bannedCommu = 0;
+                    LoadingApp.setIfBannedCommu(bannedCommu);
+                    LoadingApp.setAllowedCommuApps();
+                    mSwitchPreferenceCommu.setChecked(false);
+                }
+                Log.e("COMMU", "is banned" + LoadingApp.getIsBannedCommu());
+                return true;
+            });
+
+            editCourse.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent("com.GraduateProject.TimeManagementApp.course");
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                startActivity(intent);
+                return true;
+            });
         }
     }
 

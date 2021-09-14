@@ -2,6 +2,7 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,6 +11,7 @@ import android.app.Service;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
@@ -35,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 public class DialogShow extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
     private String TAG = "Timers" ;
-    private List<String> apps = new ArrayList<>();
     WindowBanned windowBanned;
 
     @Override
@@ -55,6 +56,17 @@ public class DialogShow extends Service {    //server是一個在背景執行的
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
+        AlertDialog.Builder banned = new AlertDialog.Builder(getApplicationContext());
+        banned.setTitle("確 認");
+        banned.setMessage("現在是讀書時間，確定要使用該APP嗎？\n\n若使用，計時將會停止。");
+        banned.setPositiveButton("確定使用", (dialog, which) -> {
+            Log.v("shuffTest", "Pressed YES");
+            if(GeneralTimerActivity.getIsCounting()){
+                GeneralTimerActivity.getActivity().finishCounting();
+            } else{
+                TomatoClockActivity.getTomatoClockActivity().finishCounting();
+            }
+        });
         windowBanned = new WindowBanned(getApplicationContext());
         windowBanned.open();
         super.onStartCommand(intent , flags , startId) ;
@@ -66,32 +78,6 @@ public class DialogShow extends Service {    //server是一個在背景執行的
         Log. e ( TAG , "onDestroy" ) ;
         super.onDestroy() ;
         this.stopSelf();
-    }
-
-    private String getForegroundTask() {
-        String currentApp = "NULL";
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressLint("WrongConstant") UsageStatsManager usm = (UsageStatsManager)this.getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
-            if (appList != null && appList.size() > 0) {
-                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
-                for (UsageStats usageStats : appList) {
-                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-                }
-                if (!mySortedMap.isEmpty()) {
-                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
-                }
-            }
-        } else {
-            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
-            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
-            if(tasks.isEmpty() || tasks == null){
-            }
-            currentApp = tasks.get(0).processName;
-        }
-        Log.e("CHECK", currentApp);
-        return currentApp;
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

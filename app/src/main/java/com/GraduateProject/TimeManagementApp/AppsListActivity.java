@@ -59,7 +59,6 @@ public class AppsListActivity extends AppCompatActivity {
         customAppsUpdateDB(gson.toJson(AppListAdapter.getEditedApps()));
         LoadingApp.setCustomAllowedApps(AppListAdapter.getEditedApps());
         LoadingApp.setAllowedAppInfos(AppListAdapter.getEditedAppInfos());
-        closeDB();
         finishAndRemoveTask();
     }
 
@@ -77,7 +76,6 @@ public class AppsListActivity extends AppCompatActivity {
             alert.setCancelable(false);
             //按"是",則退出應用程式
             alert.setPositiveButton("立即儲存", (dialog, i) -> {
-                closeDB();
                 finishAndRemoveTask();
             });
             //按"否",則不執行任何操作

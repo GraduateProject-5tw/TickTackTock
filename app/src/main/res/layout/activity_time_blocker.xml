@@ -1,56 +1,88 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TimeBlockerActivity">
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start">
 
-    <TextView
-        android:id="@+id/tv_date"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@color/light_slate_Blue"
-        android:gravity="center"
-        android:text="2015年1月"
-        android:textColor="#ffffff"
-        android:textSize="16sp"/>
-
-    <com.GraduateProject.TimeManagementApp.WeekHeaderView
-        android:id="@+id/weekheaderview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_date"
-        app:firstDayOfWeek2="sunday"
-        app:headerBackgroundColor="@color/light_slate_Blue"
-        app:headerDayLabelNormalTextColor="#ffffff"
-        app:headerDayLabelTextSize="20sp"
-        app:headerDayLabelTodayTextColor="@android:color/holo_red_dark"
-        app:headerFocusBackgroundColor="#ffffff"
-        app:headerFocusSameDayBackgroundColor="#ffffff"
-        app:headerFocusSameDayTextColor="#000000"
-        app:headerFocusTextColor="#000000"
-        app:headerPaddingTop="20dp"
-        app:headerRowGap="40dp"
-        app:headerWeekLabelTextColor="#ffffff"
-        app:headerWeekLabelTextSize="16sp" />
-
-    <com.GraduateProject.TimeManagementApp.WeekDayView
-        android:id="@+id/weekdayview"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/weekheaderview"
-        android:visibility="visible"
-        app:columnGap="8dp"
-        app:dayBackgroundColor="#ffffffff"
-        app:eventTextColor="@android:color/white"
-        app:headerColumnBackground="#ffffffff"
-        app:headerColumnPadding="8dp"
-        app:headerColumnTextColor="@android:color/black"
-        app:headerRowBackgroundColor="@color/light_slate_Blue"
-        app:headerRowPadding="12dp"
-        app:hourHeight="60dp"
-        app:noOfVisibleDays="1"
-        app:textSize="12sp"
-        app:todayBackgroundColor="#1848adff"
-        app:todayHeaderTextColor="@android:color/holo_purple" />
-</RelativeLayout>
+        android:orientation="vertical"
+        tools:context=".TimeBlockerActivity">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat"
+            app:liftOnScroll="true">
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/mytoolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"
+            app:titleTextAppearance="@style/Toolbar.DateText">
+        </com.google.android.material.appbar.MaterialToolbar>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".TimeBlockerActivity">
+
+            <com.GraduateProject.TimeManagementApp.WeekHeaderView
+                android:id="@+id/weekheaderview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_date"
+                app:firstDayOfWeek2="sunday"
+                app:headerBackgroundColor="@color/light_slate_Blue"
+                app:headerDayLabelNormalTextColor="#ffffff"
+                app:headerDayLabelTextSize="20sp"
+                app:headerDayLabelTodayTextColor="@android:color/holo_red_dark"
+                app:headerFocusBackgroundColor="#ffffff"
+                app:headerFocusSameDayBackgroundColor="#ffffff"
+                app:headerFocusSameDayTextColor="#000000"
+                app:headerFocusTextColor="#000000"
+                app:headerPaddingTop="20dp"
+                app:headerRowGap="40dp"
+                app:headerWeekLabelTextColor="#ffffff"
+                app:headerWeekLabelTextSize="16sp" />
+
+            <com.GraduateProject.TimeManagementApp.WeekDayView
+                android:id="@+id/weekdayview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/weekheaderview"
+                android:visibility="visible"
+                app:columnGap="8dp"
+                app:dayBackgroundColor="#ffffffff"
+                app:eventTextColor="@android:color/white"
+                app:headerColumnBackground="#ffffffff"
+                app:headerColumnPadding="8dp"
+                app:headerColumnTextColor="@android:color/black"
+                app:headerRowBackgroundColor="@color/light_slate_Blue"
+                app:headerRowPadding="12dp"
+                app:hourHeight="60dp"
+                app:noOfVisibleDays="1"
+                app:textSize="12sp"
+                app:todayBackgroundColor="#1848adff"
+                app:todayHeaderTextColor="@android:color/holo_purple" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/nav_menuitem" />
+</androidx.drawerlayout.widget.DrawerLayout>

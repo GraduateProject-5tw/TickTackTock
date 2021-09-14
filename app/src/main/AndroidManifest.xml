@@ -33,9 +33,6 @@
         android:supportsRtl="true"
         android:taskAffinity=""
         android:theme="@style/Theme.MyApplication">
-        <activity
-            android:name=".PopupMessageCommu"
-            android:exported="true" />
         <activity android:name=".LoadingApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -83,6 +80,13 @@
         <activity android:name=".AppsListActivity">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.Banned" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".CourseListActivity">
+            <intent-filter>
+                <action android:name="com.GraduateProject.TimeManagementApp.course" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

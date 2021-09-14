@@ -3,14 +3,13 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="15dp"
-    android:background="@null">
+    android:padding="15dp">
 
     <androidx.cardview.widget.CardView
         android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="15dp">
+        app:cardCornerRadius="40dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -22,17 +21,18 @@
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:orientation="vertical"
-                android:background="@color/white">
+                android:orientation="vertical">
                 <TextView
                     android:id="@+id/txt_tit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="\t確 認"
-                    android:textColor="@color/light_slate_Blue"
+                    android:paddingStart="30dp"
+                    android:paddingVertical="4dp"
+                    android:text="確 認"
+                    android:textColor="#8a82cf"
                     android:textSize="20sp"
-                    android:background="#f8f7fc"/>
+                    android:background="@drawable/dialog_border"/>
                 <TextView
                     android:id="@+id/txt_dia"
                     android:layout_width="match_parent"
@@ -42,7 +42,7 @@
                     android:paddingBottom="15dp"
                     android:gravity="center|top"
                     android:text="現在是讀書時間，確定要使用該APP嗎？\n\n若使用，計時將會停止。"
-                    android:textColor="@color/light_slate_Blue"
+                    android:textColor="#6f68b0"
                     android:textSize="15sp"/>
             </LinearLayout>
 
@@ -59,7 +59,7 @@
                     android:background="@drawable/button_border"
                     android:clickable="true"
                     android:text="確 定 使 用"
-                    android:textColor="@color/light_slate_Blue"
+                    android:textColor="#6f68b0"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:focusable="true" />
@@ -68,10 +68,10 @@
                     android:id="@+id/btn_no"
                     android:layout_width="150dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/button_border"
+                    android:background="@drawable/button_border_right"
                     android:clickable="true"
                     android:text="放 棄 使 用"
-                    android:textColor="@color/light_slate_Blue"
+                    android:textColor="#6f68b0"
                     android:textStyle="bold"
                     android:textSize="13sp"
                     android:focusable="true" />
