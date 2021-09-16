@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -46,11 +47,12 @@ public class DialogShow extends Service {    //server是一個在背景執行的
 
     @Override //一旦離開app，建立server服務
     public void onCreate () {
-        Log. e ( TAG , "onCreate" );
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        Log.e(TAG, "onCreate");
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
             startMyOwnForeground();
-        else
+        } else {
             startForeground(1, new Notification());
+        }
     }
 
     @Override
@@ -67,8 +69,27 @@ public class DialogShow extends Service {    //server是一個在背景執行的
                 TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
         });
-        windowBanned = new WindowBanned(getApplicationContext());
-        windowBanned.open();
+        banned.setNegativeButton("放棄使用", ((dialog, which) -> {
+            Log.v("shuffTest", "Pressed NO");
+            Intent intentHome;
+            if(GeneralTimerActivity.getIsCounting()){
+                intentHome = new Intent(getApplicationContext(), GeneralTimerActivity.class);
+            } else{
+                intentHome = new Intent(getApplicationContext(), TomatoClockActivity.class);
+            }
+            intentHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getApplicationContext().startActivity(intentHome);
+        }));
+        AlertDialog alertDialog = banned.create();
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+        }
+        else {
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
+        }
+        alertDialog.show();
+        //windowBanned = new WindowBanned(getApplicationContext());
+        //windowBanned.open();
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }
