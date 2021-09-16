@@ -84,12 +84,15 @@ public class DialogShow extends Service {    //server是一個在背景執行的
         }));
         AlertDialog alertDialog = banned.create();
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-            if(Settings.canDrawOverlays(getApplicationContext())){
-                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-            }
-            else{
-                Log.e("OVERLAY","overlay error");
-            }
+            Handler handler = new Handler();
+            handler.postDelayed(() -> {
+                if(!Settings.canDrawOverlays(getApplicationContext())){
+                    Log.e("OVERLAY","overlay error");
+                }
+                else{
+                    alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+                }
+            }, 500);
         }
         else {
             alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
