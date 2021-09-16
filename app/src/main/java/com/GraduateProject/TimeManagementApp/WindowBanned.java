@@ -25,7 +25,7 @@ public class WindowBanned {
     public WindowBanned(Context context){
         this.context=context;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
             Log.e("VERSION", "ABOVE 26");
             // set the layout parameters of the window
             mParams = new WindowManager.LayoutParams(

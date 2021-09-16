@@ -589,10 +589,11 @@ public class TomatoClockActivity extends AppCompatActivity {
         if(isCounting){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(new Intent(this, CheckFrontApp.class));
+                startForegroundService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
             } else {
                 startService(new Intent(this, CheckFrontApp.class));
+                startService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
             }
-            startService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
         }
     }
 
