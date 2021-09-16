@@ -93,7 +93,7 @@ public class DialogShow extends Service {    //server是一個在背景執行的
                     alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                     alertDialog.show();
                 }
-            }, 10000);
+            }, 18000);
         }
         else {
             alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
