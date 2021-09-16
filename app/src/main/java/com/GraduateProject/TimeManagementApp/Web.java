@@ -7,7 +7,7 @@ import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-public class Web {
+public class Web {  //暫時存放
     private static String urll;
     private static String[] split;
     //private boolean ret;
