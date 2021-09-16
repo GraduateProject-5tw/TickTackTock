@@ -134,11 +134,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             isCounting = true;
             date= getDay();
             startTime=getTime();
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                startForegroundService(new Intent(GeneralTimerActivity.this, DialogShow.class));
-            } else {
-                startService(new Intent(GeneralTimerActivity.this, DialogShow.class));
-            }
         });
 
         //停止按鈕的功能實作

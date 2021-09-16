@@ -59,7 +59,7 @@ public class DialogShow extends Service {    //server是一個在背景執行的
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
-        AlertDialog.Builder banned = new AlertDialog.Builder(getApplicationContext());
+        /**AlertDialog.Builder banned = new AlertDialog.Builder(getApplicationContext());
         banned.setTitle("確 認");
         banned.setMessage("現在是讀書時間，確定要使用該APP嗎？\n\n若使用，計時將會停止。");
         banned.setCancelable(false);
@@ -93,14 +93,14 @@ public class DialogShow extends Service {    //server是一個在背景執行的
                     alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                     alertDialog.show();
                 }
-            }, 10000);
+            }, 18000);
         }
         else {
             alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
             alertDialog.show();
-        }
-        //windowBanned = new WindowBanned(getApplicationContext());
-        //windowBanned.open();
+        }**/
+        windowBanned = new WindowBanned(getApplicationContext());
+        windowBanned.open();
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
     }
