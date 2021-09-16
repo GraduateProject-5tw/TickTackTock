@@ -7,6 +7,7 @@ import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -83,6 +84,10 @@ public class WindowBanned {
             intentHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intentHome);
         });
+
+        mView.findViewById(R.id.message_background).setOnClickListener(v -> {
+        });
+
         // Define the position of the
         // window within the screen
         mParams.gravity = Gravity.CENTER;

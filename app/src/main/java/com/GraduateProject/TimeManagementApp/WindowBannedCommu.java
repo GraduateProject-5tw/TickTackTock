@@ -86,6 +86,10 @@ public class WindowBannedCommu {
             intentHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intentHome);
         });
+
+        mView.findViewById(R.id.message_background).setOnClickListener(v -> {
+        });
+
         // Define the position of the
         // window within the screen
         mParams.gravity = Gravity.CENTER;

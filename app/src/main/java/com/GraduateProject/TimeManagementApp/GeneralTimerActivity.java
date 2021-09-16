@@ -130,6 +130,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             isCounting = true;
             date= getDay();
             startTime=getTime();
+            startService(new Intent(GeneralTimerActivity.this, DialogShow.class));
 
         });
 
@@ -446,6 +447,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     @Override
     public void onPause() {
         super.onPause();
+        startService(new Intent(GeneralTimerActivity.this, DialogShow.class));
         if (isCounting) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(new Intent(this, CheckFrontApp.class));
@@ -461,7 +463,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     protected void onResume() {
         super.onResume();
         stopService(new Intent(this, CheckFrontApp.class));
-        stopService(new Intent(this, DialogShow.class));
+        //stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
         stopService(new Intent(this, DialogShow.class));
     }
