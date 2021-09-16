@@ -91,13 +91,14 @@ public class DialogShow extends Service {    //server是一個在背景執行的
                 }
                 else{
                     alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+                    alertDialog.show();
                 }
-            }, 500);
+            }, 10000);
         }
         else {
             alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
+            alertDialog.show();
         }
-        alertDialog.show();
         //windowBanned = new WindowBanned(getApplicationContext());
         //windowBanned.open();
         super.onStartCommand(intent , flags , startId) ;
