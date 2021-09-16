@@ -874,6 +874,4 @@ public class TomatoClockActivity extends AppCompatActivity {
     private void onDestory(){
         super.onDestroy();
     }
-
-
-}//
+}

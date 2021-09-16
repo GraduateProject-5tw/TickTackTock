@@ -113,6 +113,10 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 case R.id.setting:
                     startActivity(new Intent(GeneralTimerActivity.this, SettingsActivity.class));
                     break;
+                // launch web activity
+                case R.id.web:
+                    startActivity(new Intent(GeneralTimerActivity.this, WebActivity.class));
+                    break;
             }
 
             drawer.closeDrawer(GravityCompat.START);
