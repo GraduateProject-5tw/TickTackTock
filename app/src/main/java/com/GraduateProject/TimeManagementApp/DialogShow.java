@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -61,6 +62,7 @@ public class DialogShow extends Service {    //server是一個在背景執行的
         AlertDialog.Builder banned = new AlertDialog.Builder(getApplicationContext());
         banned.setTitle("確 認");
         banned.setMessage("現在是讀書時間，確定要使用該APP嗎？\n\n若使用，計時將會停止。");
+        banned.setCancelable(false);
         banned.setPositiveButton("確定使用", (dialog, which) -> {
             Log.v("shuffTest", "Pressed YES");
             if(GeneralTimerActivity.getIsCounting()){
@@ -82,7 +84,12 @@ public class DialogShow extends Service {    //server是一個在背景執行的
         }));
         AlertDialog alertDialog = banned.create();
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            if(Settings.canDrawOverlays(getApplicationContext())){
+                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+            }
+            else{
+                Log.e("OVERLAY","overlay error");
+            }
         }
         else {
             alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_PHONE);
