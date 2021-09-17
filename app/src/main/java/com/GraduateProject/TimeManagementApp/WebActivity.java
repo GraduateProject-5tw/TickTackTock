@@ -59,7 +59,7 @@ public class WebActivity extends AppCompatActivity {
                         }
 
 
-                        //      對webView的設置
+                        //對webView的設置
                         WebSettings websettings = mWebView.getSettings();
                         websettings.setSupportZoom(true);
                         websettings.setBuiltInZoomControls(true);
