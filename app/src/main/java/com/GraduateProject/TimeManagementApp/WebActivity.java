@@ -3,15 +3,11 @@ package com.GraduateProject.TimeManagementApp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-//import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
@@ -22,15 +18,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
 import android.widget.EditText;
-import android.widget.Toast;
-
 import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
 
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Locale;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 public class WebActivity extends AppCompatActivity {
 
@@ -59,6 +52,7 @@ public class WebActivity extends AppCompatActivity {
                         //按下確定鍵後的事件
                         mWebView = findViewById(R.id.webview_show);
                         textt = et.getText().toString();
+                        textt = textt.toLowerCase();
                         split = textt.split(",");
                         for (int j = 0; j < split.length; j++) {
                             System.out.println(split[j]);
@@ -82,21 +76,37 @@ public class WebActivity extends AppCompatActivity {
                         mWebView.setWebViewClient(new WebViewClient() {
                             @Override
                             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                                new Thread(new Runnable() {
+                                Callable<String> myCallable = new Callable<String>() {
                                     @Override
-                                    public void run() {
-                                        try {
-                                            Crawler crawler = new Crawler();
-                                            ret = crawler.webGet(url, split);
-                                            System.out.println(url);
-                                            System.out.println("ret=" + ret);
-                                            Log.i("ansen", "攔截url:" + url);
-
-                                        } catch (Exception ex) {
-                                            ex.printStackTrace();
-                                        }
+                                    public String call() throws Exception {
+                                        Crawler crawler = new Crawler();
+                                        String words = crawler.webGet(url);
+                                        return words;
                                     }
-                                }).start();
+                                };
+                                // 2.由上面的callable物件創建一個FutureTask物件
+                                FutureTask<String> oneTask = new FutureTask<String>(myCallable);
+                                // 3.由FutureTask創建一個Thread物件
+                                Thread t = new Thread(oneTask);
+                                // 4.開啟執行緒
+                                t.start();
+
+                                outer:
+                                for (int i = 0; i < split.length; i++) {
+                                    boolean retval = false;
+                                    try {
+                                        retval = oneTask.get().contains(split[i]);
+                                    } catch (ExecutionException e) {
+                                        e.printStackTrace();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    if (retval) {
+                                        ret = true;
+                                        break outer;
+                                    }
+                                }
+                                Log.i("ansen", "攔截url:" + url);
                                 if (ret == false) {
                                     bannedURL();
                                     return true;//表示我已經處理過了
@@ -199,4 +209,6 @@ public class WebActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }

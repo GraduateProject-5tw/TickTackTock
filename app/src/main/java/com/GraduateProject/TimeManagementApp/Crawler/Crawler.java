@@ -8,9 +8,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class Crawler {
-    public boolean webGet(String url, String[] split) {
+    public String webGet(String url) {
         String words = "", title = "";
-        boolean ret = false;
+        String wordsToLowerCase = "";
+
         try {
             Document doc = Jsoup.connect(url).get();    //connect to the link
             Elements elements = doc.body().select("*");     //select all elements in the website's body
@@ -21,16 +22,10 @@ public class Crawler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        wordsToLowerCase = words.toLowerCase();
         System.out.println("爬蟲結果fetch words from " + title + ':');
-        System.out.println(words);
-        outer:
-        for (int i = 0; i < split.length; i++) {
-            boolean retval = words.contains(split[i]);
-            if (retval) {
-                ret = true;
-                break outer;
-            }
-        }
-        return ret;
+        System.out.println("Cr class:"+wordsToLowerCase);
+
+        return wordsToLowerCase;
     }
 }
