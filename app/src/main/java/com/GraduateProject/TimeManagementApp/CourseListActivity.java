@@ -59,6 +59,7 @@ public class CourseListActivity extends AppCompatActivity {
             courseDialog.setTitle("輸入新科目");
             courseDialog.setView(editText);
             courseDialog.setPositiveButton("確定", ((dialogs, y) -> { }));
+            courseDialog.setNegativeButton("取消", ((dialogs, y) -> { }));
             AlertDialog alert = courseDialog.create();
             alert.show();
             alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
@@ -76,21 +77,19 @@ public class CourseListActivity extends AppCompatActivity {
                     overridePendingTransition(0, 0);
                 }
             }));
+            alert.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener((x -> {
+                alert.dismiss();
+            }));
             alert.setCanceledOnTouchOutside(true);
             alert.setCancelable(true);
         });
 
         RecyclerView course_list = findViewById(R.id.course_list);
         course_list.setLayoutManager(new LinearLayoutManager(this));
-        courses.size();
         colors.clear();
         textColors.clear();
         getCoursesInfo();
-        Log.e("List", "size : " + courses.size());
-        for(int i = 0; i < courses.size(); i++){
-            Log.e("List", courses.get(i));
-        }
-        CourseListAdapter adapter = new CourseListAdapter(courses, colors, textColors);
+        CourseListAdapter adapter = new CourseListAdapter(courses, colors, textColors, db);
         course_list.setAdapter(adapter);
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new CourseTouchHelper(adapter));

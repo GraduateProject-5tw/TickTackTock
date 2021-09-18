@@ -341,7 +341,7 @@ public class WeekDayView extends View {
 
         // Prepare event background color.
         mEventBackgroundPaint = new Paint();
-        mEventBackgroundPaint.setColor(Color.rgb(174, 208, 238));
+        mEventBackgroundPaint.setColor(Color.rgb(255, 253, 232));
 
         // Prepare header column background color.
         mHeaderColumnBackgroundPaint = new Paint();
@@ -355,7 +355,7 @@ public class WeekDayView extends View {
         mStartDate = (Calendar) mToday.clone();
 
         // Set default event color.
-        mDefaultEventColor = Color.parseColor("#9fc6e7");
+        mDefaultEventColor = Color.parseColor("#fffde8");
     }
 
     @Override
@@ -612,12 +612,7 @@ public class WeekDayView extends View {
                         mEventRects.get(i).rectF = eventRectF;
                         mEventBackgroundPaint.setColor(mEventRects.get(i).event.getColor() == 0 ? mDefaultEventColor : mEventRects.get(i).event.getColor());
                         canvas.drawRect(mEventRects.get(i).rectF, mEventBackgroundPaint);
-                        if (mEventRects.get(i).event.getName() == null) {
-                            drawText("subject", mEventRects.get(i).rectF, canvas, originalTop, originalLeft);
-
-                        } else {
-                            drawText(mEventRects.get(i).event.getName(), mEventRects.get(i).rectF, canvas, originalTop, originalLeft);
-                        }
+                        drawText(mEventRects.get(i).event.getName(), mEventRects.get(i).rectF, mEventRects.get(i).event.getText(), canvas, originalTop, originalLeft);
                     }else {
                         mEventRects.get(i).rectF = null;
                         Log.e("EVENT", "fail to draw event " + mEventRects.get(i).event.getName());
@@ -637,7 +632,7 @@ public class WeekDayView extends View {
      * @param originalTop  The original top position of the rectangle. The rectangle may have some of its portion outside of the visible area.
      * @param originalLeft The original left position of the rectangle. The rectangle may have some of its portion outside of the visible area.
      */
-    private void drawText(String text, RectF rect, Canvas canvas, float originalTop, float originalLeft) {
+    private void drawText(String text, RectF rect, int textColor, Canvas canvas, float originalTop, float originalLeft) {
         if (rect.right - rect.left - mEventPadding * 2 < 0) return;
 
         // Get text dimensions
@@ -646,6 +641,7 @@ public class WeekDayView extends View {
         // Crop height
         int availableHeight = (int) (rect.bottom - originalTop - mEventPadding * 2);
         int lineHeight = textLayout.getHeight() / textLayout.getLineCount();
+        mEventTextPaint.setColor(textColor);
         if (lineHeight < availableHeight && textLayout.getHeight() > rect.height() - mEventPadding * 2) {
             int lineCount = textLayout.getLineCount();
             int availableLineCount = (int) Math.floor(lineCount * availableHeight / textLayout.getHeight());

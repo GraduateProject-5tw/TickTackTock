@@ -8,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -253,7 +254,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         });
 
         tomato_btn.setEnabled(true);
-        tomato_btn.setBackgroundColor(-1); //白色
+        tomato_btn.setBackgroundColor(-1);
         tomato_btn.setOnClickListener(view ->
         {
             getCoursesInfo();
@@ -438,6 +439,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         //general的禁按
         general_btn.setEnabled(false);
         general_btn.setBackgroundColor(-3355444);
+        general_btn.setTextColor(-1);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)

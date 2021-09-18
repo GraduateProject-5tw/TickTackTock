@@ -5,10 +5,10 @@ import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,12 +16,10 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,9 +30,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
 import com.google.android.material.navigation.NavigationView;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -81,8 +77,8 @@ public class TomatoClockActivity extends AppCompatActivity {
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
         showDialogStart();
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
-        startBtn = findViewById(R.id.tstart_btn);
-        stopBtn = findViewById(R.id.tstop_btn);     //可用K停止
+        startBtn = findViewById(R.id.start_btn);
+        stopBtn = findViewById(R.id.stop_btn);     //可用K停止
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         timeButton = findViewById(R.id.clock); //clock image
@@ -362,10 +358,12 @@ public class TomatoClockActivity extends AppCompatActivity {
         //tomato的禁按
         tomato_btn.setEnabled(false);
         tomato_btn.setBackgroundColor(-3355444); //淺灰色
+        tomato_btn.setTextColor(-1);
 
         //計時按鈕的功能實作
         startBtn.setOnClickListener(v -> {
             stopBtn.setVisibility(View.VISIBLE);
+            startBtn.setVisibility(View.GONE);
             startTime = getTime();
             date = getDay();
             beginTime=SystemClock.elapsedRealtime();  //抓取當下時間

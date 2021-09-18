@@ -1,44 +1,20 @@
 package com.GraduateProject.TimeManagementApp;
 
-import android.annotation.SuppressLint;
-import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.WindowManager;
-
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class DialogShow extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
-    private String TAG = "Timers" ;
+    private final String TAG = "Timers" ;
     WindowBanned windowBanned;
 
     @Override

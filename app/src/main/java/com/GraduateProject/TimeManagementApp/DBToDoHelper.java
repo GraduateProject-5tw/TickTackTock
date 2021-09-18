@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.GraduateProject.TimeManagementApp.ToDoModel;
 
@@ -48,6 +49,7 @@ public class DBToDoHelper extends SQLiteOpenHelper {
     }
 
     public void openDatabase() {
+        Log.e("TASK", "open database");
         db = this.getWritableDatabase();
     }
 
@@ -59,12 +61,13 @@ public class DBToDoHelper extends SQLiteOpenHelper {
         db.insert(TODO_TABLE, null, cv);
     }
 
-    public List<ToDoModel> getAllTasks(){
+    public List<ToDoModel> getAllTasks(String selectDate){
+        SQLiteDatabase db = this.getReadableDatabase();
         List<ToDoModel> taskList = new ArrayList<>();
         Cursor cur = null;
         db.beginTransaction();
         try{
-            cur = db.query(TODO_TABLE, null, null, null, null, null, null, null);
+            cur = db.query(TODO_TABLE, null, NOWDATE + " = ?", new String[] { selectDate }, null, null, null, null);
             if(cur != null){
                 if(cur.moveToFirst()){
                     do{
@@ -74,6 +77,7 @@ public class DBToDoHelper extends SQLiteOpenHelper {
                         task.setStatus(cur.getInt(cur.getColumnIndex(STATUS)));
                         task.setDay(cur.getString(cur.getColumnIndex(NOWDATE)));
                         taskList.add(task);
+                        Log.e("Task", cur.getString(cur.getColumnIndex(TASK)));
                     }
                     while(cur.moveToNext());
                 }

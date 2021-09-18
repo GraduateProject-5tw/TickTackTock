@@ -13,6 +13,7 @@ public class WeekViewEvent implements Serializable {
     private Calendar mEndTime;
     private String mName;
     private int mColor;
+    private int text;
 
     public WeekViewEvent(){
 
@@ -98,6 +99,14 @@ public class WeekViewEvent implements Serializable {
 
     public void setColor(int color) {
         this.mColor = color;
+    }
+
+    public int getText() {
+        return text;
+    }
+
+    public void setText(int color) {
+        text = color;
     }
 
     public long getId() {

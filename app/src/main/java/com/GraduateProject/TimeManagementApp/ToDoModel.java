@@ -1,6 +1,9 @@
 package com.GraduateProject.TimeManagementApp;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class ToDoModel {
@@ -31,7 +34,9 @@ public class ToDoModel {
 
     //抓當下日期
     public String getDay(){
-        nowDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        Calendar day = TodoHeaderView.getSelectedAddDay();
+        int selectedMonth = day.get(Calendar.MONTH) + 1;
+        nowDate = day.get(Calendar.YEAR) + "-" + String.format("%02d", selectedMonth) + "-" + String.format("%02d", day.get(Calendar.DAY_OF_MONTH));
         return nowDate;
     }
     public void setDay(String nowDate){ this.nowDate = nowDate; }

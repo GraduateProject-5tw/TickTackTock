@@ -8,119 +8,140 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <LinearLayout
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".TomatoClockActivity">
+        android:background="@drawable/background_view"/>
 
-        <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/appBarLayout"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.AppCompat"
-            app:liftOnScroll="true">
-        </com.google.android.material.appbar.AppBarLayout>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context=".TomatoClockActivity">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/mytoolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="番茄模式"
-            app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
-            style="@style/Widget.MaterialComponents.Toolbar.Primary"
-            app:titleTextAppearance="@style/Toolbar.TitleText">
-        </com.google.android.material.appbar.MaterialToolbar>
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/generalTimer_btn"
-                android:layout_width="130dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="65dp"
-                android:textSize="12sp"
-                android:text="@string/general"
-                android:textColor="#FF424242"
-                android:background="@drawable/button_left" />
-
-            <Button
-                android:id="@+id/tomatoClock_btn"
-                android:layout_width="130dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center_horizontal"
-                android:text="@string/tomato"
-                android:textSize="12sp"
-                android:textColor="#FF424242"
-                android:layout_marginTop="65dp"
-                android:background="@drawable/button_right"
-                android:layout_toEndOf="@id/generalTimer_btn" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/clockPanel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="40dp">
-
-            <!--background為進度條(黃色) // progressDrawable會隨著progress變化的圓圈(灰色)-->
-            <com.GraduateProject.TimeManagementApp.RingProgressBar
-                android:id="@+id/progressBarStudy"
-                android:layout_width="270dp"
-                android:layout_height="270dp"
-                android:layout_centerHorizontal="true"
-                android:visibility="gone"/>
-
-            <com.GraduateProject.TimeManagementApp.AnalogClockStyle
-                android:id="@+id/clock"
+            <com.google.android.material.appbar.AppBarLayout
+                android:id="@+id/appBarLayout"
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="15dp"/>
+                android:layout_height="wrap_content"
+                android:theme="@style/ThemeOverlay.AppCompat"
+                app:liftOnScroll="true">
+            </com.google.android.material.appbar.AppBarLayout>
 
-            <ImageView
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/mytoolbar"
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="15dp"
-                android:contentDescription="@null"
-                android:src="@drawable/clock" />
-        </RelativeLayout>
+                android:layout_height="?attr/actionBarSize"
+                app:title="番茄模式"
+                app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
+                style="@style/Widget.MaterialComponents.Toolbar.Primary"
+                app:titleTextAppearance="@style/Toolbar.TitleText">
+            </com.google.android.material.appbar.MaterialToolbar>
 
-
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-
-            <Button
-                android:id="@+id/tstart_btn"
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="45dp"
-                android:text="@string/計時"
-                android:visibility="gone"
-                app:backgroundTint="#DAFAC3" />
+                android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/tstop_btn"
+                <Button
+                    android:id="@+id/generalTimer_btn"
+                    android:layout_width="130dp"
+                    android:layout_height="35dp"
+                    android:gravity="center"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="65dp"
+                    android:text="@string/general"
+                    android:textColor="#ffd2b0"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:background="@drawable/button_left" />
+
+                <Button
+                    android:id="@+id/tomatoClock_btn"
+                    android:layout_width="130dp"
+                    android:layout_height="35dp"
+                    android:gravity="center"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginTop="65dp"
+                    android:layout_toEndOf="@id/generalTimer_btn"
+                    android:text="@string/tomato"
+                    android:textColor="#ffd2b0"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:background="@drawable/button_right" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/clockPanel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/停止"
-                android:layout_marginTop="45dp"
-                android:visibility="gone"
-                app:backgroundTint="#FAC3C3"/>
-        </FrameLayout>
-    </LinearLayout>
+                android:layout_marginTop="40dp">
+
+                <!--background為進度條(黃色) // progressDrawable會隨著progress變化的圓圈(灰色)-->
+                <com.GraduateProject.TimeManagementApp.RingProgressBar
+                    android:id="@+id/progressBarStudy"
+                    android:layout_width="270dp"
+                    android:layout_height="270dp"
+                    android:layout_centerHorizontal="true"
+                    android:visibility="gone"/>
+
+                <com.GraduateProject.TimeManagementApp.AnalogClockStyle
+                    android:id="@+id/clock"
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="15dp"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="240dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="15dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/clock" />
+            </RelativeLayout>
+
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/start_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:padding="15dp"
+                    android:layout_marginTop="105dp"
+                    android:text="開 始"
+                    android:visibility="gone"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    app:backgroundTint="#9095f0" />
+
+                <Button
+                    android:id="@+id/stop_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:padding="15dp"
+                    android:text="停 止"
+                    android:textSize="16sp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="90dp"
+                    android:visibility="gone"
+                    app:backgroundTint="#FC9292"/>
+            </FrameLayout>
+        </LinearLayout>
+    </FrameLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"

@@ -12,6 +12,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,13 +38,17 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     private static Toolbar toolbar;
     private int currentYear = 0;
     private int currentMonth = 0;
-    List<WeekViewEvent> mNewEvent = new ArrayList<WeekViewEvent>();
     private AppBarConfiguration mAppBarConfiguration;
+    private static DBTotalHelper dbBannedAppsHelper = null;
+    private static final String TABLE_APPS = "Courses";
+    private static SQLiteDatabase db = null;
+    private static final String COURSE_NAME = "_COURSE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_blocker);
+        openDB();
         assignViews();
 
         //目錄相關
@@ -141,6 +146,34 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
             }
         });
     }
+
+    //資料庫相關
+    //打開database
+    private void openDB() {
+        dbBannedAppsHelper = new DBTotalHelper(this);
+        db = dbBannedAppsHelper.getWritableDatabase();
+    }
+
+    private int getCoursesColor(String name){
+        String Query = "Select _COLOR from " + TABLE_APPS + " where " + COURSE_NAME + " = " + "'" + name + "'";
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int color = cursor.getInt(0);
+        Log.e("COURSE", "color is " + Integer.toHexString(color));
+        cursor.close();
+        return color;
+    }
+
+    private int getTextColor(String name){
+        String Query = "Select _TEXT from " + TABLE_APPS + " where " + COURSE_NAME + " = " + "'" + name + "'";
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int color = cursor.getInt(0);
+        Log.e("COURSE", "text color is " + Integer.toHexString(color));
+        cursor.close();
+        return color;
+    }
+
     @Override
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
 // Populate the week view with some events.
@@ -183,7 +216,8 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
                 endTime.set(Calendar.HOUR_OF_DAY, endHour);
                 endTime.set(Calendar.MINUTE, endMinute);
                 WeekViewEvent event = new WeekViewEvent(theID, Course, startTime, endTime);
-                event.setColor(getResources().getColor(R.color.purple_200));
+                event.setColor(getCoursesColor(Course));
+                event.setText(getTextColor(Course));
                 events.add(event);
 
                 Log.e("TIME BLOCK", "回數：" + rotation + " 科目：" + Course + " 日期：" + Date);
