@@ -455,9 +455,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
                 startForegroundService(new Intent(this, CheckFrontApp.class));
                 startForegroundService(new Intent(this, CheckFrontCommuApp.class));
+                startForegroundService(new Intent(this,CheckFrontBrowser.class));
             } else {
                 startService(new Intent(this, CheckFrontApp.class));
                 startService(new Intent(this, CheckFrontCommuApp.class));
+                startService(new Intent(this,CheckFrontBrowser.class));
             }
         }
     }
@@ -469,6 +471,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         //stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
         stopService(new Intent(this, DialogShow.class));
+        stopService(new Intent(this,CheckFrontBrowser.class));
     }
 
     public void finishCounting(){

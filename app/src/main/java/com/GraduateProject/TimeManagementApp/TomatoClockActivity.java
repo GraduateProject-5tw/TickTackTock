@@ -588,9 +588,11 @@ public class TomatoClockActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(new Intent(this, CheckFrontApp.class));
                 startForegroundService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
+                startForegroundService(new Intent(this, CheckFrontBrowser.class));
             } else {
                 startService(new Intent(this, CheckFrontApp.class));
                 startService(new Intent(TomatoClockActivity.this, CheckFrontCommuApp.class));
+                startService(new Intent(this, CheckFrontBrowser.class));
             }
         }
     }
@@ -602,6 +604,8 @@ public class TomatoClockActivity extends AppCompatActivity {
         stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
         stopService(new Intent(this, DialogShowCommu.class));
+        stopService(new Intent(this, CheckFrontBrowser.class));
+        stopService(new Intent(this, DialogShowBrowser.class));
     }
 
     @Override
