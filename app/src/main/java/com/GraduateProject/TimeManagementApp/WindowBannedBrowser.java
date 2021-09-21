@@ -12,6 +12,12 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static android.content.Context.WINDOW_SERVICE;
 
 public class WindowBannedBrowser {
@@ -21,7 +27,8 @@ public class WindowBannedBrowser {
     private final WindowManager.LayoutParams mParams;
     private final WindowManager mWindowManager;
     private EditText SearchKey;
-
+    private final String[] bannedCat = {"facebook","youtube","購物","遊戲","Instagram","旅遊"};
+    private final List<String> bannedBrowser = Arrays.asList(bannedCat);
     public WindowBannedBrowser(Context context){
         this.context=context;
 
@@ -66,6 +73,43 @@ public class WindowBannedBrowser {
 
             Log.v("shuffTest", "Pressed SEARCH");
             SearchKey = mView.findViewById(R.id.search_key);
+            String url = "http://www.google.com/search?q = "+ SearchKey;
+
+            Crawler crawler = new Crawler();
+            String word = crawler.webGet(url);
+            if(word.contains((CharSequence) bannedBrowser)){
+              View  aView = layoutInflater.inflate(R.layout.activity_popup_message_browser, null);
+                aView.findViewById(R.id.btn_yes).setOnClickListener(views -> {
+                    close();
+                    Log.v("shuffTest", "Pressed YES");
+                    if(GeneralTimerActivity.getIsCounting()){
+                        GeneralTimerActivity.getActivity().finishCounting();
+                    } else{
+                        TomatoClockActivity.getTomatoClockActivity().finishCounting();
+                    }
+                });
+
+                aView.findViewById(R.id.btn_no).setOnClickListener(views-> {
+                    close();
+                    Log.v("shuffTest", "Pressed NO");
+                    Intent intentHome;
+                    if(GeneralTimerActivity.getIsCounting()){
+                        intentHome = new Intent(context, GeneralTimerActivity.class);
+                    } else{
+                        intentHome = new Intent(context, TomatoClockActivity.class);
+                    }
+                    intentHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intentHome);
+                });
+
+                mView.findViewById(R.id.message_background).setOnClickListener(v -> {
+                });
+
+
+            }
+            else{
+
+            }
 
 
 
