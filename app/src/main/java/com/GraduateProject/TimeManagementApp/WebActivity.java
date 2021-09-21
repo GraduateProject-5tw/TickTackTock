@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -17,9 +18,12 @@ import android.webkit.WebView;
 import android.webkit.WebSettings;
 import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
+import android.widget.Button;
 import android.widget.EditText;
 import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -28,17 +32,23 @@ import java.util.concurrent.FutureTask;
 public class WebActivity extends AppCompatActivity {
 
     private WebView mWebView;
+    private Button edit;
     private String rootUrl = "https://www.google.com.tw/";
     private String textt;
     private boolean ret;
     private String[] split;
+    private final String[] bannedCat = {"facebook","購","玩","instagram","遊","旅","演","唱","play","song", "travel", "celebrity","漫畫", "anime", "角色","character"};
+    private final List<String> bannedBrowser = Arrays.asList(bannedCat);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
         mWebView = (WebView) findViewById(R.id.webview_show);
+        edit = findViewById(R.id.edit);
         alert_edit();
+
+        edit.setOnClickListener(v -> alert_edit());
     }
 
     public void alert_edit() {
@@ -46,6 +56,7 @@ public class WebActivity extends AppCompatActivity {
         new AlertDialog.Builder(this).setTitle("添加允許搜尋的關鍵字: \n(請用逗號區隔單字)")
                 .setIcon(android.R.drawable.sym_def_app_icon)
                 .setView(et)
+                .setCancelable(false)
                 .setPositiveButton("完成", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -76,13 +87,10 @@ public class WebActivity extends AppCompatActivity {
                         mWebView.setWebViewClient(new WebViewClient() {
                             @Override
                             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                                Callable<String> myCallable = new Callable<String>() {
-                                    @Override
-                                    public String call() throws Exception {
-                                        Crawler crawler = new Crawler();
-                                        String words = crawler.webGet(url);
-                                        return words;
-                                    }
+                                Callable<String> myCallable = () -> {
+                                    Crawler crawler = new Crawler();
+                                    String words = crawler.webGet(url);
+                                    return words;
                                 };
                                 // 2.由上面的callable物件創建一個FutureTask物件
                                 FutureTask<String> oneTask = new FutureTask<String>(myCallable);
@@ -92,22 +100,38 @@ public class WebActivity extends AppCompatActivity {
                                 t.start();
 
                                 outer:
-                                for (int i = 0; i < split.length; i++) {
+                                for (String s : split) {
                                     boolean retval = false;
+                                    boolean banned = false;
                                     try {
-                                        retval = oneTask.get().contains(split[i]);
-                                    } catch (ExecutionException e) {
-                                        e.printStackTrace();
-                                    } catch (InterruptedException e) {
+                                        retval = oneTask.get().contains(s);
+                                        if (!retval) {
+                                            Log.e("RESULT", "not allowed");
+                                            ret = false;
+                                            break;
+                                        } else {
+                                            for (int j = 0; j < bannedBrowser.size(); j++) {
+                                                Log.e("RESULT", "checking " + bannedBrowser.get(j));
+                                                banned = oneTask.get().contains(bannedBrowser.get(j));
+                                                if (banned) {
+                                                    Log.e("RESULT", "include banned url");
+                                                    ret = false;
+                                                    banned = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } catch (ExecutionException | InterruptedException e) {
                                         e.printStackTrace();
                                     }
-                                    if (retval) {
+                                    if (retval && !banned) {
+                                        Log.e("RESULT", "not include banned url");
                                         ret = true;
-                                        break outer;
+                                        //break outer;
                                     }
                                 }
                                 Log.i("ansen", "攔截url:" + url);
-                                if (ret == false) {
+                                if (!ret) {
                                     bannedURL();
                                     return true;//表示我已經處理過了
                                 } else {
@@ -126,29 +150,15 @@ public class WebActivity extends AppCompatActivity {
         AlertDialog.Builder bannedUrl = new AlertDialog.Builder(this);
         bannedUrl.setTitle("禁用網站")
                 .setMessage("此網站不含您設定的關鍵字，確定要使用嗎? \n 選取「確定」會停止計時")
-                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (GeneralTimerActivity.getIsCounting()) {
-                            GeneralTimerActivity.getActivity().finishCounting();
-                        } else {
-                            TomatoClockActivity.getTomatoClockActivity().finishCounting();
-                        }
-                        finish();
+                .setPositiveButton("確定", (dialogInterface, i) -> {
+                    if (GeneralTimerActivity.getIsCounting()) {
+                        GeneralTimerActivity.getActivity().finishCounting();
+                    } else {
+                        TomatoClockActivity.getTomatoClockActivity().finishCounting();
                     }
+                    finish();
                 })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intentHome = null;
-                        if (GeneralTimerActivity.getIsCounting()) {
-                            intentHome = new Intent(getApplicationContext(), GeneralTimerActivity.class);
-                        } else {
-                            intentHome = new Intent(getApplicationContext(), TomatoClockActivity.class);
-                        }
-                        startActivity(intentHome);
-                        finish();
-                    }
+                .setNegativeButton("取消", (dialogInterface, i) -> {
                 })
                 .show();
     }

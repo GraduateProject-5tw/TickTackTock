@@ -6,9 +6,9 @@
     android:layout_height="match_parent">
 
     <Button
+        android:id="@+id/edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="alert_edit"
         android:layout_gravity="bottom|right"
         android:text="網址禁用" />
 
