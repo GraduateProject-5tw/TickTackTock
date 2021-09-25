@@ -21,7 +21,7 @@ public class AppListAdapter extends RecyclerView.Adapter<AppListAdapter.ViewHold
     private static List<AppInfo> appList;
     private Context context;
 
-    AppListAdapter(List<AppInfo> appInfos, List<String> apps){
+    public AppListAdapter(List<AppInfo> appInfos, List<String> apps){
         appList=appInfos;
         AppListAdapter.apps = apps;
     }
