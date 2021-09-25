@@ -45,7 +45,7 @@
                     android:layout_marginTop="10dp"
                     android:paddingBottom="15dp"
                     android:gravity="center|top"
-                    android:text="此網頁含娛樂性質，確定要使用嗎？\n\n若使用，計時將會停止。"
+                    android:text="此搜尋含娛樂或購物內容，確定要搜尋嗎？\n\n若搜尋，計時將會停止。"
                     android:textColor="#6f68b0"
                     android:textSize="15sp"/>
             </LinearLayout>
@@ -62,7 +62,7 @@
                     android:layout_height="35dp"
                     android:background="@drawable/button_border"
                     android:clickable="true"
-                    android:text="確 定 使 用"
+                    android:text="確 定 搜 尋"
                     android:textColor="#6f68b0"
                     android:textStyle="bold"
                     android:textSize="13sp"
@@ -74,7 +74,7 @@
                     android:layout_height="35dp"
                     android:background="@drawable/button_border_right"
                     android:clickable="true"
-                    android:text="放 棄 使 用"
+                    android:text="放 棄 搜 尋"
                     android:textColor="#6f68b0"
                     android:textStyle="bold"
                     android:textSize="13sp"

@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,7 +36,8 @@ public class WindowBanned {
                     // Display it on top of other application windows
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                     // Don't let it grab the input focus
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                            WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                     // Make the underlying application window visible
                     // through any transparent parts
                     PixelFormat.TRANSLUCENT);
@@ -50,16 +52,33 @@ public class WindowBanned {
                     // Display it on top of other application windows-
                     WindowManager.LayoutParams.TYPE_PHONE,
                     // Don't let it grab the input focus
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                            WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                     // Make the underlying application window visible
                     // through any transparent parts
                     PixelFormat.TRANSLUCENT);
         }
+        mParams.dimAmount = 0.65f;
         // getting a LayoutInflater
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // inflating the view with the custom layout we created
         mView = layoutInflater.inflate(R.layout.activity_popup_message, null);
 
+        mView.setFocusable(true);
+        mView.setOnKeyListener((v, keyCode, event) -> {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    return true;
+                }
+                else if (keyCode == KeyEvent.KEYCODE_HOME) {
+                    return true;
+                }
+                else if (keyCode == KeyEvent.KEYCODE_MENU){
+                    return true;
+                }
+            }
+            return false;
+        });
         // set onClickListener on the remove button, which removes
         // the view from the window
         mView.findViewById(R.id.btn_yes).setOnClickListener(view -> {

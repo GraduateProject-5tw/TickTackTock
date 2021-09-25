@@ -605,7 +605,6 @@ public class TomatoClockActivity extends AppCompatActivity {
         stopService(new Intent(this, CheckFrontCommuApp.class));
         stopService(new Intent(this, DialogShowCommu.class));
         stopService(new Intent(this, CheckFrontBrowser.class));
-        stopService(new Intent(this, DialogShowBrowser.class));
     }
 
     @Override

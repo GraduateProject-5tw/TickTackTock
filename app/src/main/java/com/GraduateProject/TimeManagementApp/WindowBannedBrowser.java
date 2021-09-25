@@ -56,7 +56,8 @@ public class WindowBannedBrowser {
                     // Display it on top of other application windows
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                     // Don't let it grab the input focus
-                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                            WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                     // Make the underlying application window visible
                     // through any transparent parts
                     PixelFormat.TRANSLUCENT);
@@ -71,18 +72,19 @@ public class WindowBannedBrowser {
                     // Display it on top of other application windows-
                     WindowManager.LayoutParams.TYPE_PHONE,
                     // Don't let it grab the input focus
-                    WindowManager.LayoutParams.FLAG_DIM_BEHIND,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                            WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                     // Make the underlying application window visible
                     // through any transparent parts
                     PixelFormat.TRANSLUCENT);
         }
+        mParams.dimAmount = 0.65f;
         // getting a LayoutInflater
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         // inflating the view with the custom layout we created
-        mView = layoutInflater.inflate(R.layout.activity_browser_search, null);
+        mView = layoutInflater.inflate(R.layout.activity_popup_message_browser, null);
 
-        mView.setFocusableInTouchMode(true);
-        mView.requestFocus();
+        mView.setFocusable(true);
         mView.setOnKeyListener((v, keyCode, event) -> {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -98,70 +100,22 @@ public class WindowBannedBrowser {
             return false;
         });
 
-            // set onClickListener on the remove button, which removes
+        // set onClickListener on the remove button, which removes
         // the view from the window
-        mView.findViewById(R.id.btn_search).setOnClickListener(view -> {
-
-            SearchKeyLabel = mView.findViewById(R.id.search_key);
-            SearchKey = SearchKeyLabel.getText().toString();
-            SearchKey = SearchKey.replace(" ","+");
-            Log.v("shuffTest", "Pressed SEARCH " + SearchKey);
-            String charset = "UTF-8";
-            String url = "http://www.google.com/search?q = "+ SearchKey +"&num=" + String.valueOf(15);
-
-            Crawler crawler = new Crawler();
-            String crawledText = null;
-            try {
-                crawledText = crawler.webGet(url);
-            } catch (IOException e) {
-                e.printStackTrace();
+        mView.findViewById(R.id.btn_yes).setOnClickListener(view -> {
+            close();
+            if (GeneralTimerActivity.getIsCounting()) {
+                GeneralTimerActivity.getActivity().finishCounting();
+            } else {
+                TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
-            for(int i = 0; i < bannedBrowser.size(); i++) {
-                Log.e("DETECTED", "start");
-                if (crawledText.contains(bannedBrowser.get(i))) {
-                    Log.e("DETECTED", "contains");
-                    View aView = layoutInflater.inflate(R.layout.activity_popup_message_browser, null);
-                    aView.findViewById(R.id.btn_yes).setOnClickListener(views -> {
-                        close();
-                        Log.v("shuffTest", "Pressed YES");
-                        if (GeneralTimerActivity.getIsCounting()) {
-                            GeneralTimerActivity.getActivity().finishCounting();
-                        } else {
-                            TomatoClockActivity.getTomatoClockActivity().finishCounting();
-                        }
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                        context.startActivity(intent);
-                    });
-
-                    aView.findViewById(R.id.btn_no).setOnClickListener(views -> {
-                        close();
-                        Log.v("shuffTest", "Pressed NO");
-                        Intent intentHome;
-                        if (GeneralTimerActivity.getIsCounting()) {
-                            intentHome = new Intent(context, GeneralTimerActivity.class);
-                        } else {
-                            intentHome = new Intent(context, TomatoClockActivity.class);
-                        }
-                        intentHome.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intentHome);
-                    });
-
-                    mView.findViewById(R.id.message_background).setOnClickListener(v -> {
-                    });
-
-
-                } else {
-                    Log.e("DETECTED", "not contains");
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                    context.startActivity(intent);
-                }
-            }
-
-
 
         });
 
-
+        mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
+            close();
+            Log.v("shuffTest", "Pressed NO");
+        });
 
         mView.findViewById(R.id.message_background).setOnClickListener(v -> {
         });

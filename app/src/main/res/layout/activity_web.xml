@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
-        android:text="網址禁用" />
+        android:text="編輯關鍵詞" />
 
     <WebView
         android:id="@+id/webview_show"

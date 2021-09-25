@@ -3,7 +3,6 @@ package com.GraduateProject.TimeManagementApp;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +15,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.GraduateProject.TimeManagementApp.Adapters.AppListAdapter;
 import com.google.gson.Gson;
 
 import java.util.List;

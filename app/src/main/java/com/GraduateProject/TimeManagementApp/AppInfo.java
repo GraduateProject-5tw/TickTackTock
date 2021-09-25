@@ -5,11 +5,11 @@ import android.graphics.drawable.Drawable;
 import java.util.Objects;
 
 public class AppInfo {
-    String packageName;
-    String appName;
-    String appCategory;
-    Drawable appLogo;
-    boolean appStatus; //禁用為true 開訪則false
+    public String packageName;
+    public String appName;
+    public String appCategory;
+    public Drawable appLogo;
+    public boolean appStatus; //禁用為true 開訪則false
 
     @Override
     public boolean equals(Object o){

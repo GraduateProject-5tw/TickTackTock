@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.GraduateProject.TimeManagementApp.Adapters.AppListAdapter;
 import com.GraduateProject.TimeManagementApp.Adapters.CourseListAdapter;
 import com.google.gson.Gson;
 

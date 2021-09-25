@@ -1,11 +1,7 @@
 package com.GraduateProject.TimeManagementApp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -13,18 +9,20 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.JsResult;
 import android.webkit.WebBackForwardList;
-import android.webkit.WebHistoryItem;
-import android.webkit.WebView;
-import android.webkit.WebSettings;
-import android.webkit.WebViewClient;
 import android.webkit.WebChromeClient;
+import android.webkit.WebHistoryItem;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
@@ -147,20 +145,8 @@ public class WebActivity extends AppCompatActivity {
     }
 
     public void bannedURL() {
-        AlertDialog.Builder bannedUrl = new AlertDialog.Builder(this);
-        bannedUrl.setTitle("禁用網站")
-                .setMessage("此網站不含您設定的關鍵字，確定要使用嗎? \n 選取「確定」會停止計時")
-                .setPositiveButton("確定", (dialogInterface, i) -> {
-                    if (GeneralTimerActivity.getIsCounting()) {
-                        GeneralTimerActivity.getActivity().finishCounting();
-                    } else {
-                        TomatoClockActivity.getTomatoClockActivity().finishCounting();
-                    }
-                    finish();
-                })
-                .setNegativeButton("取消", (dialogInterface, i) -> {
-                })
-                .show();
+        WindowBannedBrowserClass windowBannedBrowser = new WindowBannedBrowserClass(getApplicationContext());
+        windowBannedBrowser.open();
     }
 
     private WebChromeClient webChromeClient = new WebChromeClient() {

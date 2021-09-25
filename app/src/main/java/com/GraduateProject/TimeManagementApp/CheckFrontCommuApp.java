@@ -50,7 +50,7 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         }
     };
 
-    private Thread DetectFrontCommuApp = new Thread(new Runnable() {
+    private final Thread DetectFrontCommuApp = new Thread(new Runnable() {
         @Override
         public void run() {
             String frontCommuApp = getForegroundTask().replaceAll("\\s+","");

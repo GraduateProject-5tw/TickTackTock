@@ -468,9 +468,9 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     protected void onResume() {
         super.onResume();
         stopService(new Intent(this, CheckFrontApp.class));
-        //stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
         stopService(new Intent(this, DialogShow.class));
+        stopService(new Intent(this, DialogShowCommu.class));
         stopService(new Intent(this,CheckFrontBrowser.class));
     }
 
