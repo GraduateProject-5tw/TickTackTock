@@ -13,9 +13,22 @@
         android:layout_height="match_parent">
 
         <ImageView
+            android:id="@+id/backgroundtheme"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@drawable/background_view"/>
+
+        <ToggleButton
+            android:id="@+id/tb"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/style_toggle_button"
+            android:layout_gravity="top|right"
+            android:layout_margin="12dp"
+            android:disabledAlpha="@android:integer/config_longAnimTime"
+            android:textOff=""
+            android:textOn=""
+            android:textSize="25sp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -28,18 +41,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:theme="@style/ThemeOverlay.AppCompat"
-                app:liftOnScroll="true">
-            </com.google.android.material.appbar.AppBarLayout>
+                app:liftOnScroll="true"></com.google.android.material.appbar.AppBarLayout>
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/mytoolbar"
+                style="@style/Widget.MaterialComponents.Toolbar.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="一般模式"
                 app:navigationIcon="@android:drawable/ic_menu_sort_by_size"
-                style="@style/Widget.MaterialComponents.Toolbar.Primary"
-                app:titleTextAppearance="@style/Toolbar.TitleText">
-            </com.google.android.material.appbar.MaterialToolbar>
+                app:title="一般模式"
+                app:titleTextAppearance="@style/Toolbar.TitleText"></com.google.android.material.appbar.MaterialToolbar>
 
 
             <RelativeLayout
@@ -48,33 +59,34 @@
                 android:layout_gravity="center_horizontal"
                 android:orientation="horizontal">
 
+
                 <Button
                     android:id="@+id/generalTimer_btn"
                     android:layout_width="130dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/button_left"
-                    android:gravity="center"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="65dp"
+                    android:background="@drawable/button_left"
+                    android:gravity="center"
                     android:text="@string/general"
                     android:textColor="#ffd2b0"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/tomatoClock_btn"
                     android:layout_width="130dp"
                     android:layout_height="35dp"
-                    android:background="@drawable/button_right"
-                    android:gravity="center"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginStart="2dp"
                     android:layout_marginTop="65dp"
                     android:layout_toEndOf="@id/generalTimer_btn"
+                    android:background="@drawable/button_right"
+                    android:gravity="center"
                     android:text="@string/tomato"
                     android:textColor="#ffd2b0"
-                    android:textStyle="bold"
-                    android:textSize="16sp"/>
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </RelativeLayout>
 
@@ -85,7 +97,6 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="105dp"
                 android:textAlignment="center"
-                android:textColor="#2C2C2C"
                 android:textSize="100sp" />
 
             <FrameLayout
@@ -98,11 +109,11 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:padding="15dp"
                     android:layout_marginTop="130dp"
+                    android:padding="15dp"
                     android:text="開 始"
-                    android:textSize="16sp"
                     android:textColor="@color/white"
+                    android:textSize="16sp"
                     app:backgroundTint="#9095f0" />
 
                 <Button
@@ -110,14 +121,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="130dp"
                     android:padding="15dp"
                     android:text="停 止"
-                    android:textSize="16sp"
                     android:textColor="@color/white"
-                    android:layout_marginTop="130dp"
+                    android:textSize="16sp"
                     android:visibility="gone"
-                    app:backgroundTint="#FC9292"/>
+                    app:backgroundTint="#FC9292" />
+
             </FrameLayout>
+
+
         </LinearLayout>
     </FrameLayout>
 

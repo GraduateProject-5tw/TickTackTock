@@ -6,9 +6,11 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -17,12 +19,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LifecycleObserver;
@@ -57,6 +65,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private String startTime;
     private String stopTime;
     private String totalTime;
+    private ToggleButton toggleButton;
+    private Chronometer mChronometer;
     private DBTotalHelper DBHelper;
     private final String TABLE_APPS = "Courses";
     private final ArrayList<String> courses = new ArrayList<>();
@@ -68,12 +78,33 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_generaltimer);  //指定對應的呈現程式碼在activity_stopwatch.xml
         chronometer = findViewById(R.id.time_view);   //用id尋找在介面佈局檔案中，時間呈現的區塊
         startBtn = findViewById(R.id.start_btn);
         stopBtn = findViewById(R.id.stop_btn);
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
+
+        //深色背景按鈕
+        toggleButton=(ToggleButton)findViewById(R.id.tb);
+        ImageView img= findViewById(R.id.backgroundtheme);
+        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) //當按鈕狀態為選取時
+                {
+                    img.setImageResource(R.drawable.background_view);
+                    chronometer.setTextColor(Color.BLACK);
+                } else //當按鈕狀態為未選取時
+                {
+                    img.setImageResource(R.drawable.background_view_night);
+                    chronometer.setTextColor(Color.WHITE);
+                }
+            }
+        });
+
         generalTimerActivity = this;
         openDB();
         showDialogStart();

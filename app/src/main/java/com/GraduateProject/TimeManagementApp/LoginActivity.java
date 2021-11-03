@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -23,6 +24,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText mEtLoginactivityPassword;
     private LinearLayout mLlLoginactivityTwo;
     private Button mBtLoginactivityLogin;
+    private ImageButton btnPrev;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +47,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // 设置点击事件监听器
         mBtLoginactivityLogin.setOnClickListener(this);
         mTvLoginactivityRegister.setOnClickListener(this);
+
+        btnPrev = (ImageButton) findViewById(R.id.btnPrev);
+
+        // 設定 ImageButton 元件 onClick 事件監聽器
+        btnPrev.setOnClickListener(btnPrevListener);
     }
 
     public void onClick(View view) {
@@ -127,5 +135,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
         return "";
     }
+
+    //  btnPrev 按鈕的 onClick() 方法
+    private ImageButton.OnClickListener btnPrevListener=new ImageButton.OnClickListener(){
+        public void onClick(View v){
+            startActivity(new Intent(LoginActivity.this, GeneralTimerActivity.class));
+        }
+    };
 }
 

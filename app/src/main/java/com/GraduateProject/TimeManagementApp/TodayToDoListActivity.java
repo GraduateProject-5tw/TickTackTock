@@ -22,7 +22,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.GraduateProject.TimeManagementApp.Adapters.ToDoAdapter;
 
@@ -49,6 +52,7 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
     private static TodayToDoListActivity todayToDoListActivity;
     private static Toolbar toolbar;
     private static Calendar today;
+    private ToggleButton toggleButton;
     private AppBarConfiguration mAppBarConfiguration;
     private static List<ToDoModel> taskList = new ArrayList<>();
     private TodoHeaderView mWeekHeaderView;
@@ -58,6 +62,18 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todolist);
+
+        //深色背景按鈕
+        toggleButton=(ToggleButton)findViewById(R.id.tb);
+        ImageView img= findViewById(R.id.backgroundtheme);
+        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                img.setImageResource(isChecked?R.drawable.background_view:R.drawable.background_view_night);
+            }
+        });
+
         todayToDoListActivity = this;
 
         new_btn = findViewById(R.id.new_btn);

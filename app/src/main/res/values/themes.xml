@@ -35,5 +35,4 @@
     <style name="Toolbar.DateText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">25sp</item>
     </style>
-
 </resources>

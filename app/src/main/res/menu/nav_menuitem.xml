@@ -31,7 +31,5 @@
             android:id="@+id/web"
             android:icon="@drawable/ic_web"
             android:title="Google" />
-
-
     </group>
 </menu>

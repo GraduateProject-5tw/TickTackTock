@@ -2,6 +2,7 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -16,6 +17,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -35,6 +37,7 @@ public class WebActivity extends AppCompatActivity {
     private String textt;
     private boolean ret;
     private String[] split;
+    private ImageButton btnPrev;
     private final String[] bannedCat = {"facebook","購","玩","instagram","遊","旅","演","唱","play","song", "travel", "celebrity","漫畫", "anime", "角色","character"};
     private final List<String> bannedBrowser = Arrays.asList(bannedCat);
 
@@ -47,6 +50,10 @@ public class WebActivity extends AppCompatActivity {
         alert_edit();
 
         edit.setOnClickListener(v -> alert_edit());
+        btnPrev = (ImageButton) findViewById(R.id.btnPrev);
+
+        // 設定 ImageButton 元件 onClick 事件監聽器
+        btnPrev.setOnClickListener(btnPrevListener);
     }
 
     public void alert_edit() {
@@ -206,5 +213,10 @@ public class WebActivity extends AppCompatActivity {
         }
     }
 
-
+    //  btnPrev 按鈕的 onClick() 方法
+    private ImageButton.OnClickListener btnPrevListener=new ImageButton.OnClickListener(){
+        public void onClick(View v){
+            startActivity(new Intent(WebActivity.this, GeneralTimerActivity.class));
+        }
+    };
 }

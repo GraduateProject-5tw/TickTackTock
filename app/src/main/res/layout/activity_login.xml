@@ -6,48 +6,46 @@
     android:layout_height="match_parent"
     android:background="#eeeeee"
     tools:context=".LoginActivity">
+
     <RelativeLayout
         android:id="@+id/rl_loginactivity_top"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="@color/purple_200" >
+        android:background="@color/light_slate_Blue">
 
-        <ImageView
-            android:id="@+id/iv_login_activity_back"
+        <ImageButton
+            android:id="@+id/btnPrev"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/ic_left_back"
-            android:clickable="true"
-            android:onClick="onClick" />
+            android:src="@drawable/ic_left_back" />
 
         <TextView
             android:id="@+id/tv_login_activity_login"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="登入"
-            android:textColor="#fff"
-            android:textSize="20dp"
-            android:layout_toRightOf="@+id/iv_login_activity_back"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
-            />
+            android:layout_toRightOf="@+id/btnPrev"
+            android:text="登入"
+            android:textColor="#fff"
+            android:textSize="20dp" />
 
         <TextView
             android:id="@+id/tv_login_activity_register"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="註冊"
-            android:textColor="#fff"
-            android:textSize="20dp"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginRight="30dp"
             android:clickable="true"
             android:onClick="onClick"
-            />
+            android:text="註冊"
+            android:textColor="#fff"
+            android:textSize="20dp" />
     </RelativeLayout>
 
     <LinearLayout

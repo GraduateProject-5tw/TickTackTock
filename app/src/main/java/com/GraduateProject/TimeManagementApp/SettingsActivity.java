@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -15,6 +16,9 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -24,19 +28,23 @@ public class SettingsActivity extends AppCompatActivity {
 
     protected static SwitchPreference mSwitchPreference;
     protected static SwitchPreference mSwitchPreferenceCommu;
+    protected static SwitchPreference mSwitchPreferenceTheme;
     protected static Preference editButton;
     protected static Preference editCourse;
     protected static String userName;
+    protected static int background;
     private static DBTotalHelper dbBannedAppsHelper = null;
     private static final String TABLE_APPS = "BannedApps";
     private static final String COL_USER = "_USER";
     private static SQLiteDatabase db = null;
     private final Gson gson = new Gson();
+    private ToggleButton toggleButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
+
         openDB();
 
         Toolbar myToolbar = findViewById(R.id.settings_toolbar);
@@ -60,6 +68,7 @@ public class SettingsActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         finishAndRemoveTask();
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -106,9 +115,6 @@ public class SettingsActivity extends AppCompatActivity {
         dbBannedAppsHelper.close();
     }
 
-
-
-
     public static class MainPreferenceFragment extends PreferenceFragmentCompat {
         private static int isCustom;
         private static int bannedCommu;
@@ -119,6 +125,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             mSwitchPreference = (SwitchPreference) findPreference("isCustomApp"); //Preference Key
             mSwitchPreferenceCommu = (SwitchPreference) findPreference("bannedCommuApp");
+            mSwitchPreferenceTheme = (SwitchPreference) findPreference("ThemeColor");
             editButton = findPreference("editCustomApp");
             editCourse = findPreference("editCourses");
 
@@ -192,4 +199,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    public static int getBackground() {
+        return background;
+    }
 }

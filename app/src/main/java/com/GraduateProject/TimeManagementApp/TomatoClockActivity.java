@@ -18,8 +18,12 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,6 +72,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private String date;
     private String stopTime;
     private String totalTime;
+    private ToggleButton toggleButton;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -75,6 +80,18 @@ public class TomatoClockActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         tomatoClockActivity = this;
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
+
+        //深色背景按鈕
+        toggleButton=(ToggleButton)findViewById(R.id.tb);
+        ImageView img= findViewById(R.id.backgroundtheme);
+        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                img.setImageResource(isChecked?R.drawable.background_view:R.drawable.background_view_night);
+            }
+        });
+
         showDialogStart();
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
         startBtn = findViewById(R.id.start_btn);

@@ -13,11 +13,15 @@ import androidx.navigation.ui.NavigationUI;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.material.navigation.NavigationView;
 
@@ -38,6 +42,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     private static Toolbar toolbar;
     private int currentYear = 0;
     private int currentMonth = 0;
+    private ToggleButton toggleButton;
     private AppBarConfiguration mAppBarConfiguration;
     private static DBTotalHelper dbBannedAppsHelper = null;
     private static final String TABLE_APPS = "Courses";
@@ -48,6 +53,21 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_blocker);
+
+        //深色背景按鈕
+        toggleButton=(ToggleButton)findViewById(R.id.tb);
+        mWeekView = findViewById(R.id.weekdayview);
+        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) //當按鈕狀態為選取時
+                { mWeekView.setBackgroundColor(Color.WHITE); }
+                else //當按鈕狀態為未選取時
+                { mWeekView.setBackgroundColor(Color.DKGRAY); }
+            }
+        });
+
         openDB();
         assignViews();
 
@@ -185,47 +205,49 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         int theID = 0;
         List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
         int rotation = 1;
-        do{
-            //int EventID = cursor.getInt(0);
-            String Date = cursor.getString(1);
-            String Course = cursor.getString(2);
-            String starTime = cursor.getString(3);
-            String stopTime = cursor.getString(4);
+        if(cursor.getCount() != 0) {
+            do {
+                //int EventID = cursor.getInt(0);
+                String Date = cursor.getString(1);
+                String Course = cursor.getString(2);
+                String starTime = cursor.getString(3);
+                String stopTime = cursor.getString(4);
 
-            int theYear = Integer.parseInt(Date.substring(0,4));
-            int theMonth = Integer.parseInt(Date.substring(5,7)) - 1;
-            //Date=Date+"0";
-            int theDay = Integer.parseInt(Date.substring(8,10));
+                int theYear = Integer.parseInt(Date.substring(0, 4));
+                int theMonth = Integer.parseInt(Date.substring(5, 7)) - 1;
+                //Date=Date+"0";
+                int theDay = Integer.parseInt(Date.substring(8, 10));
 
-            if(theMonth == newMonth){
-                String[] starts = starTime.split(":");
-                int starHour = Integer.parseInt(starts[0]);
-                int starMinute = Integer.parseInt(starts[1]);
-                String[] ends = stopTime.split(":");
-                int endHour = Integer.parseInt(ends[0]);
-                int endMinute = Integer.parseInt(ends[1]);
+                if (theMonth == newMonth) {
+                    String[] starts = starTime.split(":");
+                    int starHour = Integer.parseInt(starts[0]);
+                    int starMinute = Integer.parseInt(starts[1]);
+                    String[] ends = stopTime.split(":");
+                    int endHour = Integer.parseInt(ends[0]);
+                    int endMinute = Integer.parseInt(ends[1]);
 
 
-                Calendar startTime = Calendar.getInstance();
-                startTime.set(Calendar.HOUR_OF_DAY, starHour);
-                startTime.set(Calendar.MINUTE, starMinute);
-                startTime.set(Calendar.DAY_OF_MONTH, theDay);
-                startTime.set(Calendar.MONTH, theMonth);
-                startTime.set(Calendar.YEAR, theYear);
-                Calendar endTime = (Calendar) startTime.clone();
-                endTime.set(Calendar.HOUR_OF_DAY, endHour);
-                endTime.set(Calendar.MINUTE, endMinute);
-                WeekViewEvent event = new WeekViewEvent(theID, Course, startTime, endTime);
-                event.setColor(getCoursesColor(Course));
-                event.setText(getTextColor(Course));
-                events.add(event);
+                    Calendar startTime = Calendar.getInstance();
+                    startTime.set(Calendar.HOUR_OF_DAY, starHour);
+                    startTime.set(Calendar.MINUTE, starMinute);
+                    startTime.set(Calendar.DAY_OF_MONTH, theDay);
+                    startTime.set(Calendar.MONTH, theMonth);
+                    startTime.set(Calendar.YEAR, theYear);
+                    Calendar endTime = (Calendar) startTime.clone();
+                    endTime.set(Calendar.HOUR_OF_DAY, endHour);
+                    endTime.set(Calendar.MINUTE, endMinute);
+                    WeekViewEvent event = new WeekViewEvent(theID, Course, startTime, endTime);
+                    event.setColor(getCoursesColor(Course));
+                    event.setText(getTextColor(Course));
+                    events.add(event);
 
-                Log.e("TIME BLOCK", "回數：" + rotation + " 科目：" + Course + " 日期：" + Date);
+                    Log.e("TIME BLOCK", "回數：" + rotation + " 科目：" + Course + " 日期：" + Date);
+                }
+
+                theID = theID + 1;
             }
-
-            theID=theID+1;
+            while (cursor.moveToNext());
         }
-        while (cursor.moveToNext());
         return events;
     }
     private String getEventTitle(Calendar time) {
