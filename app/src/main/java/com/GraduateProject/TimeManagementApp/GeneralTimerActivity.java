@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -16,7 +17,10 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.CompoundButton;
@@ -70,6 +74,8 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private DBTotalHelper DBHelper;
     private final String TABLE_APPS = "Courses";
     private final ArrayList<String> courses = new ArrayList<>();
+    private Context context;
+    private View mView;
 
     public GeneralTimerActivity() {
     }
@@ -184,11 +190,13 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             final String[] coursesArray = courses.toArray(new String[0]);
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
             if (recordTime < 15 * 6000) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
-                builder.setCancelable(false);
-                builder.setTitle("紀錄確認");
-                builder.setMessage("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
-                builder.setPositiveButton("是", (dialog12, which) -> {
+                // getting a LayoutInflater
+                LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                // inflating the view with the custom layout we created
+                mView = layoutInflater.inflate(R.layout.activity_record_study, null);
+                mView.setFocusable(true);
+                mView.findViewById(R.id.btn_yes).setOnClickListener(view -> {
+                    close();
                     //顯示紀錄時間
                     AlertDialog.Builder b = new AlertDialog.Builder(GeneralTimerActivity.this);
                     b.setCancelable(false);
@@ -232,13 +240,16 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                         recordTime = 0;
                         chronometer.setBase(SystemClock.elapsedRealtime());
                     }));
+
                 });
-                builder.setNegativeButton("否", (dialog13, which) -> {
+
+                mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
+                    close();;
                     courses.clear();
                     recordTime = 0;
                     chronometer.setBase(SystemClock.elapsedRealtime());
                 });
-                builder.show();
+
             } else {
                 //顯示紀錄時間
                 AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
@@ -293,16 +304,20 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             final String[] coursesArray = courses.toArray(new String[0]);
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
             if (isCounting) {
-                AlertDialog.Builder change = new AlertDialog.Builder(GeneralTimerActivity.this);
-                change.setTitle("番茄時鐘");
-                change.setMessage("是否要換成番茄時鐘?");
+
+                // getting a LayoutInflater
+                LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                // inflating the view with the custom layout we created
+                mView = layoutInflater.inflate(R.layout.activity_change_tomatoclock, null);
+                mView.setFocusable(true);
                 chronometer.stop();
                 isCounting = false;
                 recordTime = SystemClock.elapsedRealtime() - chronometer.getBase();  //取得累計時間，單位是毫秒
                 String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
                 //是的話跳轉到tomato
-                change.setPositiveButton("是", (dialog, i) -> {
+                mView.findViewById(R.id.btn_yes).setOnClickListener(mview -> {
                     //tomato的切換頁面
+                    close();
                     Intent intent = new Intent();
                     intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
                     //跳出視窗
@@ -442,8 +457,10 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                         }));
                     }
                 });
-                //否的話留在一般
-                change.setNegativeButton("否", (dialog, i) -> {
+
+
+                mView.findViewById(R.id.btn_no).setOnClickListener(mview -> {
+                    close();
                     courses.clear();
                     startBtn.setVisibility(View.GONE);
                     stopBtn.setVisibility(View.VISIBLE);
@@ -452,7 +469,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     chronometer.start();
                     isCounting = true;
                 });
-                change.show();
+
             } else {
                 //tomato的切換頁面
                 courses.clear();
@@ -750,6 +767,22 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
 
     private void onDestory(){
         super.onDestroy();
+    }
+    public void close() {
+
+        try {
+            // remove the view from the window
+            ((WindowManager)context.getSystemService(WINDOW_SERVICE)).removeView(mView);
+            // invalidate the view
+            mView.invalidate();
+            // remove all views
+            ((ViewGroup)mView.getParent()).removeAllViews();
+
+            // the above steps are necessary when you are adding and removing
+            // the view simultaneously, it might give some exceptions
+        } catch (Exception e) {
+            Log.d("Error2",e.toString());
+        }
     }
 
 

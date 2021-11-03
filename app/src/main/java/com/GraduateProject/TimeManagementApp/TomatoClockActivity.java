@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,7 +17,10 @@ import android.os.SystemClock;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -73,6 +77,8 @@ public class TomatoClockActivity extends AppCompatActivity {
     private String stopTime;
     private String totalTime;
     private ToggleButton toggleButton;
+    private Context context;
+    private View mView;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -213,6 +219,11 @@ public class TomatoClockActivity extends AppCompatActivity {
         general_btn.setBackgroundColor(-1); //白色
         general_btn.setOnClickListener(v -> {
             if(isCounting){
+                // getting a LayoutInflater
+                LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                // inflating the view with the custom layout we created
+                mView = layoutInflater.inflate(R.layout.activity_change_generalclock, null);
+                mView.setFocusable(true);
                 AlertDialog.Builder change = new AlertDialog.Builder(TomatoClockActivity.this);
                 change.setTitle("一般計時");
                 change.setMessage("是否要換成一般計時?");
@@ -221,16 +232,17 @@ public class TomatoClockActivity extends AppCompatActivity {
                 recordTime += (SystemClock.elapsedRealtime()-beginTime);//將讀完時間記錄下來
                 String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
                 totalTime = getTotalTime(recordTime);
-                change.setPositiveButton("是", (dialog, i) -> {
+                mView.findViewById(R.id.btn_yes).setOnClickListener(view -> {
                     //general的切換頁面
+                    close();
                     Intent intent = new Intent();
                     intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
                     if(recordTime < 15*6000){
-                        AlertDialog.Builder builder = new AlertDialog.Builder(TomatoClockActivity.this);
-                        builder.setCancelable(false);
-                        builder.setTitle("紀錄確認");
-                        builder.setMessage("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
-                        builder.setPositiveButton("是", (dialog12, which) -> {
+                        // inflating the view with the custom layout we created
+                        mView = layoutInflater.inflate(R.layout.activity_record_study, null);
+                        mView.setFocusable(true);
+                        mView.findViewById(R.id.btn_yes).setOnClickListener(view1 -> {
+                            close();
                             //顯示紀錄時間
                             getCoursesInfo();
                             courses.add("新增科目");
@@ -283,7 +295,9 @@ public class TomatoClockActivity extends AppCompatActivity {
                                 study.cancel();
                             }));
                         });
-                        builder.setNegativeButton("否", (dialog13, which) -> {
+
+                        mView.findViewById(R.id.btn_no).setOnClickListener(view1 -> {
+                            close();
                             courses.clear();
                             spinnerStudy.setIsNewProgress(false);
                             spinnerStudy.setIsNewProgress(false);
@@ -293,7 +307,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                             TomatoClockActivity.this.finish();
                             startActivity(intent);
                         });
-                        builder.show();
+
                     }
                     else{
                         //顯示紀錄時間
@@ -348,16 +362,19 @@ public class TomatoClockActivity extends AppCompatActivity {
                             study.cancel();
                         }));
                     }
+
                 });
+
                 //否的話留在番茄
-                change.setNegativeButton("否", (dialog, i) -> {
+                mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
+                    close();
                     courses.clear();
                     stopBtn.setVisibility(View.VISIBLE);
                     beginTime=SystemClock.elapsedRealtime();  //抓取當下時間
                     isCounting = true; //正在計時中
                     timeButton.setEnabled(false); //計時中不得按時鐘
                 });
-                change.show();
+
             }
             else{
                 //general的切換頁面
@@ -474,12 +491,13 @@ public class TomatoClockActivity extends AppCompatActivity {
             totalTime = getTotalTime(recordTime);
             //跳出視窗
             if (recordTime < 15 * 6000) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(TomatoClockActivity.this);
-                builder.setCancelable(false);
-                builder.setTitle("紀錄確認");
-                builder.setMessage("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
-                builder.setPositiveButton("是", (dialog12, which) -> {
-                    //顯示紀錄時間
+                // getting a LayoutInflater
+                LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                // inflating the view with the custom layout we created
+                mView = layoutInflater.inflate(R.layout.activity_record_study, null);
+                mView.setFocusable(true);
+                mView.findViewById(R.id.btn_yes).setOnClickListener(view -> {
+                    close();
                     getCoursesInfo();
                     courses.add("新增科目");
                     final String[] coursesArray = courses.toArray(new String[0]);
@@ -529,7 +547,9 @@ public class TomatoClockActivity extends AppCompatActivity {
                         study.cancel();
                     }));
                 });
-                builder.setNegativeButton("否", (dialog13, which) -> {
+
+                mView.findViewById(R.id.btn_no).setOnClickListener(view -> {
+                    close();
                     courses.clear();
                     spinnerStudy.setIsNewProgress(false);
                     spinnerStudy.setIsNewProgress(false);
@@ -537,7 +557,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                     beginTime = 0;
                     study.cancel();
                 });
-                builder.show();
+
             } else {
                 //顯示紀錄時間
                 getCoursesInfo();
@@ -891,5 +911,21 @@ public class TomatoClockActivity extends AppCompatActivity {
 
     private void onDestory(){
         super.onDestroy();
+    }
+    public void close() {
+
+        try {
+            // remove the view from the window
+            ((WindowManager) context.getSystemService(WINDOW_SERVICE)).removeView(mView);
+            // invalidate the view
+            mView.invalidate();
+            // remove all views
+            ((ViewGroup) mView.getParent()).removeAllViews();
+
+            // the above steps are necessary when you are adding and removing
+            // the view simultaneously, it might give some exceptions
+        } catch (Exception e) {
+            Log.d("Error2", e.toString());
+        }
     }
 }
