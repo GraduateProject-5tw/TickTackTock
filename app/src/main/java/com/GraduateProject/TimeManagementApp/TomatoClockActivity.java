@@ -2,6 +2,7 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
@@ -21,9 +22,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -38,6 +42,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import com.GraduateProject.TimeManagementApp.Adapters.SingleChoooiceAdapter;
 import com.google.android.material.navigation.NavigationView;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -94,7 +100,13 @@ public class TomatoClockActivity extends AppCompatActivity {
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                img.setImageResource(isChecked?R.drawable.background_view:R.drawable.background_view_night);
+                if(isChecked) //當按鈕狀態為選取時
+                {
+                    img.setBackground(getDrawable(R.drawable.background_view));
+                } else //當按鈕狀態為未選取時
+                {
+                    img.setBackground(getDrawable(R.drawable.background_view_night));
+                }
             }
         });
 
@@ -155,64 +167,7 @@ public class TomatoClockActivity extends AppCompatActivity {
 
         //當按下時鐘
         timeButton.setOnClickListener(v -> {
-            AlertDialog.Builder timeConfirm = new AlertDialog.Builder(TomatoClockActivity.this);
-            AlertDialog.Builder StoptimeConfirm = new AlertDialog.Builder(TomatoClockActivity.this);
-            AlertDialog.Builder remind = new AlertDialog.Builder(TomatoClockActivity.this);
-            timeConfirm.setTitle("讀書時間設置:(分鐘)");
-            timeConfirm.setIcon(android.R.drawable.ic_dialog_info);
-            StoptimeConfirm.setIcon(android.R.drawable.ic_dialog_info);
-            remind.setIcon(android.R.drawable.ic_popup_reminder);
-            StoptimeConfirm.setCancelable(false);
-            timeConfirm.setCancelable(false);
-            //設定單選列表
-            timeConfirm.setSingleChoiceItems(studytime, -1, (dialog, which) -> {
-                // TODO Auto-generated method stub
-               int i = Integer.parseInt(studytime[which]);
-                studyInMillis = i*60000;
-            });
-            //設定取消按鈕並且設定響應事件
-            timeConfirm.setNegativeButton("取消", (dialog, which) -> { });
-            timeConfirm.setPositiveButton("下一步→", (dialog, which) -> { });
-            AlertDialog a = timeConfirm.create();
-            a.show();
-            a.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x1 -> {
-                if(studyInMillis == 0){
-                    Toast.makeText(TomatoClockActivity.this, "尚未選擇讀書時間", Toast.LENGTH_SHORT).show();
-                }else {
-                    a.dismiss();
-                    StoptimeConfirm.setTitle("休息時間設置:(分鐘)");
-                    StoptimeConfirm.setSingleChoiceItems(resttime, -1, (dialog1, which1) -> {
-                        // TODO Auto-generated method stub
-                        int j = Integer.parseInt(resttime[which1]);
-                        stopInMillis = j * 60000;
-                    });
-                    StoptimeConfirm.setPositiveButton("確定", (ddialog, wwhich) -> { });
-                    StoptimeConfirm.setNeutralButton("←上一步", (dialog, which) -> { });
-                    StoptimeConfirm.setNegativeButton("取消", (dialoga, whicha) -> { });
-                    AlertDialog b = StoptimeConfirm.create();
-                    b.show();
-                    b.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x3 -> {
-                        if (stopInMillis > studyInMillis || stopInMillis == studyInMillis) {
-                            Toast.makeText(TomatoClockActivity.this, "休息時間只能小於讀書時間", Toast.LENGTH_SHORT).show();
-                        } else {
-                            b.dismiss();
-                            //顯示設定完成提醒
-                            Toast.makeText(TomatoClockActivity.this, "時間設定完成", Toast.LENGTH_SHORT).show();
-                            futureInMillis = studyInMillis;
-                            //出現開始計時按鈕
-                            startBtn.setVisibility(View.VISIBLE);
-                        }
-                    }));
-                    b.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener((x4 -> {
-                        b.dismiss();
-                        a.show();
-                    }));
-                    b.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(x5 -> b.dismiss());
-                }
-            }));
-            a.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener((x2 -> {
-                a.dismiss();//結束對話框
-            }));
+            showDialogSetTime("讀書時間設置:(分鐘)", studytime, 0);
         });
 
         general_btn.setEnabled(true);
@@ -237,7 +192,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                     close();
                     Intent intent = new Intent();
                     intent.setClass(TomatoClockActivity.this, GeneralTimerActivity.class);
-                    if(recordTime < 15*6000){
+                    if(recordTime < 15*60000){
                         // inflating the view with the custom layout we created
                         mView = layoutInflater.inflate(R.layout.activity_record_study, null);
                         mView.setFocusable(true);
@@ -362,9 +317,7 @@ public class TomatoClockActivity extends AppCompatActivity {
                             study.cancel();
                         }));
                     }
-
                 });
-
                 //否的話留在番茄
                 mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
                     close();
@@ -490,7 +443,7 @@ public class TomatoClockActivity extends AppCompatActivity {
             String Time = getDurationBreakdown(recordTime);  //轉成小時分鐘秒
             totalTime = getTotalTime(recordTime);
             //跳出視窗
-            if (recordTime < 15 * 6000) {
+            if (recordTime < 15 * 60000) {
                 // getting a LayoutInflater
                 LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 // inflating the view with the custom layout we created
@@ -702,131 +655,6 @@ public class TomatoClockActivity extends AppCompatActivity {
         recordTime=0;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public void showDialog() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressWarnings("WrongConstant")
-            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
-                    time - 1000 * 1000, time);
-
-            AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
-            alert.setTitle("離開");
-            alert.setMessage("確定要離開?");
-            alert.setCancelable(false);
-            //按"是",則退出應用程式
-            alert.setPositiveButton("是", (dialog, i) -> {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
-                startActivity(intent);
-            });
-            //按"否",則不執行任何操作
-            alert.setNegativeButton("否", (dialog, i) -> {
-            });
-
-            AlertDialog alert2 = new AlertDialog.Builder(this)
-                    .setTitle("Usage Access")
-                    .setCancelable(false)
-                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
-                    .setPositiveButton("設定", (dialog, which) -> {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        alert.show();//顯示訊息視窗
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .create();
-
-            if (appList.size() == 0) {
-
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setTitle("Usage Access")
-                        .setCancelable(false)
-                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setPositiveButton("設定", (dialog, which) -> {
-                            // continue with delete
-                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
-                                alert2.show();//顯示訊息視窗
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .create();
-
-                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                alertDialog.show();
-            }
-            else if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
-                alert2.show();//顯示訊息視窗
-            } else{
-                alert.show();
-            }
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public void showDialogStart() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressWarnings("WrongConstant")
-            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
-                    time - 1000 * 1000, time);
-
-            AlertDialog alert2 = new AlertDialog.Builder(this)
-                    .setTitle("Usage Access")
-                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
-                    .setPositiveButton("設定", (dialog, which) -> {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    })
-                    .setNegativeButton("放棄", (dialog, which) -> {
-                        // do nothing
-                        dialog.dismiss();
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .create();
-
-            if (appList.size() == 0) {
-
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setTitle("Usage Access")
-                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setPositiveButton("設定", (dialog, which) -> {
-                            // continue with delete
-                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
-                                alert2.show();//顯示訊息視窗
-                            }
-                        })
-                        .setNegativeButton("放棄", (dialog, which) -> {
-                            // do nothing
-                            dialog.dismiss();
-                            if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
-                                alert2.show();//顯示訊息視窗
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .create();
-
-                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                alertDialog.show();
-            }
-            else if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
-                alert2.show();//顯示訊息視窗
-            }
-        }
-    }
-
     //目錄相關操作
     @Override
     public boolean onSupportNavigateUp() {
@@ -903,6 +731,231 @@ public class TomatoClockActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
         }
         cursor.close();
+    }
+
+
+    //dialogs
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void showDialog() {
+        @SuppressWarnings("WrongConstant")
+        UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+        long time = System.currentTimeMillis();
+        List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                time - 1000 * 1000, time);
+
+        final Dialog leave = new Dialog(TomatoClockActivity.this);
+        leave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        leave.setCancelable(false);
+        leave.setContentView(R.layout.activity_popup_yesnobutton);
+
+        TextView title = (TextView) leave.findViewById(R.id.txt_tit);
+        title.setText("離 開");
+
+        TextView content = (TextView) leave.findViewById(R.id.txt_dia);
+        content.setText("確定要離開嗎？");
+
+        Button no = (Button) leave.findViewById(R.id.btn_no);
+        no.setText("否");
+        no.setOnClickListener(v -> leave.dismiss());
+
+        Button yes = (Button) leave.findViewById(R.id.btn_yes);
+        yes.setText("是");
+        yes.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
+            leave.dismiss();
+        });
+
+        final Dialog floating = new Dialog(TomatoClockActivity.this);
+        floating.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        floating.setCancelable(false);
+        floating.setContentView(R.layout.activity_popup_singlebutton);
+
+        TextView text = (TextView) floating.findViewById(R.id.txt_dia);
+        text.setText("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。");
+
+        Button setFloat = (Button) floating.findViewById(R.id.btn_yes);
+        setFloat.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            floating.dismiss();
+            leave.show();//顯示訊息視窗
+        });
+
+        if (appList.size() == 0) {
+
+            final Dialog access = new Dialog(TomatoClockActivity.this);
+            access.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            access.setCancelable(false);
+            access.setContentView(R.layout.activity_popup_singlebutton);
+
+            TextView text2 = (TextView) access.findViewById(R.id.txt_dia);
+            text2.setText("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。");
+
+            Button setAccess = (Button) access.findViewById(R.id.btn_yes);
+            setAccess.setOnClickListener(v -> {
+                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                    floating.show();//顯示訊息視窗
+                }
+                access.dismiss();
+            });
+            access.show();
+        }
+        else if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+            floating.show();//顯示訊息視窗
+        } else{
+            leave.show();
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void showDialogStart() {
+        @SuppressWarnings("WrongConstant")
+        UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+        long time = System.currentTimeMillis();
+        List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                time - 1000 * 1000, time);
+
+        final Dialog floating = new Dialog(TomatoClockActivity.this);
+        floating.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        floating.setCancelable(false);
+        floating.setContentView(R.layout.activity_popup_singlebutton);
+
+        TextView text = (TextView) floating.findViewById(R.id.txt_dia);
+        text.setText("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。");
+
+        Button setFloat = (Button) floating.findViewById(R.id.btn_yes);
+        setFloat.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            floating.dismiss();//顯示訊息視窗
+        });
+
+        if (appList.size() == 0) {
+
+            final Dialog access = new Dialog(TomatoClockActivity.this);
+            access.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            access.setCancelable(false);
+            access.setContentView(R.layout.activity_popup_singlebutton);
+
+            TextView text2 = (TextView) access.findViewById(R.id.txt_dia);
+            text2.setText("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。");
+
+            Button setAccess = (Button) access.findViewById(R.id.btn_yes);
+            setAccess.setOnClickListener(v -> {
+                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+                    floating.show();//顯示訊息視窗
+                }
+                access.dismiss();
+            });
+            access.show();
+        }
+        else if (!Settings.canDrawOverlays(TomatoClockActivity.this)) {
+            floating.show();//顯示訊息視窗
+        }
+    }
+
+    public void showDialogSetTime(String title, String[] time, int position){
+        final Dialog dialog = new Dialog(TomatoClockActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.activity_popup_radiobutton);
+
+        TextView text = (TextView) dialog.findViewById(R.id.txt_tit);
+        text.setText(title);
+
+        //Create an instance of Adapter for Listview
+        SingleChoooiceAdapter adapter = new SingleChoooiceAdapter(TomatoClockActivity.this, R.layout.list_item, time);
+
+        //Create an instance of ListView for AlertDialog
+        final ListView simpleListView = (ListView)dialog.findViewById(R.id.txt_dia);
+        simpleListView.setAdapter(adapter);
+        simpleListView.setOnItemClickListener(
+                (arg0, view, position1, id) -> {
+                    // TODO Auto-generated method stub
+                    adapter.setSelectedIndex(position1);
+                    adapter.notifyDataSetChanged();
+                    Object o = simpleListView.getItemAtPosition(position1);
+                    String t = o.toString();
+                    int tim = Integer.parseInt(t);
+                    studyInMillis = tim * 60000;
+                }
+        );
+
+        Button no = (Button) dialog.findViewById(R.id.btn_no);
+        no.setOnClickListener(v -> dialog.dismiss());
+
+        Button yes = (Button) dialog.findViewById(R.id.btn_yes);
+        yes.setOnClickListener(v -> {
+            if(studyInMillis == 0){
+                Toast.makeText(TomatoClockActivity.this, "尚未選擇讀書時間", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                dialog.dismiss();
+                showDialogSetRestTime("休息時間設置:(分鐘)", resttime, 0);
+            }
+        });
+
+
+        dialog.show();
+
+    }
+
+    public void showDialogSetRestTime(String title, String[] time, int position){
+        final Dialog dialog = new Dialog(TomatoClockActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setCancelable(false);
+        dialog.setContentView(R.layout.activity_popup_radiobutton);
+
+        TextView text = (TextView) dialog.findViewById(R.id.txt_tit);
+        text.setText(title);
+
+        //Create an instance of Adapter for Listview
+        SingleChoooiceAdapter adapter = new SingleChoooiceAdapter(TomatoClockActivity.this, R.layout.list_item, time);
+
+        //Create an instance of ListView for AlertDialog
+        final ListView simpleListView = (ListView)dialog.findViewById(R.id.txt_dia);
+        simpleListView.setAdapter(adapter);
+        simpleListView.setOnItemClickListener(
+                (arg0, view, position1, id) -> {
+                    // TODO Auto-generated method stub
+                    adapter.setSelectedIndex(position1);
+                    adapter.notifyDataSetChanged();
+                    Object o = simpleListView.getItemAtPosition(position1);
+                    String t = o.toString();
+                    int tim = Integer.parseInt(t);
+                    stopInMillis = tim * 60000;
+                }
+        );
+
+        Button no = (Button) dialog.findViewById(R.id.btn_no);
+        no.setOnClickListener(v -> dialog.dismiss());
+
+        Button yes = (Button) dialog.findViewById(R.id.btn_yes);
+        yes.setOnClickListener(v -> {
+            if(stopInMillis > studyInMillis || stopInMillis == studyInMillis){
+                Toast.makeText(TomatoClockActivity.this, "休息時間只能小於讀書時間", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                dialog.dismiss();
+                //顯示設定完成提醒
+                Toast.makeText(TomatoClockActivity.this, "時間設定完成", Toast.LENGTH_SHORT).show();
+                futureInMillis = studyInMillis;
+                //出現開始計時按鈕
+                startBtn.setVisibility(View.VISIBLE);
+            }
+        });
+        dialog.show();
     }
 
     private void closeDB() {

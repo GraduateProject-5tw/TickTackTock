@@ -36,8 +36,13 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
         public void onTick(long millisUntilFinished) {
             Log.e("Countdown", "開始倒數計時10分鐘");
             String frontCommuApp = getForegroundTask().replaceAll("\\s+","");
-            if(!commuapps.contains(frontCommuApp)){
-                CommuTimer.cancel();
+            synchronized (DetectFrontCommuApp) {
+                if (!commuapps.contains(frontCommuApp)){
+                    Log.e("Countdown", "restart countdown");
+                    i = 0;
+                    DetectFrontCommuApp.notifyAll();
+                    CommuTimer.cancel();
+                }
             }
         }
 
@@ -56,12 +61,19 @@ public class CheckFrontCommuApp extends Service {    //server是一個在背景�
             String frontCommuApp = getForegroundTask().replaceAll("\\s+","");
             if(commuapps.contains(frontCommuApp)){
                 Log.e("checkCommu", "Detect Communication App Press");
-                executor.shutdown();
-                if(i==0){
-                    CommuTimer.start();
-                    i+=1;
-                }else{
-                    CommuTimer.cancel();
+                try {
+                    if(i==0){
+                        CommuTimer.start();
+                        i+=1;
+                    }else{
+                        CommuTimer.cancel();
+                    }
+                    synchronized (DetectFrontCommuApp) {
+                        if (commuapps.contains(frontCommuApp))
+                            DetectFrontCommuApp.wait();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }

@@ -1,11 +1,15 @@
 package com.GraduateProject.TimeManagementApp;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -36,14 +40,31 @@ public class CourseTouchHelper extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
         final int position = viewHolder.getBindingAdapterPosition();
         if (direction == ItemTouchHelper.LEFT) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-            builder.setTitle("刪除讀書科目");
-            builder.setMessage("請問是否要刪除此科目？");
-            builder.setPositiveButton("確定",
-                    (dialog, which) -> adapter.deleteCourse(position));
-            builder.setNegativeButton("取消", (dialog, which) -> adapter.notifyItemChanged(viewHolder.getBindingAdapterPosition()));
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            final Dialog leave = new Dialog(adapter.getContext());
+            leave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            leave.setCancelable(false);
+            leave.setContentView(R.layout.activity_popup_yesnobutton);
+
+            TextView title = (TextView) leave.findViewById(R.id.txt_tit);
+            title.setText("刪除讀書科目");
+
+            TextView content = (TextView) leave.findViewById(R.id.txt_dia);
+            content.setText("請問是否要刪除此科目？");
+
+            Button no = (Button) leave.findViewById(R.id.btn_no);
+            no.setText("取消");
+            no.setOnClickListener(v -> {
+                adapter.notifyItemChanged(viewHolder.getBindingAdapterPosition());
+                leave.dismiss();
+            });
+
+            Button yes = (Button) leave.findViewById(R.id.btn_yes);
+            yes.setText("確定");
+            yes.setOnClickListener(v -> {
+                adapter.deleteCourse(position);
+                leave.dismiss();
+            });
+            leave.show();
         }
     }
 

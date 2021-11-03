@@ -2,6 +2,7 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
@@ -21,12 +22,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -101,11 +104,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked) //當按鈕狀態為選取時
                 {
-                    img.setImageResource(R.drawable.background_view);
+                    img.setBackground(getDrawable(R.drawable.background_view));
                     chronometer.setTextColor(Color.BLACK);
                 } else //當按鈕狀態為未選取時
                 {
-                    img.setImageResource(R.drawable.background_view_night);
+                    img.setBackground(getDrawable(R.drawable.background_view_night));
                     chronometer.setTextColor(Color.WHITE);
                 }
             }
@@ -189,7 +192,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             courses.add("新增科目");
             final String[] coursesArray = courses.toArray(new String[0]);
             final EditText editText = new EditText(GeneralTimerActivity.this);//其他的文字輸入方塊
-            if (recordTime < 15 * 6000) {
+            if (recordTime < 15 * 60000) {
                 // getting a LayoutInflater
                 LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 // inflating the view with the custom layout we created
@@ -240,7 +243,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                         recordTime = 0;
                         chronometer.setBase(SystemClock.elapsedRealtime());
                     }));
-
                 });
 
                 mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
@@ -321,7 +323,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                     Intent intent = new Intent();
                     intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
                     //跳出視窗
-                    if (recordTime < 15 * 6000) {
+                    if (recordTime < 15 * 60000) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(GeneralTimerActivity.this);
                         builder.setCancelable(false);
                         builder.setTitle("紀錄確認");
@@ -597,120 +599,134 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     }
 
 
+    //dialogs
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void showDialog() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressWarnings("WrongConstant")
-            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
-                    time - 1000 * 1000, time);
+        @SuppressWarnings("WrongConstant")
+        UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+        long time = System.currentTimeMillis();
+        List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                time - 1000 * 1000, time);
 
-            AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
-            alert.setTitle("離開");
-            alert.setCancelable(false);
-            alert.setMessage("確定要離開?");
-            //按"是",則退出應用程式
-            alert.setPositiveButton("是", (dialog, i) -> {
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_HOME);
+        final Dialog leave = new Dialog(GeneralTimerActivity.this);
+        leave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        leave.setCancelable(false);
+        leave.setContentView(R.layout.activity_popup_yesnobutton);
+
+        TextView title = (TextView) leave.findViewById(R.id.txt_tit);
+        title.setText("離 開");
+
+        TextView content = (TextView) leave.findViewById(R.id.txt_dia);
+        content.setText("確定要離開嗎？");
+
+        Button no = (Button) leave.findViewById(R.id.btn_no);
+        no.setText("否");
+        no.setOnClickListener(v -> leave.dismiss());
+
+        Button yes = (Button) leave.findViewById(R.id.btn_yes);
+        yes.setText("是");
+        yes.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            startActivity(intent);
+            leave.dismiss();
+        });
+
+        final Dialog floating = new Dialog(GeneralTimerActivity.this);
+        floating.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        floating.setCancelable(false);
+        floating.setContentView(R.layout.activity_popup_singlebutton);
+
+        TextView text = (TextView) floating.findViewById(R.id.txt_dia);
+        text.setText("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。");
+
+        Button setFloat = (Button) floating.findViewById(R.id.btn_yes);
+        setFloat.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            floating.dismiss();
+            leave.show();//顯示訊息視窗
+        });
+
+        if (appList.size() == 0) {
+
+            final Dialog access = new Dialog(GeneralTimerActivity.this);
+            access.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            access.setCancelable(false);
+            access.setContentView(R.layout.activity_popup_singlebutton);
+
+            TextView text2 = (TextView) access.findViewById(R.id.txt_dia);
+            text2.setText("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。");
+
+            Button setAccess = (Button) access.findViewById(R.id.btn_yes);
+            setAccess.setOnClickListener(v -> {
+                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                    floating.show();//顯示訊息視窗
+                }
+                access.dismiss();
             });
-            //按"否",則不執行任何操作
-            alert.setNegativeButton("否", (dialog, i) -> {
-            });
-
-            AlertDialog alert2 = new AlertDialog.Builder(this)
-                    .setTitle("Usage Access")
-                    .setCancelable(false)
-                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
-                    .setPositiveButton("設定", (dialog, which) -> {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        alert.show();//顯示訊息視窗
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .create();
-
-            if (appList.size() == 0) {
-
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setTitle("Usage Access")
-                        .setCancelable(false)
-                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setPositiveButton("設定", (dialog, which) -> {
-                            // continue with delete
-                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                                alert2.show();//顯示訊息視窗
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .create();
-
-                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                alertDialog.show();
-            }
-            else if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                alert2.show();//顯示訊息視窗
-            } else{
-                alert.show();
-            }
+            access.show();
+        }
+        else if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+            floating.show();//顯示訊息視窗
+        } else{
+            leave.show();
         }
     }
 
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void showDialogStart() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            @SuppressWarnings("WrongConstant")
-            UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
-            long time = System.currentTimeMillis();
-            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
-                    time - 1000 * 1000, time);
+        @SuppressWarnings("WrongConstant")
+        UsageStatsManager usm = (UsageStatsManager) getSystemService("usagestats");
+        long time = System.currentTimeMillis();
+        List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+                time - 1000 * 1000, time);
 
-            AlertDialog alert2 = new AlertDialog.Builder(this)
-                    .setTitle("Usage Access")
-                    .setMessage("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。")
-                    .setCancelable(false)
-                    .setPositiveButton("設定", (dialog, which) -> {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    })
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .create();
+        final Dialog floating = new Dialog(GeneralTimerActivity.this);
+        floating.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        floating.setCancelable(false);
+        floating.setContentView(R.layout.activity_popup_singlebutton);
 
-            if (appList.size() == 0) {
+        TextView text = (TextView) floating.findViewById(R.id.txt_dia);
+        text.setText("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。");
 
-                AlertDialog alertDialog = new AlertDialog.Builder(this)
-                        .setTitle("Usage Access")
-                        .setMessage("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。")
-                        .setCancelable(false)
-                        .setPositiveButton("設定", (dialog, which) -> {
-                            // continue with delete
-                            Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                            // intent.setComponent(new ComponentName("com.android.settings","com.android.settings.Settings$SecuritySettingsActivity"));
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                                alert2.show();//顯示訊息視窗
-                            }
-                        })
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .create();
+        Button setFloat = (Button) floating.findViewById(R.id.btn_yes);
+        setFloat.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            floating.dismiss();//顯示訊息視窗
+        });
 
-                //alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-                alertDialog.show();
-            }
-            else if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
-                alert2.show();//顯示訊息視窗
-            }
+        if (appList.size() == 0) {
+
+            final Dialog access = new Dialog(GeneralTimerActivity.this);
+            access.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            access.setCancelable(false);
+            access.setContentView(R.layout.activity_popup_singlebutton);
+
+            TextView text2 = (TextView) access.findViewById(R.id.txt_dia);
+            text2.setText("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。");
+
+            Button setAccess = (Button) access.findViewById(R.id.btn_yes);
+            setAccess.setOnClickListener(v -> {
+                Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+                    floating.show();//顯示訊息視窗
+                }
+                access.dismiss();
+            });
+            access.show();
+        }
+        else if (!Settings.canDrawOverlays(GeneralTimerActivity.this)) {
+            floating.show();//顯示訊息視窗
         }
     }
 

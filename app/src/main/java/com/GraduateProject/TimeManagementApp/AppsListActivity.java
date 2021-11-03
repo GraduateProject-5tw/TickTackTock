@@ -2,12 +2,17 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -70,18 +75,28 @@ public class AppsListActivity extends AppCompatActivity {
             customAppsUpdateDB(gson.toJson(AppListAdapter.getEditedApps()));
             LoadingApp.setCustomAllowedApps(AppListAdapter.getEditedApps());
             LoadingApp.setAllowedAppInfos(AppListAdapter.getEditedAppInfos());
-            AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
-            alert.setTitle("離開");
-            alert.setMessage("尚未儲存變更，確定要離開設定?");
-            alert.setCancelable(false);
-            //按"是",則退出應用程式
-            alert.setPositiveButton("立即儲存", (dialog, i) -> {
+
+            final Dialog leave = new Dialog(this);
+            leave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            leave.setCancelable(false);
+            leave.setContentView(R.layout.activity_popup_yesnobutton);
+
+            TextView title = (TextView) leave.findViewById(R.id.txt_tit);
+            title.setText("離 開");
+
+            TextView content = (TextView) leave.findViewById(R.id.txt_dia);
+            content.setText("尚未儲存變更，確定要離開嗎？");
+
+            Button no = (Button) leave.findViewById(R.id.btn_no);
+            no.setText("否");
+            no.setOnClickListener(v -> leave.dismiss());
+
+            Button yes = (Button) leave.findViewById(R.id.btn_yes);
+            yes.setText("是");
+            yes.setOnClickListener(v -> {
                 finishAndRemoveTask();
             });
-            //按"否",則不執行任何操作
-            alert.setNegativeButton("否", (dialog, i) -> {
-            });
-            alert.show();
+            leave.show();
             return true;
         }
         return super.onOptionsItemSelected(item);

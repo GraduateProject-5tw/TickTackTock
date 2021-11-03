@@ -1,11 +1,15 @@
 package com.GraduateProject.TimeManagementApp;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -33,26 +37,33 @@ public class RecyclerItemTouchHelper extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
-        final int position = viewHolder.getAdapterPosition();
+        final int position = viewHolder.getBindingAdapterPosition();
         if (direction == ItemTouchHelper.LEFT) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-            builder.setTitle("Delete Task");
-            builder.setMessage("Are you sure you want to delete this Task?");
-            builder.setPositiveButton("Confirm",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            adapter.deleteItem(position);
-                        }
-                    });
-            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    adapter.notifyItemChanged(viewHolder.getAdapterPosition());
-                }
+            final Dialog leave = new Dialog(adapter.getContext());
+            leave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            leave.setCancelable(false);
+            leave.setContentView(R.layout.activity_popup_yesnobutton);
+
+            TextView title = (TextView) leave.findViewById(R.id.txt_tit);
+            title.setText("刪除任務");
+
+            TextView content = (TextView) leave.findViewById(R.id.txt_dia);
+            content.setText("請問是否要刪除此代辦任務？");
+
+            Button no = (Button) leave.findViewById(R.id.btn_no);
+            no.setText("取消");
+            no.setOnClickListener(v -> {
+                adapter.notifyItemChanged(viewHolder.getBindingAdapterPosition());
+                leave.dismiss();
             });
-            AlertDialog dialog = builder.create();
-            dialog.show();
+
+            Button yes = (Button) leave.findViewById(R.id.btn_yes);
+            yes.setText("確定");
+            yes.setOnClickListener(v -> {
+                adapter.deleteItem(position);
+                leave.dismiss();
+            });
+            leave.show();
         } else {
             adapter.editItem(position);
         }

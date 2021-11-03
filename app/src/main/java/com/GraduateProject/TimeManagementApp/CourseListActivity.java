@@ -2,13 +2,21 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,8 +52,6 @@ public class CourseListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_list);
-        final EditText editText = new EditText(CourseListActivity.this);//其他的文字輸入方塊
-
         openDB();
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.course_toolbar);
@@ -56,33 +62,43 @@ public class CourseListActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("編輯讀書科目");
 
         add.setOnClickListener(v -> {
-            AlertDialog.Builder courseDialog = new AlertDialog.Builder(CourseListActivity.this);
-            courseDialog.setTitle("輸入新科目");
-            courseDialog.setView(editText);
-            courseDialog.setPositiveButton("確定", ((dialogs, y) -> { }));
-            courseDialog.setNegativeButton("取消", ((dialogs, y) -> { }));
-            AlertDialog alert = courseDialog.create();
-            alert.show();
-            alert.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener((x -> {
+            final Dialog add = new Dialog(this);
+            add.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            add.setCanceledOnTouchOutside(true);
+            add.setCancelable(true);
+            add.setContentView(R.layout.activity_popup_edittext);
+
+            TextView title = (TextView) add.findViewById(R.id.txt_tit);
+            title.setText("輸入新科目");
+
+            EditText editText = (EditText) add.findViewById(R.id.editText);
+            add.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+            Button right = (Button) add.findViewById(R.id.btn_yes);
+            right.setText("確 定");
+            right.setOnClickListener(v1 -> {
                 if (editText.getText().toString().isEmpty()) {
                     Toast.makeText(getApplicationContext(), "科目不可空白", Toast.LENGTH_SHORT).show();
                 } else {
                     course = editText.getText().toString();
                     Log.e("COURSE", "added course is " + course);
+                    customAppsUpdateDB(CourseListAdapter.getCourse_list(), CourseListAdapter.getColor_list(), CourseListAdapter.getText_list());
                     courses.add(course);
                     insertCourse(course);
-                    alert.dismiss();
+                    add.dismiss();
                     finish();
                     overridePendingTransition(0, 0);
                     startActivity(getIntent());
                     overridePendingTransition(0, 0);
                 }
-            }));
-            alert.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener((x -> {
-                alert.dismiss();
-            }));
-            alert.setCanceledOnTouchOutside(true);
-            alert.setCancelable(true);
+            });
+
+            Button left = (Button) add.findViewById(R.id.btn_no);
+            left.setText("取 消");
+            left.setOnClickListener(v2 -> {
+                add.dismiss();
+            });
+            add.show();
         });
 
         RecyclerView course_list = findViewById(R.id.course_list);
@@ -111,18 +127,27 @@ public class CourseListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             customAppsUpdateDB(CourseListAdapter.getCourse_list(), CourseListAdapter.getColor_list(), CourseListAdapter.getText_list());
-            AlertDialog.Builder alert = new AlertDialog.Builder(this); //創建訊息方塊
-            alert.setTitle("離開");
-            alert.setMessage("尚未儲存變更，確定要離開設定?");
-            alert.setCancelable(false);
-            //按"是",則退出應用程式
-            alert.setPositiveButton("立即儲存", (dialog, i) -> {
+            final Dialog leave = new Dialog(this);
+            leave.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            leave.setCancelable(false);
+            leave.setContentView(R.layout.activity_popup_yesnobutton);
+
+            TextView title = (TextView) leave.findViewById(R.id.txt_tit);
+            title.setText("離 開");
+
+            TextView content = (TextView) leave.findViewById(R.id.txt_dia);
+            content.setText("尚未儲存變更，確定要離開嗎？");
+
+            Button no = (Button) leave.findViewById(R.id.btn_no);
+            no.setText("否");
+            no.setOnClickListener(v -> leave.dismiss());
+
+            Button yes = (Button) leave.findViewById(R.id.btn_yes);
+            yes.setText("是");
+            yes.setOnClickListener(v -> {
                 finishAndRemoveTask();
             });
-            //按"否",則不執行任何操作
-            alert.setNegativeButton("否", (dialog, i) -> {
-            });
-            alert.show();
+            leave.show();
             return true;
         }
         return super.onOptionsItemSelected(item);
