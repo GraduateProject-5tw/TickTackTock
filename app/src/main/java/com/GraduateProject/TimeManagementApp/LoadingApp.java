@@ -80,7 +80,7 @@ public class LoadingApp extends AppCompatActivity {
                     setAllowedCommuApps();
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
-                    finish();
+                    finishAndRemoveTask();
                 }
             }
         };
@@ -116,7 +116,7 @@ public class LoadingApp extends AppCompatActivity {
                     setAllowedCommuApps();
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
-                    finish();
+                    finishAndRemoveTask();
                 }
             }
         };
@@ -154,7 +154,7 @@ public class LoadingApp extends AppCompatActivity {
                     setAllowedCommuApps();
                     Intent main = new Intent(LoadingApp.this, GeneralTimerActivity.class);
                     startActivity(main);
-                    finish();
+                    finishAndRemoveTask();
                 }
             }
         };
@@ -234,9 +234,13 @@ public class LoadingApp extends AppCompatActivity {
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
             }else if(category.equals(communication)){    //社交APP禁用開始操作
-                appInfo.setAppStatus(false);
-                Log.e("check",appInfo.getPackageName() + "is added");
-                commuApps.add(appInfo.getPackageName());
+                if (appInfo.getPackageName().contains("browser")|| appInfo.getPackageName().contains("chrome") || appInfo.getPackageName().contains("search")){
+                }
+                else{
+                    appInfo.setAppStatus(false);
+                    Log.e("check",appInfo.getPackageName() + "is added");
+                    commuApps.add(appInfo.getPackageName());
+                }
             }else{
                 appInfo.setAppStatus(false);
             }
@@ -316,7 +320,7 @@ public class LoadingApp extends AppCompatActivity {
             Document doc = Jsoup.connect(query_url).get();
 
             if (doc != null) {
-                Element link = doc.select("a[itemprop=genre]").first();
+                Element link = doc.select("span[itemprop=genre]").first();
                 return link.text();
             } else{
                 return "null doc";

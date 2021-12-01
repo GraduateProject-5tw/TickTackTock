@@ -2,6 +2,8 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -36,6 +38,8 @@ public class WebActivityBasic extends AppCompatActivity {
     private String[] split;
     private final String[] bannedCat = {"facebook","購","玩","instagram","遊","旅","演","唱","play","song", "travel", "celebrity","漫畫", "anime", "角色","character"};
     private final List<String> bannedBrowser = Arrays.asList(bannedCat);
+    private static WebActivityBasic webPage;
+    private static String uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +47,11 @@ public class WebActivityBasic extends AppCompatActivity {
         setContentView(R.layout.activity_web_basic);
         mWebView = (WebView) findViewById(R.id.webview_show);
         alert_edit();
+        webPage = this;
+    }
+
+    public static WebActivityBasic getWebPage(){
+        return webPage;
     }
 
     public void alert_edit() {
@@ -66,6 +75,7 @@ public class WebActivityBasic extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) { Callable<String> myCallable = () -> {
                 Crawler crawler = new Crawler();
+                uri = url;
                 String words = crawler.webGet(url);
                 return words;
             };
@@ -113,6 +123,10 @@ public class WebActivityBasic extends AppCompatActivity {
         windowBannedBrowser.open();
     }
 
+    public static String getUri(){
+        return uri;
+    }
+
     private WebChromeClient webChromeClient = new WebChromeClient() {
         @Override
         public boolean onJsAlert(WebView webView, String url, String message, JsResult result) {
@@ -146,16 +160,48 @@ public class WebActivityBasic extends AppCompatActivity {
                     }
                     return true;
                 }
+                else{
+                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) { //只處理一次
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        startActivity(intent);
+                    }
+                }
                 return false;
             }
 
         });
     }
 
+    @Override
+    public void onBackPressed() {  //當按back按紐時
+        myOnclick();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        finishAndRemoveTask();
+        if(!WindowBannedBrowser.getSearch()){
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+                startForegroundService(new Intent(this,CheckFrontBrowser.class));
+            } else {
+                startService(new Intent(this,CheckFrontBrowser.class));
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        stopService(new Intent(this,CheckFrontBrowser.class));
+    }
+
     /**
      * 拿到上一頁的路徑
      */
-    private void myLastUrl() {
+    protected void myLastUrl() {
         WebBackForwardList backForwardList = mWebView.copyBackForwardList();
         if (backForwardList != null && backForwardList.getSize() != 0) {
             //當前頁面在歷史佇列中的位置

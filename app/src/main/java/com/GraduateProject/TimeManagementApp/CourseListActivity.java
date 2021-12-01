@@ -68,6 +68,8 @@ public class CourseListActivity extends AppCompatActivity {
             add.setCancelable(true);
             add.setContentView(R.layout.activity_popup_edittext);
 
+            customAppsUpdateDB(CourseListAdapter.getCourse_list(), CourseListAdapter.getColor_list(), CourseListAdapter.getText_list());
+
             TextView title = (TextView) add.findViewById(R.id.txt_tit);
             title.setText("輸入新科目");
 

@@ -101,6 +101,7 @@ public class SettingsActivity extends AppCompatActivity {
             Button yes = (Button) leave.findViewById(R.id.btn_yes);
             yes.setText("是");
             yes.setOnClickListener(v -> {
+                leave.dismiss();
                 Intent intent = new Intent(SettingsActivity.this, GeneralTimerActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);

@@ -94,6 +94,7 @@ public class AppsListActivity extends AppCompatActivity {
             Button yes = (Button) leave.findViewById(R.id.btn_yes);
             yes.setText("是");
             yes.setOnClickListener(v -> {
+                leave.dismiss();
                 finishAndRemoveTask();
             });
             leave.show();

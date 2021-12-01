@@ -38,6 +38,7 @@ public class WindowBannedBrowser {
     private final View mView;
     private final WindowManager.LayoutParams mParams;
     private final WindowManager mWindowManager;
+    private static boolean search = false;
     private EditText SearchKeyLabel;
     private String SearchKey;
     private final String[] bannedCat = {"facebook","youtube","購","玩","instagram","遊","旅","演","唱"};
@@ -104,6 +105,12 @@ public class WindowBannedBrowser {
         // the view from the window
         mView.findViewById(R.id.btn_yes).setOnClickListener(view -> {
             close();
+            String escapedQuery = WebActivityBasic.getUri();
+            Uri uri = Uri.parse(escapedQuery);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            WebActivityBasic.getWebPage().startActivity(intent);
+            WebActivityBasic.getWebPage().finish();
+            search = true;
             if (GeneralTimerActivity.getIsCounting()) {
                 GeneralTimerActivity.getActivity().finishCounting();
             } else {
@@ -114,6 +121,7 @@ public class WindowBannedBrowser {
 
         mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
             close();
+            WebActivityBasic.getWebPage().myLastUrl();
             Log.v("shuffTest", "Pressed NO");
         });
 
@@ -156,6 +164,10 @@ public class WindowBannedBrowser {
         } catch (Exception e) {
             Log.d("Error2",e.toString());
         }
+    }
+
+    public static boolean getSearch(){
+        return search;
     }
 }
 

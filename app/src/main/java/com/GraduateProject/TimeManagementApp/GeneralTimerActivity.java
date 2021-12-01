@@ -200,7 +200,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 title2.setText("紀錄確認");
 
                 TextView content2 = (TextView) study_record_check.findViewById(R.id.txt_dia);
-                content2.setText("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
+                content2.setText("專注時間未滿15分鐘 \n\n 請問是否需要儲存此次紀錄？");
 
                 Button yes_recordstudy = (Button) study_record_check.findViewById(R.id.btn_yes);
                 yes_recordstudy.setText("是");
@@ -281,7 +281,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                         title2.setText("紀錄確認");
 
                         TextView content2 = (TextView) study_record.findViewById(R.id.txt_dia);
-                        content2.setText("讀書時間未滿15分鐘，請問是否需要儲存此次紀錄？");
+                        content2.setText("專注時間未滿15分鐘 \n\n 請問是否需要儲存此次紀錄？");
                         Button yes_recordstudy = (Button) study_record.findViewById(R.id.btn_yes);
                         yes_recordstudy.setText("是");
                         yes_recordstudy.setOnClickListener(v3 -> {//顯示紀錄時間
@@ -481,7 +481,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         floating.setContentView(R.layout.activity_popup_singlebutton);
 
         TextView text = (TextView) floating.findViewById(R.id.txt_dia);
-        text.setText("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。");
+        text.setText("此APP需要允許漂浮視窗 \n\n 否則將無法使用禁用APP的功能");
 
         Button setFloat = (Button) floating.findViewById(R.id.btn_yes);
         setFloat.setOnClickListener(v -> {
@@ -500,7 +500,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             access.setContentView(R.layout.activity_popup_singlebutton);
 
             TextView text2 = (TextView) access.findViewById(R.id.txt_dia);
-            text2.setText("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。");
+            text2.setText("此APP需存取裝置內其餘APP名稱 \n\n 否則將無法使用禁用APP的功能");
 
             Button setAccess = (Button) access.findViewById(R.id.btn_yes);
             setAccess.setOnClickListener(v -> {
@@ -535,7 +535,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         floating.setContentView(R.layout.activity_popup_singlebutton);
 
         TextView text = (TextView) floating.findViewById(R.id.txt_dia);
-        text.setText("此APP需要允許漂浮視窗，否則將無法使用禁用APP的功能。");
+        text.setText("此APP需要允許漂浮視窗 \n\n 否則將無法使用禁用APP的功能。");
 
         Button setFloat = (Button) floating.findViewById(R.id.btn_yes);
         setFloat.setOnClickListener(v -> {
@@ -553,7 +553,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             access.setContentView(R.layout.activity_popup_singlebutton);
 
             TextView text2 = (TextView) access.findViewById(R.id.txt_dia);
-            text2.setText("此APP需要使用到部分權限，否則將無法使用禁用APP的功能。");
+            text2.setText("此APP需存取裝置內其餘APP名稱 \n\n 否則將無法使用禁用APP的功能");
 
             Button setAccess = (Button) access.findViewById(R.id.btn_yes);
             setAccess.setOnClickListener(v -> {

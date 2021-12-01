@@ -42,10 +42,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginHorizontal="30dp"
                     android:paddingBottom="15dp"
                     android:gravity="center|top"
-                    android:text="現在是讀書時間，確定要使用該APP嗎？\n\n若使用，計時將會停止。"
+                    android:text="現在是專注時間 \n 確定要使用該APP嗎？\n\n若使用，計時將會停止。"
                     android:textColor="#6f68b0"
                     android:textSize="15sp"/>
             </LinearLayout>
