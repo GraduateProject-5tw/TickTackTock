@@ -43,6 +43,7 @@ public class LoadingApp extends AppCompatActivity {
     private String userName;
     private DBTotalHelper dbBannedAppsHelper = null;
     private final String TABLE_APPS = "BannedApps";
+    private final String TABLE_BG = "Background";
     private static final String COL_USER = "_USER";
     private static final String COL_CHECK = "_ISCUSTOM";
     private SQLiteDatabase db = null;
@@ -71,6 +72,7 @@ public class LoadingApp extends AppCompatActivity {
                     Log.e("INSERT", inputString1);
                     Log.e("INSERT", inputString2);
                     insertDB(userName, inputString2, inputString3, inputString1, inputString1);
+                    insertBGDefault();
                     realDefaultApps = getDefaultApps();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -381,6 +383,15 @@ public class LoadingApp extends AppCompatActivity {
         values.put("_DEFAULT", defaults);
         values.put("_CUSTOM", customs);
         db.insert(TABLE_APPS,null,values);
+    }
+
+    private void insertBGDefault(){
+        ContentValues values = new ContentValues();
+        values.put("_GENERAL ",1);
+        values.put("_TOMATO", 1);
+        values.put("_TIMEBLOCK", 1);
+        values.put("_TODO", 1);
+        db.insert(TABLE_BG,null,values);
     }
 
     public void defaultAppsUpdateDB(String defaults, String commus, String alls){

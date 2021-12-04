@@ -14,9 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +48,7 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
 
     @SuppressLint("StaticFieldLeak")
     private static DBToDoHelper db;
+    private static DBTotalHelper db_total;
     private static RecyclerView tasksRecyclerView;
     private static ToDoAdapter taskAdapter;
     private static FloatingActionButton new_btn;
@@ -56,6 +59,8 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
     private AppBarConfiguration mAppBarConfiguration;
     private static List<ToDoModel> taskList = new ArrayList<>();
     private TodoHeaderView mWeekHeaderView;
+    private static final String TABLE_BG = "Background";
+    private static SQLiteDatabase dbase = null;
 
 //to do list建立
     @Override
@@ -63,14 +68,32 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_todolist);
 
+        openDB();
+
         //深色背景按鈕
         toggleButton=(ToggleButton)findViewById(R.id.tb);
         ImageView img= findViewById(R.id.backgroundtheme);
-        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
-        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                img.setImageResource(isChecked?R.drawable.background_view:R.drawable.background_view_night);
+        boolean BGStatus;
+        if(getBGStatus() == 1){
+            Log.e("BG STATUS", "true");
+            img.setBackground(getDrawable(R.drawable.background_view));
+            BGStatus = true;
+        }
+        else {
+            Log.e("BG STATUS", "false");
+            img.setBackground(getDrawable(R.drawable.background_view_night));
+            BGStatus = false;
+        }
+        toggleButton.setChecked(BGStatus);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked) //當按鈕狀態為選取時
+            {
+                updateBGStatus(1);
+                img.setBackground(getDrawable(R.drawable.background_view));
+            } else //當按鈕狀態為未選取時
+            {
+                updateBGStatus(0);
+                img.setBackground(getDrawable(R.drawable.background_view_night));
             }
         });
 
@@ -90,15 +113,11 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         //to make the Navigation drawer icon always appear on the action bar
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting,R.id.web).setOpenableLayout(drawer).build();
         toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
         navigationView.setNavigationItemSelectedListener(item -> {
 
             switch (item.getItemId()) {
-                //lunch login activity
-                case R.id.nav_login:
-                    startActivity(new Intent(TodayToDoListActivity.this, LoginActivity.class));
-                    break;
                 // launch general timer
                 case R.id.nav_home:
                     startActivity(new Intent(TodayToDoListActivity.this, GeneralTimerActivity.class));
@@ -114,6 +133,10 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
                 case R.id.setting:
                     startActivity(new Intent(TodayToDoListActivity.this, SettingsActivity.class));
                     break;
+                // launch web activity
+                case R.id.web:
+                    startActivity(new Intent(TodayToDoListActivity.this, WebActivity.class));
+                    break;
             }
 
             drawer.closeDrawer(GravityCompat.START);
@@ -124,7 +147,6 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         assignViews();
 
         today = Calendar.getInstance();
-        db = new DBToDoHelper(this);
         int selectedMonth = today.get(Calendar.MONTH) + 1;
 
         String selectedDate = today.get(Calendar.YEAR) + "-" + String.format("%02d", selectedMonth) + "-" + String.format("%02d", today.get(Calendar.DAY_OF_MONTH));
@@ -208,5 +230,27 @@ public class TodayToDoListActivity extends AppCompatActivity implements DialogCl
         Collections.reverse(taskList);
         taskAdapter.setTasks(taskList);
         taskAdapter.notifyDataSetChanged();
+    }
+
+
+    private void openDB() {
+        db = new DBToDoHelper(this);
+        db_total = new DBTotalHelper(this);
+        dbase = db_total.getWritableDatabase();
+    }
+
+    private int getBGStatus(){
+        String Query = "Select * from " + TABLE_BG;
+        Cursor cursor = dbase.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int BG = cursor.getInt(cursor.getColumnIndex("_TODO"));
+        cursor.close();
+        return BG;
+    }
+
+    private void updateBGStatus(int BG){
+        ContentValues values = new ContentValues();
+        values.put("_TODO", BG);
+        dbase.update(TABLE_BG,values,null, null);
     }
 }

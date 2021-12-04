@@ -74,6 +74,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     private Chronometer mChronometer;
     private DBTotalHelper DBHelper;
     private final String TABLE_APPS = "Courses";
+    private final String TABLE_BG = "Background";
     private final ArrayList<String> courses = new ArrayList<>();
     private Context context;
     private View mView;
@@ -94,28 +95,40 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         Button general_btn = findViewById(R.id.generalTimer_btn);
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
 
-        //深色背景按鈕
-        toggleButton=(ToggleButton)findViewById(R.id.tb);
-        ImageView img= findViewById(R.id.backgroundtheme);
-        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
-        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) //當按鈕狀態為選取時
-                {
-                    img.setBackground(getDrawable(R.drawable.background_view));
-                    chronometer.setTextColor(Color.BLACK);
-                } else //當按鈕狀態為未選取時
-                {
-                    img.setBackground(getDrawable(R.drawable.background_view_night));
-                    chronometer.setTextColor(Color.WHITE);
-                }
-            }
-        });
-
         generalTimerActivity = this;
         openDB();
         showDialogStart();
+
+        //深色背景按鈕
+        toggleButton=(ToggleButton)findViewById(R.id.tb);
+        ImageView img= findViewById(R.id.backgroundtheme);
+        boolean BGStatus;
+        if(getBGStatus() == 1){
+            Log.e("BG STATUS", "true");
+            img.setBackground(getDrawable(R.drawable.background_view));
+            chronometer.setTextColor(Color.BLACK);
+            BGStatus = true;
+        }
+        else {
+            Log.e("BG STATUS", "false");
+            img.setBackground(getDrawable(R.drawable.background_view_night));
+            chronometer.setTextColor(Color.WHITE);
+            BGStatus = false;
+        }
+        toggleButton.setChecked(BGStatus);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked) //當按鈕狀態為選取時
+            {
+                updateBGStatus(1);
+                img.setBackground(getDrawable(R.drawable.background_view));
+                chronometer.setTextColor(Color.BLACK);
+            } else //當按鈕狀態為未選取時
+            {
+                updateBGStatus(0);
+                img.setBackground(getDrawable(R.drawable.background_view_night));
+                chronometer.setTextColor(Color.WHITE);
+            }
+        });
 
         //目錄相關
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -128,15 +141,11 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         //to make the Navigation drawer icon always appear on the action bar
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting,R.id.web).setOpenableLayout(drawer).build();
         toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
         navigationView.setNavigationItemSelectedListener(item -> {
 
             switch (item.getItemId()) {
-                //lunch login activity
-                case R.id.nav_login:
-                    startActivity(new Intent(GeneralTimerActivity.this, LoginActivity.class));
-                    break;
                 // launch general timer
                 case R.id.nav_home:
                     break;
@@ -697,6 +706,23 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             } while (cursor.moveToNext());
         }
         cursor.close();
+    }
+
+    private int getBGStatus(){
+        String Query = "Select * from " + TABLE_BG;
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int BG = cursor.getInt(cursor.getColumnIndex("_GENERAL"));
+        cursor.close();
+        return BG;
+    }
+
+    private void updateBGStatus(int BG){
+        ContentValues values = new ContentValues();
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        values.put("_GENERAL", BG);
+        db.update(TABLE_BG,values,null, null);
     }
 
     private void closeDB() {

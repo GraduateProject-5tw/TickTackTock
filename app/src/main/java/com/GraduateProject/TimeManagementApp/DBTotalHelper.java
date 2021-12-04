@@ -16,6 +16,7 @@ public class DBTotalHelper extends SQLiteOpenHelper {
     private final static String _TableNameforTime = "TimeBlocker"; //<-- table name
     private final static String _TableNameforBanned = "BannedApps"; //<-- table name
     private final static String _TableNameforCourse = "Courses"; //<-- table name
+    private final static String _TableNameforBG = "Background";
 
     public DBTotalHelper(Context context) {
         super(context, _DBName, null, _DBVersion);
@@ -50,9 +51,17 @@ public class DBTotalHelper extends SQLiteOpenHelper {
                 "_COLOR INTEGER NOT NULL, " +
                 "_TEXT INTEGER NOT NULL " +
                 ");";
+        String SQL5 = "CREATE TABLE IF NOT EXISTS " + _TableNameforBG + "( " +
+                "_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "_GENERAL INTEGER NOT NULL, " +
+                "_TOMATO INTEGER NOT NULL, " +
+                "_TIMEBLOCK INTEGER NOT NULL, " +
+                "_TODO INTEGER NOT NULL " +
+                ");";
         db.execSQL(SQL2);
         db.execSQL(SQL1);
         db.execSQL(SQL4);
+        db.execSQL(SQL5);
     }
 
     @Override

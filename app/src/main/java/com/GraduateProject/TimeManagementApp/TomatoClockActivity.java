@@ -76,6 +76,7 @@ public class TomatoClockActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private DBTotalHelper DBHelper;
     private final String TABLE_APPS = "Courses";
+    private final String TABLE_BG = "Background";
     private final ArrayList<String> courses = new ArrayList<>();
     private String startTime;
     private String date;
@@ -92,23 +93,6 @@ public class TomatoClockActivity extends AppCompatActivity {
         tomatoClockActivity = this;
         setContentView(R.layout.activity_tomatoclock);  //指定對應的畫面呈現程式碼在activity_tomatoclock.xml
 
-        //深色背景按鈕
-        toggleButton=(ToggleButton)findViewById(R.id.tb);
-        ImageView img= findViewById(R.id.backgroundtheme);
-        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
-        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) //當按鈕狀態為選取時
-                {
-                    img.setBackground(getDrawable(R.drawable.background_view));
-                } else //當按鈕狀態為未選取時
-                {
-                    img.setBackground(getDrawable(R.drawable.background_view_night));
-                }
-            }
-        });
-
         showDialogStart();
         Toast.makeText(TomatoClockActivity.this, "點選時鐘設定時長", Toast.LENGTH_LONG).show();
         startBtn = findViewById(R.id.start_btn);
@@ -117,6 +101,33 @@ public class TomatoClockActivity extends AppCompatActivity {
         Button tomato_btn = findViewById(R.id.tomatoClock_btn);
         timeButton = findViewById(R.id.clock); //clock image
         openDB();
+
+        //深色背景按鈕
+        toggleButton=(ToggleButton)findViewById(R.id.tb);
+        ImageView img= findViewById(R.id.backgroundtheme);
+        boolean BGStatus;
+        if(getBGStatus() == 1){
+            Log.e("BG STATUS", "true");
+            img.setBackground(getDrawable(R.drawable.background_view));
+            BGStatus = true;
+        }
+        else {
+            Log.e("BG STATUS", "false");
+            img.setBackground(getDrawable(R.drawable.background_view_night));
+            BGStatus = false;
+        }
+        toggleButton.setChecked(BGStatus);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked) //當按鈕狀態為選取時
+            {
+                updateBGStatus(1);
+                img.setBackground(getDrawable(R.drawable.background_view));
+            } else //當按鈕狀態為未選取時
+            {
+                updateBGStatus(0);
+                img.setBackground(getDrawable(R.drawable.background_view_night));
+            }
+        });
 
 
         //目錄相關
@@ -130,16 +141,12 @@ public class TomatoClockActivity extends AppCompatActivity {
         //to make the Navigation drawer icon always appear on the action bar
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting,R.id.web).setOpenableLayout(drawer).build();
         toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
 
         navigationView.setNavigationItemSelectedListener(item -> {
 
             switch (item.getItemId()) {
-                //lunch login activity
-                case R.id.nav_login:
-                    startActivity(new Intent(TomatoClockActivity.this, LoginActivity.class));
-                    break;
                 // launch general timer
                 case R.id.nav_home:
                     break;
@@ -155,6 +162,10 @@ public class TomatoClockActivity extends AppCompatActivity {
                 // launch settings activity
                 case R.id.setting:
                     startActivity(new Intent(TomatoClockActivity.this, SettingsActivity.class));
+                    break;
+                // launch web activity
+                case R.id.web:
+                    startActivity(new Intent(TomatoClockActivity.this, WebActivity.class));
                     break;
             }
 
@@ -577,6 +588,23 @@ public class TomatoClockActivity extends AppCompatActivity {
             } while (cursor.moveToNext());
         }
         cursor.close();
+    }
+
+    private int getBGStatus(){
+        String Query = "Select * from " + TABLE_BG;
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int BG = cursor.getInt(cursor.getColumnIndex("_TOMATO"));
+        cursor.close();
+        return BG;
+    }
+
+    private void updateBGStatus(int BG){
+        ContentValues values = new ContentValues();
+        SQLiteDatabase db = DBHelper.getWritableDatabase();
+        values.put("_TOMATO", BG);
+        db.update(TABLE_BG,values,null, null);
     }
 
 

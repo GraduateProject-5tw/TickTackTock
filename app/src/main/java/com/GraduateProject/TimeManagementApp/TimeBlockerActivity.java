@@ -10,6 +10,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -46,6 +47,7 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
     private AppBarConfiguration mAppBarConfiguration;
     private static DBTotalHelper dbBannedAppsHelper = null;
     private static final String TABLE_APPS = "Courses";
+    private static final String TABLE_BG = "Background";
     private static SQLiteDatabase db = null;
     private static final String COURSE_NAME = "_COURSE";
 
@@ -54,21 +56,33 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_blocker);
 
+        openDB();
+
         //深色背景按鈕
         toggleButton=(ToggleButton)findViewById(R.id.tb);
         mWeekView = findViewById(R.id.weekdayview);
-        toggleButton.setChecked(true);	//設定按紐狀態 - true:選取, false:未選取
-        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) //當按鈕狀態為選取時
-                { mWeekView.setBackgroundColor(Color.WHITE); }
-                else //當按鈕狀態為未選取時
-                { mWeekView.setBackgroundColor(Color.DKGRAY); }
+        boolean BGStatus;
+        if(getBGStatus() == 1){
+            Log.e("BG STATUS", "true");
+            mWeekView.setBackgroundColor(Color.WHITE);
+            BGStatus = true;
+        }
+        else {
+            Log.e("BG STATUS", "false");
+            mWeekView.setBackgroundColor(Color.DKGRAY);
+            BGStatus = false;
+        }
+        toggleButton.setChecked(BGStatus);	//設定按紐狀態 - true:選取, false:未選取
+        toggleButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if(isChecked){ //當按鈕狀態為選取時
+                updateBGStatus(1);
+                mWeekView.setBackgroundColor(Color.WHITE);
+            } else{ //當按鈕狀態為未選取時
+                updateBGStatus(0);
+                mWeekView.setBackgroundColor(Color.DKGRAY);
             }
         });
 
-        openDB();
         assignViews();
 
         //目錄相關
@@ -83,15 +97,11 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         //to make the Navigation drawer icon always appear on the action bar
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_login,R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting).setOpenableLayout(drawer).build();
+                R.id.nav_home, R.id.todolist, R.id.studytime,R.id.setting,R.id.web).setOpenableLayout(drawer).build();
         toolbar.setNavigationOnClickListener(view -> drawer.openDrawer(navigationView));
         navigationView.setNavigationItemSelectedListener(item -> {
 
             switch (item.getItemId()) {
-                //lunch login activity
-                case R.id.nav_login:
-                    startActivity(new Intent(TimeBlockerActivity.this, LoginActivity.class));
-                    break;
                 // launch general timer
                 case R.id.nav_home:
                     startActivity(new Intent(TimeBlockerActivity.this, GeneralTimerActivity.class));
@@ -107,6 +117,10 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
                 // launch settings activity
                 case R.id.setting:
                     startActivity(new Intent(TimeBlockerActivity.this, SettingsActivity.class));
+                    break;
+                // launch web activity
+                case R.id.web:
+                    startActivity(new Intent(TimeBlockerActivity.this, WebActivity.class));
                     break;
             }
 
@@ -192,6 +206,21 @@ public class TimeBlockerActivity extends AppCompatActivity implements WeekDayVie
         Log.e("COURSE", "text color is " + Integer.toHexString(color));
         cursor.close();
         return color;
+    }
+
+    private int getBGStatus(){
+        String Query = "Select * from " + TABLE_BG;
+        Cursor cursor = db.rawQuery(Query, null);
+        cursor.moveToFirst();
+        int BG = cursor.getInt(cursor.getColumnIndex("_TIMEBLOCK"));
+        cursor.close();
+        return BG;
+    }
+
+    private void updateBGStatus(int BG){
+        ContentValues values = new ContentValues();
+        values.put("_TIMEBLOCK", BG);
+        db.update(TABLE_BG,values,null, null);
     }
 
     @Override
