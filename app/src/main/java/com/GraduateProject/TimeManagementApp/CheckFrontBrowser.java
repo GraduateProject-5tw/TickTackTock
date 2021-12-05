@@ -46,7 +46,7 @@ public class CheckFrontBrowser extends Service {
             String frontApp = getForegroundTask().replaceAll("\\s+", "");
             if (frontApp.contains("browser")|| frontApp.contains("chrome") || frontApp.contains("search")){
                 Log.e("check", "Detect App Press :" + frontApp);
-                startActivity(new Intent("com.GraduateProject.TimeManagementApp.web"));
+                startService(new Intent(CheckFrontBrowser.this, DialogShowBrowser.class));
                 executor.shutdown();
                 stopSelf();
             }

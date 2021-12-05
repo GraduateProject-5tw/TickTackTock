@@ -9,13 +9,14 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
+
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
-public class DialogShow extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
+public class DialogShowBrowser extends Service {    //server是一個在背景執行的服務，透過bindservice create、startservice start
 
     private final String TAG = "Timers" ;
-    WindowBanned windowBanned;
+    WebUseConfirm windowBanned;
 
     @Override
     public IBinder onBind (Intent arg0) {  //將app綁定server服務
@@ -35,7 +36,7 @@ public class DialogShow extends Service {    //server是一個在背景執行的
     @Override
     public int onStartCommand (Intent intent , int flags , int startId) {  //建立以後，啟動server服務
         Log. e ( TAG , "onStartCommand" ) ;
-        windowBanned = new WindowBanned(getApplicationContext());
+        windowBanned = new WebUseConfirm(getApplicationContext());
         windowBanned.open();
         super.onStartCommand(intent , flags , startId) ;
         return START_STICKY ;
