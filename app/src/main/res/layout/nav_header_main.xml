@@ -21,9 +21,9 @@
             android:layout_marginLeft="24dp"
             android:layout_marginStart="24dp"
             android:paddingBottom="8dp"
-            android:text="您目前位於選單..."
+            android:text="目 錄"
             android:textColor="#fff"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
 

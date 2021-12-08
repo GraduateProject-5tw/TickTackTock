@@ -3,6 +3,7 @@ package com.GraduateProject.TimeManagementApp;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.ContentValues;
@@ -11,6 +12,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -277,6 +280,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                 yes.setText("是");
                 yes.setOnClickListener(v -> {
                     //tomato的切換頁面
+                    change_clock.dismiss();
                     Intent intent = new Intent();
                     intent.setClass(GeneralTimerActivity.this, TomatoClockActivity.class);
                     //跳出視窗
@@ -319,8 +323,6 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
                         showStudyRecordDialog(Time,coursesArray);
                     }
                 });
-
-
              change_clock.show();
 
             } else {
@@ -353,25 +355,22 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
     public void onPause() {
         super.onPause();
         if (isCounting) {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                startForegroundService(new Intent(this, CheckFrontApp.class));
-                startForegroundService(new Intent(this, CheckFrontCommuApp.class));
-                startForegroundService(new Intent(this,CheckFrontBrowser.class));
-            } else {
-                startService(new Intent(this, CheckFrontApp.class));
-                startService(new Intent(this, CheckFrontCommuApp.class));
-                startService(new Intent(this,CheckFrontBrowser.class));
-            }
+            startForegroundService(new Intent(this, CheckFrontApp.class));
+            startForegroundService(new Intent(this, CheckFrontCommuApp.class));
+            startForegroundService(new Intent(this,CheckFrontBrowser.class));
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancelAll();
         stopService(new Intent(this, CheckFrontApp.class));
         stopService(new Intent(this, CheckFrontCommuApp.class));
         stopService(new Intent(this, DialogShow.class));
         stopService(new Intent(this, DialogShowCommu.class));
+        stopService(new Intent(this, DialogShowBrowser.class));
         stopService(new Intent(this,CheckFrontBrowser.class));
     }
 
@@ -383,6 +382,14 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
         startBtn.setVisibility(View.VISIBLE);
         stopBtn.setVisibility(View.GONE);
         recordTime = 0;
+        NotificationManager manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.cancelAll();
+        stopService(new Intent(this, CheckFrontApp.class));
+        stopService(new Intent(this, CheckFrontCommuApp.class));
+        stopService(new Intent(this, DialogShow.class));
+        stopService(new Intent(this, DialogShowCommu.class));
+        stopService(new Intent(this, DialogShowBrowser.class));
+        stopService(new Intent(this,CheckFrontBrowser.class));
     }
 
     public static String getDurationBreakdown(long millis) {
@@ -498,7 +505,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             floating.dismiss();
-            leave.show();//顯示訊息視窗
+            leave.show();
         });
 
         if (appList.size() == 0) {
@@ -551,7 +558,7 @@ public class GeneralTimerActivity extends AppCompatActivity implements Lifecycle
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            floating.dismiss();//顯示訊息視窗
+            floating.dismiss();
         });
 
         if (appList.size() == 0) {

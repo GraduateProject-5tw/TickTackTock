@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.GraduateProject.TimeManagementApp">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -12,6 +13,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission
@@ -21,8 +23,6 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
-
-            <category android:name="android.intent.category.HOME" />
         </intent>
     </queries>
 
@@ -36,8 +36,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:taskAffinity=""
+        android:screenOrientation="portrait"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoadingApp">
+        <activity android:name=".LoadingApp"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,39 +48,46 @@
         </activity>
         <activity
             android:name=".GeneralTimerActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action" />
             </intent-filter>
         </activity>
         <activity
             android:name=".TomatoClockActivity"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action" />
             </intent-filter>
         </activity>
-        <activity android:name=".TodayToDoListActivity">
+        <activity android:name=".TodayToDoListActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action" />
             </intent-filter>
         </activity>
-        <activity android:name=".TimeBlockerActivity">
+        <activity android:name=".TimeBlockerActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action" />
             </intent-filter>
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" />
-        <activity android:name=".AppsListActivity">
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait" />
+        <activity android:name=".AppsListActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.Banned" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".CourseListActivity">
+        <activity android:name=".CourseListActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.course" />
 
@@ -87,7 +96,8 @@
         </activity>
         <activity
             android:name=".WebActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.webinclass" />
 
@@ -97,7 +107,8 @@
         <activity
             android:name=".WebActivityBasic"
             android:exported="true"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="com.GraduateProject.TimeManagementApp.web" />
                 <category android:name="android.intent.category.DEFAULT" />

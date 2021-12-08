@@ -1,8 +1,8 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +13,10 @@ import android.webkit.JsResult;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,20 +32,17 @@ import java.util.concurrent.FutureTask;
 public class WebActivityBasic extends AppCompatActivity {
 
     private WebView mWebView;
-    private final String rootUrl = "https://www.google.com.tw/";
-    private String textt;
     private boolean ret;
-    private String[] split;
-    private final String[] bannedCat = {"facebook","購","玩","instagram","遊","旅","演","唱","play","song", "travel", "celebrity","漫畫", "anime", "角色","character"};
+    private final String[] bannedCat = {"facebook","購買","玩","instagram","遊戲","旅行","演唱","明星","play","song", "travel", "celebrity","漫畫", "anime", "角色","movie", "buy"};
     private final List<String> bannedBrowser = Arrays.asList(bannedCat);
     private static WebActivityBasic webPage;
-    private static String uri;
+    private static String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_basic);
-        mWebView = (WebView) findViewById(R.id.webview_show);
+        mWebView = findViewById(R.id.webview_show);
         alert_edit();
         webPage = this;
     }
@@ -55,7 +52,6 @@ public class WebActivityBasic extends AppCompatActivity {
     }
 
     public void alert_edit() {
-        final EditText et = new EditText(this);
 
         //對webView的設置
         WebSettings websettings = mWebView.getSettings();
@@ -73,14 +69,15 @@ public class WebActivityBasic extends AppCompatActivity {
 
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) { Callable<String> myCallable = () -> {
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest webResourceRequest) { Callable<String> myCallable = () -> {
                 Crawler crawler = new Crawler();
-                uri = url;
-                String words = crawler.webGet(url);
-                return words;
+                url = webResourceRequest.getUrl().toString();
+                Uri uri = Uri.parse(url);
+                String key = uri.getQueryParameter("q");
+                return crawler.webGet("https://tw.search.yahoo.com/search?p=" + key);
             };
             // 2.由上面的callable物件創建一個FutureTask物件
-                FutureTask<String> oneTask = new FutureTask<String>(myCallable);
+                FutureTask<String> oneTask = new FutureTask<>(myCallable);
                 // 3.由FutureTask創建一個Thread物件
                 Thread t = new Thread(oneTask);
                 // 4.開啟執行緒
@@ -111,10 +108,11 @@ public class WebActivityBasic extends AppCompatActivity {
                     return true;//表示我已經處理過了
                 } else {
                     mWebView.loadUrl(url);
-                    return super.shouldOverrideUrlLoading(view, url);
+                    return super.shouldOverrideUrlLoading(view, webResourceRequest);
                 }
             }
         });
+        String rootUrl = "https://www.google.com.tw/";
         mWebView.loadUrl(rootUrl);
     }
 
@@ -124,10 +122,10 @@ public class WebActivityBasic extends AppCompatActivity {
     }
 
     public static String getUri(){
-        return uri;
+        return url;
     }
 
-    private WebChromeClient webChromeClient = new WebChromeClient() {
+    private final WebChromeClient webChromeClient = new WebChromeClient() {
         @Override
         public boolean onJsAlert(WebView webView, String url, String message, JsResult result) {
             AlertDialog.Builder localBuilder = new AlertDialog.Builder(webView.getContext());
@@ -151,26 +149,22 @@ public class WebActivityBasic extends AppCompatActivity {
 
     private void myOnclick() {
 //      監聽返回鍵
-        mWebView.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent keyEvent) {
-                if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
-                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) { //只處理一次
-                        myLastUrl();
-                    }
-                    return true;
+        mWebView.setOnKeyListener((v, keyCode, keyEvent) -> {
+            if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) { //只處理一次
+                    myLastUrl();
                 }
-                else{
-                    if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) { //只處理一次
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_MAIN);
-                        intent.addCategory(Intent.CATEGORY_HOME);
-                        startActivity(intent);
-                    }
-                }
-                return false;
+                return true;
             }
-
+            else{
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) { //只處理一次
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(intent);
+                }
+            }
+            return false;
         });
     }
 
@@ -184,11 +178,7 @@ public class WebActivityBasic extends AppCompatActivity {
         super.onPause();
         finishAndRemoveTask();
         if(!WindowBannedBrowser.getSearch()){
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-                startForegroundService(new Intent(this,CheckFrontBrowser.class));
-            } else {
-                startService(new Intent(this,CheckFrontBrowser.class));
-            }
+            startForegroundService(new Intent(this,CheckFrontBrowser.class));
         }
     }
 

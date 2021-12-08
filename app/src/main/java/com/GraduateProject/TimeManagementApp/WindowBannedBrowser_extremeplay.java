@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -14,14 +15,15 @@ import android.view.WindowManager;
 
 import static android.content.Context.WINDOW_SERVICE;
 
-public class WindowBannedBrowser {
+public class WindowBannedBrowser_extremeplay {
     // declaring required variables
     private final Context context;
     private final View mView;
     private final WindowManager.LayoutParams mParams;
     private final WindowManager mWindowManager;
     private static boolean search = false;
-    public WindowBannedBrowser(Context context){
+
+    public WindowBannedBrowser_extremeplay(Context context){
         this.context=context;
 
         Log.e("VERSION", "ABOVE 26");
@@ -68,19 +70,19 @@ public class WindowBannedBrowser {
             search = true;
             if (GeneralTimerActivity.getIsCounting()) {
                 GeneralTimerActivity.getActivity().finishCounting();
-            } else {
+            } else if (TomatoClockActivity.getIsCounting()){
                 TomatoClockActivity.getTomatoClockActivity().finishCounting();
             }
-            String escapedQuery = WebActivityBasic.getUri();
+            String escapedQuery = WebActivity.getUrl();
             Uri uri = Uri.parse(escapedQuery);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            WebActivityBasic.getWebPage().startActivity(intent);
-            WebActivityBasic.getWebPage().finishAndRemoveTask();
+            WebActivity.getWebPage().startActivity(intent);
+            WebActivity.getWebPage().finishAndRemoveTask();
         });
 
         mView.findViewById(R.id.btn_no).setOnClickListener(views -> {
             close();
-            WebActivityBasic.getWebPage().myLastUrl();
+            WebActivity.getWebPage().myLastUrl();
             Log.v("shuffTest", "Pressed NO");
         });
 

@@ -32,6 +32,7 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
         @Override
         public void run() {
             String frontApp = getForegroundTask().replaceAll("\\s+", "");
+            Log.e("check", "current app : " + frontApp);
             if (apps.contains(frontApp)) {
                 Log.e("check", "Detect App Press :" + frontApp);
                 stopService(new Intent(CheckFrontApp.this, CheckFrontCommuApp.class));
@@ -114,8 +115,8 @@ public class CheckFrontApp extends Service {    //server是一個在背景執行
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("偵測中")
-                .setContentText("正在偵測使用中的APP")
+                .setContentTitle("TickTackTock")
+                .setContentText("啟用中")
 
                 // this is important, otherwise the notification will show the way
                 // you want i.e. it will show some default notification

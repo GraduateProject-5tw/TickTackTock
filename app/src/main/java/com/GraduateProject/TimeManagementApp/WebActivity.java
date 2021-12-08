@@ -2,14 +2,13 @@ package com.GraduateProject.TimeManagementApp;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
@@ -17,12 +16,12 @@ import android.webkit.JsResult;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebHistoryItem;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +29,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.GraduateProject.TimeManagementApp.Adapters.CourseListAdapter;
 import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
 
 import java.util.Arrays;
@@ -42,28 +40,39 @@ import java.util.concurrent.FutureTask;
 public class WebActivity extends AppCompatActivity {
 
     private WebView mWebView;
-    private String rootUrl = "https://www.google.com.tw/";
+    private final String rootUrl = "https://www.google.com.tw/";
     private String textt;
     private boolean ret;
+    private boolean banned = false;
     private String[] split;
-    private final String[] bannedCat = {"facebook","購","玩","instagram","遊","旅","演","唱","play","song", "travel", "celebrity","漫畫", "anime", "角色","character"};
+    private final String[] bannedCat = {"facebook","購買","玩","instagram","遊戲","旅行","演唱","明星","play","song", "travel", "celebrity","漫畫", "anime", "角色","movie", "buy"};
     private final List<String> bannedBrowser = Arrays.asList(bannedCat);
-    private TextView add;
+    private static WebActivity webPage;
+    private static String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
-        mWebView = (WebView) findViewById(R.id.webview_show);
+        mWebView = findViewById(R.id.webview_show);
         alert_edit();
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.key_toolbar);
-        add = findViewById(R.id.add_key);
+        Toolbar myToolbar = findViewById(R.id.key_toolbar);
+        TextView add = findViewById(R.id.add_key);
         setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         add.setOnClickListener(v -> alert_edit());
+        webPage = this;
+    }
+
+    protected static WebActivity getWebPage(){
+        return webPage;
+    }
+
+    protected static String getUrl(){
+        return url;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -84,13 +93,13 @@ public class WebActivity extends AppCompatActivity {
         add.setCancelable(true);
         add.setContentView(R.layout.activity_popup_edittext_onebutton);
 
-        TextView title = (TextView) add.findViewById(R.id.txt_tit);
+        TextView title = add.findViewById(R.id.txt_tit);
         title.setText("添加允許搜尋的關鍵字: \n(請用逗號區隔單字)");
 
-        EditText editText = (EditText) add.findViewById(R.id.editText);
+        EditText editText = add.findViewById(R.id.editText);
         add.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
-        Button right = (Button) add.findViewById(R.id.btn_yes);
+        Button right = add.findViewById(R.id.btn_yes);
         right.setText("確 定");
         right.setOnClickListener(v1 -> {
             if (editText.getText().toString().isEmpty()) {
@@ -102,8 +111,8 @@ public class WebActivity extends AppCompatActivity {
                 textt = editText.getText().toString();
                 textt = textt.toLowerCase();
                 split = textt.split(",");
-                for (int j = 0; j < split.length; j++) {
-                    System.out.println(split[j]);
+                for (String s : split) {
+                    System.out.println(s);
                 }
 
 
@@ -122,24 +131,24 @@ public class WebActivity extends AppCompatActivity {
                 mWebView.setWebChromeClient(webChromeClient);
 
                 mWebView.setWebViewClient(new WebViewClient() {
+
                     @Override
-                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                        Callable<String> myCallable = () -> {
-                            Crawler crawler = new Crawler();
-                            String words = crawler.webGet(url);
-                            return words;
-                        };
+                    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest webResourceRequest) { Callable<String> myCallable = () -> {
+                        Crawler crawler = new Crawler();
+                        url = webResourceRequest.getUrl().toString();
+                        Uri uri = Uri.parse(url);
+                        String key = uri.getQueryParameter("q");
+                        return crawler.webGet("https://tw.search.yahoo.com/search?p=" + key);
+                    };
                         // 2.由上面的callable物件創建一個FutureTask物件
-                        FutureTask<String> oneTask = new FutureTask<String>(myCallable);
+                        FutureTask<String> oneTask = new FutureTask<>(myCallable);
                         // 3.由FutureTask創建一個Thread物件
                         Thread t = new Thread(oneTask);
                         // 4.開啟執行緒
                         t.start();
 
-                        outer:
                         for (String s : split) {
                             boolean retval = false;
-                            boolean banned = false;
                             try {
                                 retval = oneTask.get().contains(s);
                                 if (!retval) {
@@ -169,11 +178,16 @@ public class WebActivity extends AppCompatActivity {
                         }
                         Log.i("ansen", "攔截url:" + url);
                         if (!ret) {
-                            bannedURL();
+                            if(banned){
+                                bannedURLPlay();
+                            }
+                            else{
+                                bannedURL();
+                            }
                             return true;//表示我已經處理過了
                         } else {
                             mWebView.loadUrl(url);
-                            return super.shouldOverrideUrlLoading(view, url);
+                            return super.shouldOverrideUrlLoading(view, webResourceRequest);
                         }
                     }
                 });
@@ -188,7 +202,12 @@ public class WebActivity extends AppCompatActivity {
         windowBannedBrowser.open();
     }
 
-    private WebChromeClient webChromeClient = new WebChromeClient() {
+    public void bannedURLPlay() {
+        WindowBannedBrowser_extremeplay windowBanned = new WindowBannedBrowser_extremeplay(getApplicationContext());
+        windowBanned.open();
+    }
+
+    private final WebChromeClient webChromeClient = new WebChromeClient() {
         @Override
         public boolean onJsAlert(WebView webView, String url, String message, JsResult result) {
             AlertDialog.Builder localBuilder = new AlertDialog.Builder(webView.getContext());
@@ -231,7 +250,7 @@ public class WebActivity extends AppCompatActivity {
     /**
      * 拿到上一頁的路徑
      */
-    private void myLastUrl() {
+    protected void myLastUrl() {
         WebBackForwardList backForwardList = mWebView.copyBackForwardList();
         if (backForwardList != null && backForwardList.getSize() != 0) {
             //當前頁面在歷史佇列中的位置

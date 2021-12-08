@@ -1,15 +1,24 @@
 package com.GraduateProject.TimeManagementApp;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.TextView;
+
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
@@ -40,15 +49,17 @@ public class LoadingApp extends AppCompatActivity {
     private final String[] bannedCat = {"artdesign", "shopping", "casual","puzzle", "social", "adventure", "casino", "sports", "card", "simulation", "music", "board", "strategy", "action", "entertainment", "videoplayerseditors", "comics"};
     private final List<String> banned = Arrays.asList(bannedCat);
     private final static String GOOGLE_URL = "https://play.google.com/store/apps/details?id=";
-    private String userName;
+    private static String userName;
     private DBTotalHelper dbBannedAppsHelper = null;
-    private final String TABLE_APPS = "BannedApps";
+    private static final String TABLE_APPS = "BannedApps";
     private final String TABLE_BG = "Background";
     private static final String COL_USER = "_USER";
     private static final String COL_CHECK = "_ISCUSTOM";
-    private SQLiteDatabase db = null;
+    private static SQLiteDatabase db = null;
     private static final Gson gson = new Gson();
-
+    private Thread loadingThread, loadingThreadCustom, loadingThreadDefault;
+    protected static Dialog wifi = null;
+    protected static boolean networkStatus;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +67,26 @@ public class LoadingApp extends AppCompatActivity {
         setContentView(R.layout.activity_loadingapp);
         boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE).getBoolean("isFirstRun", true);
 
+        networkStatus = false;
+
+        wifi = new Dialog(LoadingApp.this);
+        wifi.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        wifi.setCancelable(false);
+        wifi.setContentView(R.layout.activity_popup_singlebutton);
+
+        TextView content_wifi = wifi.findViewById(R.id.txt_dia);
+        content_wifi.setText("此APP需要網路連線 \n\n 否則將無法使用禁用APP的功能");
+
+        Button setWifi = wifi.findViewById(R.id.btn_yes);
+        setWifi.setOnClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            wifi.dismiss();
+        });
+
         //先列出所有禁用App(新用戶)
-        Thread loadingThread = new Thread() {
+        loadingThread = new Thread() {
 
             @Override
             public void run() {
@@ -88,7 +117,7 @@ public class LoadingApp extends AppCompatActivity {
         };
 
         //先列出所有禁用App(custom)
-        Thread loadingThreadCustom = new Thread() {
+        loadingThreadCustom = new Thread() {
 
             @Override
             public void run() {
@@ -124,7 +153,7 @@ public class LoadingApp extends AppCompatActivity {
         };
 
         //先列出所有禁用App(default)
-        Thread loadingThreadDefault = new Thread() {
+        loadingThreadDefault = new Thread() {
 
             @Override
             public void run() {
@@ -166,11 +195,10 @@ public class LoadingApp extends AppCompatActivity {
             userName = Build.USER;
             boolean exist = checkIfUserExists();
             Log.e("START", "LOAD APP, exist = "+ exist);
-            getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
         }
     }
 
-    private void getApps(Thread thread1, Thread thread2, Thread thread3, boolean exist){
+    protected static void getApps(Thread thread1, Thread thread2, Thread thread3, boolean exist){
         if(!exist) {
             Log.e("GET", "user not exist, add USER");
             thread1.start();
@@ -185,6 +213,39 @@ public class LoadingApp extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        boolean exist = checkIfUserExists();
+        wifi.dismiss();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Log.e("SDK", "above 29");
+            // Register Callback - Call this in your app start!
+            CheckNetwork network = new CheckNetwork(getApplicationContext(), loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
+            network.registerNetworkCallback();
+            new Handler().postDelayed(() -> {
+                if(!CheckNetwork.isNetworkStatus()){
+                    wifi.show();
+                }
+                else{
+                    getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
+                }
+            }, 3000);
+        }
+        else{
+            Log.e("SDK", "below 29");
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(GeneralTimerActivity.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+            if(!isConnected){
+                wifi.show();
+            }
+            else{
+                getApps(loadingThread, loadingThreadCustom, loadingThreadDefault, exist);
+            }
+        }
+    }
 
     //取得預設禁用APP
     protected boolean checkNewApps(){
@@ -231,11 +292,11 @@ public class LoadingApp extends AppCompatActivity {
             String query_url = GOOGLE_URL + info.activityInfo.packageName + "&hl=en";
             category = getCategory(query_url).replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
             Log.e("CATEGORY",category);
-            if(banned.contains(category)){
+            if(banned.contains(category) || info.activityInfo.packageName.contains("com.instagram.android")){
                 appInfo.setAppStatus(true);
                 Log.e("check",appInfo.getPackageName() + "is added");
                 defaultApps.add(appInfo.getPackageName());
-            }else if(category.equals(communication)){    //社交APP禁用開始操作
+            }else if(category.equals(communication) || info.activityInfo.packageName.contains("com.facebook.orca")){    //社交APP禁用開始操作
                 if (appInfo.getPackageName().contains("browser")|| appInfo.getPackageName().contains("chrome") || appInfo.getPackageName().contains("search")){
                 }
                 else{
@@ -246,8 +307,10 @@ public class LoadingApp extends AppCompatActivity {
             }else{
                 appInfo.setAppStatus(false);
             }
-            allApps.add(appInfo.getPackageName());
-            defaultAppsList.add(appInfo);
+            if(!appInfo.getPackageName().contains("ticktacktock")){
+                allApps.add(appInfo.getPackageName());
+                defaultAppsList.add(appInfo);
+            }
         }
         setAllowedAppInfos(defaultAppsList);
         customAppsList = defaultAppsList;
@@ -277,10 +340,13 @@ public class LoadingApp extends AppCompatActivity {
                 Log.e("check",info.activityInfo.packageName + "is added to main");
                 defaultApps.add(info.activityInfo.packageName);
             }else if(category.equals(communication)){    //社交APP禁用開始操作
-                Log.e("check",info.activityInfo.packageName + "is added to communication");
-                commuApps.add(info.activityInfo.packageName);
+                if (info.activityInfo.packageName.contains("browser")|| info.activityInfo.packageName.contains("chrome") || info.activityInfo.packageName.contains("search")){
+                }
+                else {
+                    Log.e("check", info.activityInfo.packageName + "is added to communication");
+                    commuApps.add(info.activityInfo.packageName);
+                }
             }
-            allApps.add(info.activityInfo.packageName);
         }
         return defaultApps;
     }
@@ -309,8 +375,10 @@ public class LoadingApp extends AppCompatActivity {
             else{
                 appInfo.setAppStatus(false);
             }
-            customAppsList.add(appInfo);
-            allApps.add(appInfo.getPackageName());
+            if(!info.activityInfo.packageName.contains("ticktacktock")){
+                customAppsList.add(appInfo);
+                allApps.add(appInfo.getPackageName());
+            }
         }
         setAllowedAppInfos(customAppsList);
     }
@@ -353,7 +421,7 @@ public class LoadingApp extends AppCompatActivity {
         return true;
     }
 
-    public int checkIfCustom(String user) {
+    public static int checkIfCustom(String user) {
         String Query = "Select * from " + TABLE_APPS + " where " + COL_USER + " = " + "'" + user + "'";
         Cursor cursor = db.rawQuery(Query, null);
         cursor.moveToFirst();
