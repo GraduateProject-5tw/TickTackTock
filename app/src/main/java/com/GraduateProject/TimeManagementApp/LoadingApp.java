@@ -259,7 +259,8 @@ public class LoadingApp extends AppCompatActivity {
         List<ResolveInfo> homeApps = packageManager.queryIntentActivities(intent, 0);
 
         List<String> databaseDefaults = getAllApps();
-        if(homeApps.size() != databaseDefaults.size()){
+        int database = databaseDefaults.size()+1;
+        if(homeApps.size() != database){
             Log.e("NEW", "new apps found? true "+homeApps.size()+" database "+databaseDefaults.size());
             return true;
         }

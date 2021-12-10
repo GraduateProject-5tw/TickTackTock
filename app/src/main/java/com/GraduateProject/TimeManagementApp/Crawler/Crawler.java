@@ -1,5 +1,7 @@
 package com.GraduateProject.TimeManagementApp.Crawler;
 
+import android.net.Uri;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,6 +10,8 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 
 public class Crawler {
+    private static String key;
+
     public String webGet(String url) {
         StringBuilder words = new StringBuilder();
         String title = "";
@@ -16,6 +20,8 @@ public class Crawler {
 
         try {
             System.out.println("傳過去的URL： " + url);
+            Uri uri = Uri.parse(url);
+            key = uri.getQueryParameter("p");
             Document doc = Jsoup.connect(url).userAgent(userAgent).get();    //connect to the link
             Elements elements = doc.body().select("*");     //select all elements in the website's body
             for (Element ele : elements)//get all elements
@@ -24,10 +30,14 @@ public class Crawler {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        wordsToLowerCase = words.substring(600, words.length()-1000);
-        System.out.println("爬蟲結果fetch words from " + title + ':');
+        wordsToLowerCase = words.substring(600, words.length()-700).toLowerCase();
+        System.out.println("爬蟲結果fetch words from " + key + ':');
         System.out.println("Cr class:"+wordsToLowerCase);
 
-        return wordsToLowerCase.toLowerCase();
+        return wordsToLowerCase;
+    }
+
+    public static String getTitle(){
+        return key;
     }
 }

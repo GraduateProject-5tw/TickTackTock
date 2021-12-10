@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -31,6 +32,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.GraduateProject.TimeManagementApp.Crawler.Crawler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -45,6 +47,7 @@ public class WebActivity extends AppCompatActivity {
     private boolean ret;
     private boolean banned = false;
     private String[] split;
+    private ArrayList<String> trim = new ArrayList<>();
     private final String[] bannedCat = {"facebook","購買","玩","instagram","遊戲","旅行","演唱","明星","play","song", "travel", "celebrity","漫畫", "anime", "角色","movie", "buy"};
     private final List<String> bannedBrowser = Arrays.asList(bannedCat);
     private static WebActivity webPage;
@@ -94,7 +97,7 @@ public class WebActivity extends AppCompatActivity {
         add.setContentView(R.layout.activity_popup_edittext_onebutton);
 
         TextView title = add.findViewById(R.id.txt_tit);
-        title.setText("添加允許搜尋的關鍵字: \n(請用逗號區隔單字)");
+        title.setText("添加允許搜尋的關鍵字: \n(請用半形逗號區隔單字)");
 
         EditText editText = add.findViewById(R.id.editText);
         add.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -112,6 +115,8 @@ public class WebActivity extends AppCompatActivity {
                 textt = textt.toLowerCase();
                 split = textt.split(",");
                 for (String s : split) {
+                    s = s.trim();
+                    trim.add(s);
                     System.out.println(s);
                 }
 
@@ -131,7 +136,6 @@ public class WebActivity extends AppCompatActivity {
                 mWebView.setWebChromeClient(webChromeClient);
 
                 mWebView.setWebViewClient(new WebViewClient() {
-
                     @Override
                     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest webResourceRequest) { Callable<String> myCallable = () -> {
                         Crawler crawler = new Crawler();
@@ -147,14 +151,16 @@ public class WebActivity extends AppCompatActivity {
                         // 4.開啟執行緒
                         t.start();
 
-                        for (String s : split) {
+                        for (String s : trim) {
                             boolean retval = false;
+                            banned = false;
+                            Log.i("Check", s);
                             try {
                                 retval = oneTask.get().contains(s);
                                 if (!retval) {
                                     Log.e("RESULT", "not allowed");
                                     ret = false;
-                                    break;
+                                    continue;
                                 } else {
                                     for (int j = 0; j < bannedBrowser.size(); j++) {
                                         Log.e("RESULT", "checking " + bannedBrowser.get(j));
@@ -171,11 +177,12 @@ public class WebActivity extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                             if (retval && !banned) {
-                                Log.e("RESULT", "not include banned url");
+                                Log.e("RESULT", "can search");
                                 ret = true;
-                                //break outer;
+                                break;
                             }
                         }
+
                         Log.i("ansen", "攔截url:" + url);
                         if (!ret) {
                             if(banned){
@@ -231,19 +238,24 @@ public class WebActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {  //當按back按紐時
+        Log.e("BACK", "origin one");
         myOnclick();
     }
 
     private void myOnclick() {
+        Log.e("BACK", "called");
 //      監聽返回鍵
         mWebView.setOnKeyListener((v, keyCode, keyEvent) -> {
             if ((keyCode == KeyEvent.KEYCODE_BACK) && mWebView.canGoBack()) {
+                Log.e("BACK", "one");
                 if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) { //只處理一次
                     myLastUrl();
                 }
-                return true;
+            } else{
+                Log.e("BACK", "two");
+                startActivity(new Intent(this, GeneralTimerActivity.class));
             }
-            return false;
+            return true;
         });
     }
 
@@ -253,11 +265,13 @@ public class WebActivity extends AppCompatActivity {
     protected void myLastUrl() {
         WebBackForwardList backForwardList = mWebView.copyBackForwardList();
         if (backForwardList != null && backForwardList.getSize() != 0) {
+            Log.e("BACK", "two_one");
             //當前頁面在歷史佇列中的位置
             int currentIndex = backForwardList.getCurrentIndex();
             WebHistoryItem historyItem =
                     backForwardList.getItemAtIndex(currentIndex - 1);
             if (historyItem != null) {
+                Log.e("BACK", "two_two");
                 //String backPageUrl = historyItem.getUrl();
 //                Logger.t("111").d("拿到返回上一頁的url"+backPageUrl);
                 mWebView.goBack();
